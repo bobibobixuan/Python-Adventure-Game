@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 Python基础闯关游戏</title>
+    <!-- BUILD:STYLES -->
+</head>
+
+<body>
+    <!-- 粒子背景 -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 漂浮金币容器 -->
+    <div class="floating-coins" id="floatingCoins"></div>
+
+    <!-- 漂浮星星容器 -->
+    <div class="floating-stars" id="floatingStars"></div>
+
+    <div class="container">
+        <!-- 顶部状态栏 -->
+        <div class="status-bar hidden" id="statusBar">
+            <div class="status-item">
+                <span class="status-icon">🎮</span>
+                <span class="level-indicator" id="levelIndicator">第1关</span>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">❤️</span>
+                <div class="lives-container" id="livesContainer">
+                    <span class="life">💖</span>
+                    <span class="life">💖</span>
+                    <span class="life">💖</span>
+                </div>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">⏱️</span>
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timerFill" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="status-item combo-display" id="comboDisplay" style="display: none;">
+                🔥 连击 <span id="comboCount">0</span>x
+            </div>
+            <div class="status-item">
+                <span class="status-icon">⭐</span>
+                <span class="score-display" id="scoreDisplay">0</span>
+            </div>
+        </div>
+
+        <!-- 开始界面 -->
+        <div class="screen active" id="startScreen">
+            <div class="start-screen">
+                <h1 class="game-title">🐍 Python基础闯关</h1>
+                <p class="game-subtitle">趣味学习，挑战自我！</p>
+
+                <div class="character">🐍</div>
+
+                <div class="mode-buttons">
+                    <button class="mode-btn primary" onclick="startAdventure()">
+                        ⚔️ 冒险模式
+                    </button>
+                    <button class="mode-btn danger" onclick="showExtremeModeSelect()">
+                        👑 极限测试
+                    </button>
+                    <button class="mode-btn secondary" onclick="startPractice()">
+                        📚 修炼场
+                    </button>
+                    <button class="mode-btn secondary" onclick="showRecords()">
+                        📊 做题记录
+                    </button>
+                    <button class="mode-btn secondary" onclick="showAchievements()">
+                        🏆 成就一览
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 极限测试范围选择 -->
+        <div class="screen" id="extremeModeScreen">
+            <div class="challenge-select-card">
+                <h2 style="text-align: center; color: #ff6f00; margin-bottom: 14px;">👑 极限测试</h2>
+                <p style="text-align: center; color: #666; line-height: 1.8; margin-bottom: 28px;">
+                    一命到底，答错即止。想再次挑战，必须重新从考核起点开始。
+                </p>
+
+                <button class="challenge-option" onclick="startExtremeTest('unit0')">
+                    <strong>🔥 单测第一单元</strong>
+                    <span>只考第一单元内容，6 段连续挑战，任何一题失误都直接判定失败。</span>
+                </button>
+
+                <button class="challenge-option" onclick="startExtremeTest('unit1')">
+                    <strong>🔥 单测第二单元</strong>
+                    <span>只考第二单元内容，完整跑完该单元全部关卡才算通过。</span>
+                </button>
+
+                <button class="challenge-option" onclick="startExtremeTest('dual')" style="background: linear-gradient(135deg, #ffe082, #ffb300); color: #3e2723;">
+                    <strong>👑 双单元综合大考</strong>
+                    <span>从第一单元第一关开始，一路打到第二单元最终挑战，全程不能错一题。</span>
+                </button>
+
+                <div style="text-align: center; margin-top: 24px;">
+                    <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 单元选择界面 -->
+        <div class="screen" id="unitSelectScreen">
+            <div class="unit-select-screen">
+                <h1 class="unit-title">📚 选择学习单元</h1>
+                <p class="unit-subtitle">选择你要挑战的单元，开始你的Python之旅</p>
+
+                <div class="units-container" id="unitsContainer"></div>
+
+                <div class="unit-buttons">
+                    <button class="continue-btn" onclick="showStartScreen()" style="background: rgba(255,255,255,0.1);">
+                        ← 返回主页
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关卡选择界面 -->
+        <div class="screen" id="levelSelectScreen">
+            <div class="level-map">
+                <h2 class="map-title">🗺️ 冒险地图</h2>
+                <div class="map-path" id="mapPath"></div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="continue-btn" onclick="selectUnit()" style="margin-right: 10px;">← 选择单元</button>
+                <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+            </div>
+        </div>
+
+        <!-- 答题界面 -->
+        <div class="screen" id="gameScreen">
+            <div style="text-align: right; margin-bottom: 15px;">
+                <button class="continue-btn" style="background: rgba(255,107,107,0.2); border: 1px solid #ff6b6b; padding: 10px 20px;" onclick="confirmQuitLevel()">🚪 退出关卡</button>
+            </div>
+            <div class="level-header">
+                <div class="level-bg" id="levelBg">🏰</div>
+                <h2 class="level-title" id="levelTitle">第1关：算术运算符</h2>
+            </div>
+
+            <div class="question-card">
+                <div class="question-meta">
+                    <span class="question-type-badge" id="questionType">选择题</span>
+                    <span class="question-progress" id="questionProgress">1 / 5</span>
+                </div>
+
+                <div class="question-content" id="questionContent">
+                    题目加载中...
+                </div>
+
+                <div id="optionsContainer"></div>
+
+                <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>
+                    确认答案
+                </button>
+            </div>
+        </div>
+
+        <!-- 修炼场界面 -->
+        <div class="screen" id="practiceScreen">
+            <div class="practice-mode">
+                <div class="practice-badge">📚 修炼场模式</div>
+                <p style="color: white; font-size: 1.2em; margin-bottom: 20px;" id="practiceTitle">随机练习</p>
+                <p style="color: rgba(255,255,255,0.8);">不计时、不扣血，专注学习</p>
+            </div>
+
+            <div class="question-card" style="margin-top: 20px;">
+                <div class="question-meta">
+                    <span class="question-type-badge" id="practiceQuestionType">选择题</span>
+                    <span class="question-progress" id="practiceProgress">1 / 25</span>
+                </div>
+
+                <div class="question-content" id="practiceQuestionContent">
+                    题目加载中...
+                </div>
+
+                <div id="practiceOptionsContainer"></div>
+
+                <button class="submit-btn" id="practiceSubmitBtn" onclick="submitPracticeAnswer()">
+                    查看答案
+                </button>
+
+                <button class="continue-btn" id="practiceNextBtn" onclick="nextPracticeQuestion()"
+                    style="display: none;">
+                    下一题 →
+                </button>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+            </div>
+        </div>
+
+        <!-- 关卡通关界面 -->
+        <div class="screen" id="levelCompleteScreen">
+            <div class="level-complete">
+                <h2 class="level-complete-title" id="completeTitle">🎉 关卡完成！</h2>
+                <div class="stars-earned" id="starsEarned">⭐⭐⭐</div>
+
+                <div class="level-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statScore">0</div>
+                        <div class="stat-label">获得积分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statCorrect">0/5</div>
+                        <div class="stat-label">正确率</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTime">0s</div>
+                        <div class="stat-label">平均用时</div>
+                    </div>
+                </div>
+
+                <div class="achievements-list" id="achievementsList"></div>
+
+                <div class="level-nav-buttons">
+                    <button class="level-nav-btn menu" onclick="showLevelSelect()">🗺️ 地图</button>
+                    <button class="level-nav-btn next" id="nextLevelBtn" onclick="nextLevel()">下一关 →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏结束界面 -->
+        <div class="screen" id="gameOverScreen">
+            <div class="game-over">
+                <h2 class="game-over-title">💔 挑战失败</h2>
+                <p style="font-size: 1.2em; margin-bottom: 30px;" id="gameOverMessage">生命值耗尽，请重新挑战！</p>
+                <div class="level-stats" style="background: rgba(0,0,0,0.2);">
+                    <div class="stat-item">
+                        <div class="stat-value" id="gameOverScore">0</div>
+                        <div class="stat-label">获得积分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="gameOverLevel">0/6</div>
+                        <div class="stat-label">到达关卡</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="gameOverCorrect">0/0</div>
+                        <div class="stat-label">正确题数</div>
+                    </div>
+                </div>
+                <button class="continue-btn" style="margin-top: 30px;" id="retryLevelBtn" onclick="retryLevel()">🔄 重新挑战</button>
+                <button class="continue-btn" style="background: rgba(255,255,255,0.1); margin-top: 15px;"
+                    onclick="showStartScreen()">← 返回主页</button>
+            </div>
+        </div>
+
+        <!-- 做题记录界面 -->
+        <div class="screen" id="recordsScreen">
+            <div style="background: rgba(255,255,255,0.95); border-radius: 25px; padding: 30px;">
+                <h2 style="text-align: center; color: #1a1a2e; margin-bottom: 30px; cursor: pointer;" onclick="_t(this);">📋 做题记录</h2>
+                <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                        <div style="font-size: 2em; font-weight: bold;" id="recordTotalQuestions">0</div>
+                        <div style="margin-top: 10px;">总做题数</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #00c853, #00e676); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                        <div style="font-size: 2em; font-weight: bold;" id="recordCorrect">0</div>
+                        <div style="margin-top: 10px;">正确题数</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                        <div style="font-size: 2em; font-weight: bold;" id="recordAccuracy">0%</div>
+                        <div style="margin-top: 10px;">正确率</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #ffb300, #ff6f00); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                        <div style="font-size: 2em; font-weight: bold;" id="recordTotalStars">0⭐</div>
+                        <div style="margin-top: 10px;">总星星数</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255, 179, 0, 0.1); border-left: 4px solid #ff9800; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="color: #ff9800; margin-bottom: 15px;">🏅 荣誉徽章</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; color: #555;">
+                        <div style="background: rgba(255,255,255,0.65); border-radius: 12px; padding: 16px;">
+                            <div style="color: #ff9800; font-weight: bold; margin-bottom: 8px;">👑 极限模式通关次数</div>
+                            <div style="font-size: 1.25em; font-weight: bold;"><span id="recordExtremePasses">0</span> 次</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.65); border-radius: 12px; padding: 16px;">
+                            <div style="color: #ff9800; font-weight: bold; margin-bottom: 8px;">🏆 综合大考通关次数</div>
+                            <div style="font-size: 1.25em; font-weight: bold;"><span id="recordExtremeDualPasses">0</span> 次</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.65); border-radius: 12px; padding: 16px;">
+                            <div style="color: #ff9800; font-weight: bold; margin-bottom: 8px;">🧘 修炼场完成题数</div>
+                            <div style="font-size: 1.25em; font-weight: bold;"><span id="recordPracticeCount">0</span> 题</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(102, 126, 234, 0.1); border-left: 4px solid #667eea; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📈 分单元关卡进度</h3>
+                    <div id="recordProgressTabs" class="segmented-tabs"></div>
+                    <div id="recordLevelStats" style="color: #555; line-height: 2;"></div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="continue-btn" style="margin-right: 10px;" onclick="showWrongAnalysis()">🔍 错误分析</button>
+                    <button class="continue-btn" style="margin-right: 10px;" onclick="resetRecords()">🔄 重置记录</button>
+                    <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 错误分析界面 -->
+        <div class="screen" id="wrongAnalysisScreen">
+            <div style="background: rgba(255,255,255,0.95); border-radius: 25px; padding: 30px;">
+                <h2 style="text-align: center; color: #ff6b6b; margin-bottom: 30px;">🔍 错误分析</h2>
+                <div id="wrongAnalysisTabs" class="segmented-tabs"></div>
+                <div id="wrongAnalysisContainer" style="max-height: 600px; overflow-y: auto;"></div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="continue-btn" style="margin-right: 10px;" onclick="clearWrongQuestions('active')">🧹 清空当前单元</button>
+                    <button class="continue-btn" style="margin-right: 10px;" onclick="clearWrongQuestions('all')">🗑️ 清空全部错误</button>
+                    <button class="continue-btn" onclick="showRecords()">← 返回</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 成就界面 -->
+        <div class="screen" id="achievementScreen">
+            <div style="background: rgba(255,255,255,0.95); border-radius: 25px; padding: 30px;">
+                <h2 style="text-align: center; color: #1a1a2e; margin-bottom: 30px;">🏆 成就一览</h2>
+                <div id="achievementsContainer"></div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="devMenuScreen" style="position: fixed; top: -100%; left: 0; width: 100%; height: 100%; z-index: 5000; display: none; transition: top 0.3s ease; align-items: center; justify-content: center;">
+            <div style="background: rgba(0,0,0,0.95); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                <div style="background: #1a1a2e; border: 3px solid #ffd700; border-radius: 25px; padding: 40px; max-width: 500px; color: white; text-align: center;">
+                    <h2 style="color: #ffd700; margin-bottom: 20px;">验证</h2>
+                    <p style="color: #a0a0a0; margin-bottom: 30px;">请输入密码</p>
+                    <input type="password" id="devPassInput" placeholder="••••••" style="width: 100%; padding: 12px; border-radius: 10px; border: none; margin-bottom: 20px; font-size: 1em;" onkeypress="if(event.key==='Enter') verifyDevPass()">
+                    <button class="continue-btn" onclick="verifyDevPass()" style="width: 100%; margin-bottom: 10px;">确认</button>
+                    <button class="continue-btn" style="width: 100%; background: rgba(255,255,255,0.1);" onclick="closeDevMenu()">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="adminScreen">
+            <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 25px; padding: 40px; color: white;">
+                <h2 style="text-align: center; color: #ffd700; margin-bottom: 40px;">⚙ 系统设置</h2>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
+                    <button class="continue-btn" onclick="adminUnlockAll()" style="background: linear-gradient(135deg, #00d9ff, #00ff88); color: #1a1a2e; font-weight: bold;">解锁全部关卡</button>
+                    <button class="continue-btn" onclick="adminLockAll()" style="background: linear-gradient(135deg, #ff6b6b, #ff4757); color: white; font-weight: bold;">锁定关卡</button>
+                    <button class="continue-btn" onclick="adminUnlockAchievements()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-weight: bold;">✓ 解锁成就</button>
+                    <button class="continue-btn" onclick="adminClearAchievements()" style="background: linear-gradient(135deg, #ff9f43, #f0932b); color: white; font-weight: bold;">✗ 清除成就</button>
+                    <button class="continue-btn" onclick="adminSetMaxStars()" style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: #1a1a2e; font-weight: bold;">★ 满星</button>
+                    <button class="continue-btn" onclick="adminClearWrongs()" style="background: linear-gradient(135deg, #ff6b9d, #c44569); color: white; font-weight: bold;">✓ 清空错题</button>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                    <p id="adminStatus" style="color: #a0a0a0; font-size: 0.95em;">...</p>
+                </div>
+                <div style="text-align: center;">
+                    <button class="continue-btn" style="background: rgba(255,255,255,0.1);" onclick="closeAdminMenu()">← 返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果弹窗 -->
+    <div class="result-overlay" id="resultOverlay">
+        <div class="result-card">
+            <div class="result-icon" id="resultIcon">✓</div>
+            <div class="result-title" id="resultTitle">回答正确！</div>
+            <div class="result-score" id="resultScore">+100</div>
+            <div class="result-bonus" id="resultBonus"></div>
+            <div class="knowledge-box" id="knowledgeBox"></div>
+            <button class="continue-btn" onclick="closeResult()">继续</button>
+        </div>
+    </div>
+
+    <!-- 成就弹窗 -->
+    <div class="achievement-popup" id="achievementPopup" style="display: none;">
+        <div class="achievement-popup-icon" id="popupIcon">🏆</div>
+        <div class="achievement-popup-title" id="popupTitle">成就解锁！</div>
+        <div class="achievement-popup-desc" id="popupDesc"></div>
+    </div>
+
+    <!-- BUILD:DATA -->
+    <!-- BUILD:GAME -->
+</body>
+
+</html>

@@ -1,0 +1,4602 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐍 Python基础闯关游戏</title>
+    <style>
+* {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* 粒子背景 */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: hidden;
+            z-index: 0;
+        }
+
+        .particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background: rgba(255, 215, 0, 0.6);
+            border-radius: 50%;
+            animation: float 15s infinite;
+        }
+
+        @keyframes float {
+
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 1;
+            }
+
+            90% {
+                opacity: 1;
+            }
+
+            100% {
+                transform: translateY(-100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* 顶部状态栏 */
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 15px 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: white;
+            font-size: 1.1em;
+        }
+
+        .status-icon {
+            font-size: 1.5em;
+        }
+
+        .lives-container {
+            display: flex;
+            gap: 5px;
+        }
+
+        .life {
+            font-size: 1.5em;
+            transition: all 0.3s ease;
+        }
+
+        .life.lost {
+            opacity: 0.3;
+            transform: scale(0.8);
+        }
+
+        .life.damage {
+            animation: shake 0.5s ease;
+            color: #ff4757;
+        }
+
+        @keyframes shake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            25% {
+                transform: translateX(-5px);
+            }
+
+            75% {
+                transform: translateX(5px);
+            }
+        }
+
+        .score-display {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+            font-size: 1.3em;
+        }
+
+        .combo-display {
+            color: #ff6b81;
+            font-weight: bold;
+            animation: pulse 0.5s ease infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.1);
+            }
+        }
+
+        .timer-bar {
+            width: 100px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .timer-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            border-radius: 4px;
+            transition: width 0.1s linear;
+        }
+
+        .timer-fill.warning {
+            background: linear-gradient(90deg, #ff6b6b, #ffa502);
+        }
+
+        .timer-fill.danger {
+            background: linear-gradient(90deg, #ff4757, #ff0000);
+        }
+
+        /* 开始界面 */
+        .start-screen {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .game-title {
+            font-size: 3em;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 10px;
+            animation: glow 2s ease infinite;
+        }
+
+        @keyframes glow {
+
+            0%,
+            100% {
+                text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            }
+
+            50% {
+                text-shadow: 0 0 40px rgba(255, 215, 0, 0.8), 0 0 60px rgba(255, 215, 0, 0.4);
+            }
+        }
+
+        .game-subtitle {
+            color: #a0a0a0;
+            font-size: 1.2em;
+            margin-bottom: 40px;
+        }
+
+        /* Python蛇角色 */
+        .character {
+            font-size: 100px;
+            margin: 30px 0;
+            animation: bounce 2s ease infinite;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        .mode-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .mode-btn {
+            padding: 20px 40px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .mode-btn.primary {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #1a1a2e;
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+
+        .mode-btn.secondary {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .mode-btn.danger {
+            background: linear-gradient(135deg, #ff8a00, #ff3d00);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.25);
+            box-shadow: 0 10px 30px rgba(255, 97, 0, 0.28);
+        }
+
+        .mode-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+        }
+
+        .segmented-tabs {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .segmented-tab {
+            flex: 1;
+            min-width: 180px;
+            border: none;
+            border-radius: 14px;
+            padding: 14px 16px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.25s ease;
+            background: rgba(102, 126, 234, 0.1);
+            color: #4c5fd5;
+            border: 2px solid rgba(102, 126, 234, 0.18);
+        }
+
+        .segmented-tab.active {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            box-shadow: 0 10px 24px rgba(102, 126, 234, 0.25);
+        }
+
+        .challenge-select-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 34px;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .challenge-option {
+            width: 100%;
+            text-align: left;
+            padding: 22px 24px;
+            border-radius: 18px;
+            border: none;
+            cursor: pointer;
+            margin-bottom: 16px;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+            background: linear-gradient(135deg, #fff6e5, #ffe0b2);
+            color: #542b00;
+            box-shadow: 0 8px 24px rgba(255, 152, 0, 0.16);
+        }
+
+        .challenge-option:last-child {
+            margin-bottom: 0;
+        }
+
+        .challenge-option:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 30px rgba(255, 152, 0, 0.24);
+        }
+
+        .challenge-option strong {
+            display: block;
+            font-size: 1.15em;
+            margin-bottom: 8px;
+        }
+
+        /* 关卡地图 */
+        .level-map {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .map-title {
+            color: white;
+            text-align: center;
+            font-size: 1.5em;
+            margin-bottom: 30px;
+        }
+
+        .map-path {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            position: relative;
+        }
+
+        .map-node {
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .map-node.unlocked {
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        }
+
+        .map-node.completed {
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            border-color: #00ff88;
+        }
+
+        .map-node.locked {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .map-node:hover:not(.locked) {
+            transform: scale(1.1);
+        }
+
+        .map-node-icon {
+            font-size: 2em;
+            margin-bottom: 5px;
+        }
+
+        .map-node-name {
+            color: white;
+            font-size: 0.85em;
+            text-align: center;
+        }
+
+        .map-node-stars {
+            font-size: 0.8em;
+            color: #ffd700;
+        }
+
+        .map-connector {
+            position: absolute;
+            top: 50%;
+            width: 30px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        /* 答题界面 */
+        .game-screen {
+            display: none;
+        }
+
+        .game-screen.active {
+            display: block;
+        }
+
+        .level-header {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border-radius: 20px;
+            margin-bottom: 20px;
+        }
+
+        .level-title {
+            color: #ffd700;
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+
+        .level-bg {
+            font-size: 60px;
+            margin-bottom: 10px;
+        }
+
+        .question-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 25px;
+            padding: 30px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .question-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, #ffd700, #ff6b6b, #00d9ff, #00ff88);
+        }
+
+        .question-card.answered-correct {
+            background: linear-gradient(135deg, rgba(0, 200, 83, 0.2), rgba(0, 230, 118, 0.15));
+            border: 3px solid #00c853;
+            animation: correctCardPulse 0.5s ease;
+        }
+
+        .question-card.answered-wrong {
+            background: linear-gradient(135deg, rgba(255, 23, 68, 0.2), rgba(255, 82, 82, 0.15));
+            border: 3px solid #ff1744;
+            animation: wrongCardShake 0.5s ease;
+        }
+
+        .answer-feedback {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 4em;
+            font-weight: bold;
+            z-index: 10;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            animation: feedbackPop 0.5s ease;
+            pointer-events: none;
+        }
+
+        .answer-feedback.correct {
+            color: #00c853;
+        }
+
+        .answer-feedback.wrong {
+            color: #ff1744;
+        }
+
+        .correct-answer-tip {
+            text-align: center;
+            padding: 15px;
+            margin-top: 15px;
+            background: rgba(255, 23, 68, 0.1);
+            border-radius: 10px;
+            color: #ff1744;
+            font-size: 1.1em;
+        }
+
+        @keyframes feedbackPop {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 0;
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.3);
+                opacity: 1;
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes correctCardPulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(0, 200, 83, 0.7);
+            }
+
+            70% {
+                box-shadow: 0 0 0 20px rgba(0, 200, 83, 0);
+            }
+
+            100% {
+                box-shadow: 0 0 0 0 rgba(0, 200, 83, 0);
+            }
+        }
+
+        @keyframes wrongCardShake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-10px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(10px);
+            }
+        }
+
+        .question-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .question-type-badge {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9em;
+        }
+
+        .question-progress {
+            color: #666;
+            font-size: 0.95em;
+        }
+
+        .question-content {
+            font-size: 1.5em;
+            color: #333;
+            margin-bottom: 30px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .question-content code {
+            background: #f0f0ff;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #e91e63;
+            font-size: 1.1em;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .option-card {
+            padding: 20px;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            font-size: 1.1em;
+            background: #fff;
+        }
+
+        .option-card:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .option-card.selected {
+            border-color: #667eea;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transform: scale(1.02);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        .option-card.selected .option-letter {
+            background: white;
+            color: #667eea;
+        }
+
+        .option-card.correct {
+            border-color: #00c853;
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: white;
+            animation: correctPulse 0.5s ease;
+        }
+
+        .option-card.correct .option-letter {
+            background: white;
+            color: #00c853;
+        }
+
+        .option-card.wrong {
+            border-color: #ff1744;
+            background: linear-gradient(135deg, #ff1744, #ff5252);
+            color: white;
+            animation: wrongShake 0.5s ease;
+        }
+
+        .option-card.wrong .option-letter {
+            background: white;
+            color: #ff1744;
+        }
+
+        @keyframes correctPulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.02);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        @keyframes wrongShake {
+
+            0%,
+            100% {
+                transform: translateX(0);
+            }
+
+            20%,
+            60% {
+                transform: translateX(-10px);
+            }
+
+            40%,
+            80% {
+                transform: translateX(10px);
+            }
+        }
+
+        .option-letter {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #666;
+            font-size: 1.2em;
+            flex-shrink: 0;
+        }
+
+        .option-card.selected .option-letter {
+            background: #667eea;
+            color: white;
+        }
+
+        .option-card.correct .option-letter {
+            background: #00ff88;
+            color: white;
+        }
+
+        .option-card.wrong .option-letter {
+            background: #ff4757;
+            color: white;
+        }
+
+        /* 判断题选项 */
+        .judge-options {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+        }
+
+        .judge-card {
+            padding: 30px 50px;
+            border: 3px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 1.2em;
+            background: #fff;
+            min-width: 150px;
+        }
+
+        .judge-card:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .judge-card.selected {
+            transform: scale(1.05);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+        }
+
+        .judge-card.true-btn {
+            background: linear-gradient(135deg, #00c853, #00e676);
+            color: white;
+            border: none;
+        }
+
+        .judge-card.false-btn {
+            background: linear-gradient(135deg, #ff1744, #ff5252);
+            color: white;
+            border: none;
+        }
+
+        .judge-card .icon {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .judge-card.correct {
+            animation: correctPulse 0.5s ease;
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(0, 200, 83, 0.5);
+        }
+
+        .judge-card.wrong {
+            animation: wrongShake 0.5s ease;
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(255, 23, 68, 0.5);
+        }
+
+        /* 填空题 */
+        .fill-blank {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .fill-input {
+            padding: 15px 30px;
+            font-size: 1.5em;
+            border: 3px solid #e0e0e0;
+            border-radius: 15px;
+            width: 200px;
+            text-align: center;
+            font-family: 'Consolas', monospace;
+            transition: all 0.3s ease;
+        }
+
+        .fill-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        /* 提交按钮 */
+        .submit-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 20px auto;
+            padding: 18px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.2em;
+            cursor: pointer;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            transition: all 0.3s ease;
+        }
+
+        .submit-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 动画效果 */
+        .floating-coins {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .coin {
+            position: absolute;
+            font-size: 30px;
+            animation: coinFloat 1s ease forwards;
+        }
+
+        @keyframes coinFloat {
+            0% {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+
+            100% {
+                opacity: 0;
+                transform: translateY(-100px) scale(0.5);
+            }
+        }
+
+        .floating-stars {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .star {
+            position: absolute;
+            font-size: 25px;
+            animation: starBurst 0.8s ease forwards;
+        }
+
+        @keyframes starBurst {
+            0% {
+                opacity: 1;
+                transform: scale(0) rotate(0deg);
+            }
+
+            50% {
+                opacity: 1;
+                transform: scale(1.5) rotate(180deg);
+            }
+
+            100% {
+                opacity: 0;
+                transform: scale(0.5) rotate(360deg) translateY(-50px);
+            }
+        }
+
+        /* 伤害效果 */
+        .damage-effect {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 0, 0, 0.3);
+            pointer-events: none;
+            z-index: 999;
+            animation: damageFlash 0.5s ease;
+        }
+
+        @keyframes damageFlash {
+
+            0%,
+            100% {
+                opacity: 0;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* 结果弹窗 */
+        .result-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-overlay.show {
+            display: flex;
+        }
+
+        .result-card {
+            background: white;
+            border-radius: 25px;
+            padding: 40px;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            animation: popIn 0.4s ease;
+        }
+
+        @keyframes popIn {
+            0% {
+                transform: scale(0.5);
+                opacity: 0;
+            }
+
+            100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .result-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+
+        .result-title {
+            font-size: 2em;
+            margin-bottom: 15px;
+        }
+
+        .result-title.correct {
+            color: #00ff88;
+        }
+
+        .result-title.wrong {
+            color: #ff4757;
+        }
+
+        .result-score {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .result-bonus {
+            color: #ff6b81;
+            font-size: 1.1em;
+            margin-bottom: 20px;
+        }
+
+        .knowledge-box {
+            background: linear-gradient(135deg, #667eea20, #764ba220);
+            border-left: 4px solid #667eea;
+            border-radius: 0 15px 15px 0;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .knowledge-box h4 {
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .knowledge-box p {
+            color: #555;
+            line-height: 1.8;
+            margin: 8px 0;
+        }
+
+        .knowledge-box code {
+            background: #f0f0ff;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-family: 'Consolas', monospace;
+            color: #e91e63;
+        }
+
+        .continue-btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+        }
+
+        /* 关卡结算 */
+        .level-complete {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .level-complete-title {
+            font-size: 2.5em;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .level-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin: 30px 0;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .stat-label {
+            color: #a0a0a0;
+            margin-top: 5px;
+        }
+
+        .stars-earned {
+            font-size: 3em;
+            margin: 20px 0;
+        }
+
+        .achievements-list {
+            margin: 20px 0;
+            text-align: left;
+        }
+
+        .achievement-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .achievement-icon {
+            font-size: 2em;
+        }
+
+        .achievement-info h5 {
+            color: #ffd700;
+            margin-bottom: 3px;
+        }
+
+        .achievement-info p {
+            color: #a0a0a0;
+            font-size: 0.9em;
+        }
+
+        .level-nav-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .level-nav-btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .level-nav-btn.next {
+            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            color: #1a1a2e;
+        }
+
+        .level-nav-btn.menu {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .level-nav-btn:hover {
+            transform: translateY(-3px);
+        }
+
+        /* 游戏结束 */
+        .game-over {
+            background: linear-gradient(135deg, #ff4757, #ff6b81);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+            color: white;
+        }
+
+        .game-over-title {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+        }
+
+        /* 成就弹窗 */
+        .achievement-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border: 3px solid #ffd700;
+            border-radius: 20px;
+            padding: 30px 50px;
+            z-index: 1001;
+            text-align: center;
+            color: white;
+            animation: achievementIn 0.5s ease;
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+        }
+
+        @keyframes achievementIn {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+            }
+
+            50% {
+                transform: translate(-50%, -50%) scale(1.2);
+            }
+
+            100% {
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        .achievement-popup-icon {
+            font-size: 4em;
+            margin-bottom: 15px;
+        }
+
+        .achievement-popup-title {
+            color: #ffd700;
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .achievement-popup-desc {
+            color: #a0a0a0;
+        }
+
+        /* 修炼场模式 */
+        .practice-mode {
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            border-radius: 25px;
+            padding: 40px;
+            text-align: center;
+        }
+
+        .practice-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 25px;
+            border-radius: 25px;
+            margin-bottom: 20px;
+            color: white;
+            font-size: 1.2em;
+        }
+
+        .practice-note {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.95em;
+            margin-top: 20px;
+        }
+
+        /* 响应式 */
+        @media (max-width: 768px) {
+            .game-title {
+                font-size: 2em;
+            }
+
+            .status-bar {
+                flex-wrap: wrap;
+                gap: 15px;
+                justify-content: center;
+            }
+
+            .options-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .judge-options {
+                flex-direction: column;
+            }
+
+            .judge-card {
+                width: 100%;
+            }
+
+            .level-stats {
+                grid-template-columns: 1fr;
+            }
+
+            .map-node {
+                width: 80px;
+                height: 80px;
+            }
+
+            .map-node-icon {
+                font-size: 1.5em;
+            }
+
+            .map-node-name {
+                font-size: 0.75em;
+            }
+        }
+
+        /* 隐藏状态栏的初始状态 */
+        .status-bar.hidden {
+            display: none;
+        }
+
+        .screen {
+            display: none;
+        }
+
+        .screen.active {
+            display: block;
+        }
+
+        /* 单元选择界面 */
+        .unit-select-screen {
+            text-align: center;
+            padding: 50px 20px;
+        }
+
+        .unit-title {
+            font-size: 2.5em;
+            color: #ffd700;
+            text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
+            margin-bottom: 40px;
+            animation: glow 2s ease infinite;
+        }
+
+        .unit-subtitle {
+            color: #a0a0a0;
+            font-size: 1.1em;
+            margin-bottom: 50px;
+        }
+
+        .units-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            max-width: 800px;
+            margin: 0 auto 40px;
+        }
+
+        .unit-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 40px 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 250px;
+        }
+
+        .unit-card:hover {
+            transform: translateY(-10px);
+            border-color: #ffd700;
+            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.3);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1), rgba(255, 215, 0, 0.05));
+        }
+
+        .unit-card.selected {
+            border-color: #00ff88;
+            box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
+            background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 136, 0.05));
+        }
+
+        .unit-icon {
+            font-size: 60px;
+            margin-bottom: 20px;
+        }
+
+        .unit-name {
+            font-size: 1.5em;
+            color: white;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .unit-desc {
+            color: #a0a0a0;
+            font-size: 0.95em;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .unit-stats {
+            color: #ffd700;
+            font-size: 0.9em;
+            margin-top: auto;
+        }
+
+        .unit-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            margin-top: 15px;
+            overflow: hidden;
+        }
+
+        .unit-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #00d9ff, #00ff88);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .unit-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 40px;
+        }
+
+        .unit-start-btn {
+            padding: 15px 40px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, #00d9ff, #00ff88);
+            color: #1a1a2e;
+            font-weight: bold;
+        }
+
+        .unit-start-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(0, 215, 255, 0.4);
+        }
+
+        .unit-start-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .unit-info-text {
+            color: #a0a0a0;
+            font-size: 0.9em;
+            margin-top: 10px;
+        }
+</style>
+</head>
+
+<body>
+    <!-- 粒子背景 -->
+    <div class="particles" id="particles"></div>
+
+    <!-- 漂浮金币容器 -->
+    <div class="floating-coins" id="floatingCoins"></div>
+
+    <!-- 漂浮星星容器 -->
+    <div class="floating-stars" id="floatingStars"></div>
+
+    <div class="container">
+        <!-- 顶部状态栏 -->
+        <div class="status-bar hidden" id="statusBar">
+            <div class="status-item">
+                <span class="status-icon">🎮</span>
+                <span class="level-indicator" id="levelIndicator">第1关</span>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">❤️</span>
+                <div class="lives-container" id="livesContainer">
+                    <span class="life">💖</span>
+                    <span class="life">💖</span>
+                    <span class="life">💖</span>
+                </div>
+            </div>
+            <div class="status-item">
+                <span class="status-icon">⏱️</span>
+                <div class="timer-bar">
+                    <div class="timer-fill" id="timerFill" style="width: 100%"></div>
+                </div>
+            </div>
+            <div class="status-item combo-display" id="comboDisplay" style="display: none;">
+                🔥 连击 <span id="comboCount">0</span>x
+            </div>
+            <div class="status-item">
+                <span class="status-icon">⭐</span>
+                <span class="score-display" id="scoreDisplay">0</span>
+            </div>
+        </div>
+
+        <!-- 开始界面 -->
+        <div class="screen active" id="startScreen">
+            <div class="start-screen">
+                <h1 class="game-title">🐍 Python基础闯关</h1>
+                <p class="game-subtitle">趣味学习，挑战自我！</p>
+
+                <div class="character">🐍</div>
+
+                <div class="mode-buttons">
+                    <button class="mode-btn primary" onclick="startAdventure()">
+                        ⚔️ 冒险模式
+                    </button>
+                    <button class="mode-btn danger" onclick="showExtremeModeSelect()">
+                        👑 极限测试
+                    </button>
+                    <button class="mode-btn secondary" onclick="startPractice()">
+                        📚 修炼场
+                    </button>
+                    <button class="mode-btn secondary" onclick="showRecords()">
+                        📊 做题记录
+                    </button>
+                    <button class="mode-btn secondary" onclick="showAchievements()">
+                        🏆 成就一览
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 极限测试范围选择 -->
+        <div class="screen" id="extremeModeScreen">
+            <div class="challenge-select-card">
+                <h2 style="text-align: center; color: #ff6f00; margin-bottom: 14px;">👑 极限测试</h2>
+                <p style="text-align: center; color: #666; line-height: 1.8; margin-bottom: 28px;">
+                    一命到底，答错即止。想再次挑战，必须重新从考核起点开始。
+                </p>
+
+                <button class="challenge-option" onclick="startExtremeTest('unit0')">
+                    <strong>🔥 单测第一单元</strong>
+                    <span>只考第一单元内容，6 段连续挑战，任何一题失误都直接判定失败。</span>
+                </button>
+
+                <button class="challenge-option" onclick="startExtremeTest('unit1')">
+                    <strong>🔥 单测第二单元</strong>
+                    <span>只考第二单元内容，完整跑完该单元全部关卡才算通过。</span>
+                </button>
+
+                <button class="challenge-option" onclick="startExtremeTest('dual')" style="background: linear-gradient(135deg, #ffe082, #ffb300); color: #3e2723;">
+                    <strong>👑 双单元综合大考</strong>
+                    <span>从第一单元第一关开始，一路打到第二单元最终挑战，全程不能错一题。</span>
+                </button>
+
+                <div style="text-align: center; margin-top: 24px;">
+                    <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 单元选择界面 -->
+        <div class="screen" id="unitSelectScreen">
+            <div class="unit-select-screen">
+                <h1 class="unit-title">📚 选择学习单元</h1>
+                <p class="unit-subtitle">选择你要挑战的单元，开始你的Python之旅</p>
+
+                <div class="units-container" id="unitsContainer"></div>
+
+                <div class="unit-buttons">
+                    <button class="continue-btn" onclick="showStartScreen()" style="background: rgba(255,255,255,0.1);">
+                        ← 返回主页
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 关卡选择界面 -->
+        <div class="screen" id="levelSelectScreen">
+            <div class="level-map">
+                <h2 class="map-title">🗺️ 冒险地图</h2>
+                <div class="map-path" id="mapPath"></div>
+            </div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="continue-btn" onclick="selectUnit()" style="margin-right: 10px;">← 选择单元</button>
+                <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+            </div>
+        </div>
+
+        <!-- 答题界面 -->
+        <div class="screen" id="gameScreen">
+            <div style="text-align: right; margin-bottom: 15px;">
+                <button class="continue-btn" style="background: rgba(255,107,107,0.2); border: 1px solid #ff6b6b; padding: 10px 20px;" onclick="confirmQuitLevel()">🚪 退出关卡</button>
+            </div>
+            <div class="level-header">
+                <div class="level-bg" id="levelBg">🏰</div>
+                <h2 class="level-title" id="levelTitle">第1关：算术运算符</h2>
+            </div>
+
+            <div class="question-card">
+                <div class="question-meta">
+                    <span class="question-type-badge" id="questionType">选择题</span>
+                    <span class="question-progress" id="questionProgress">1 / 5</span>
+                </div>
+
+                <div class="question-content" id="questionContent">
+                    题目加载中...
+                </div>
+
+                <div id="optionsContainer"></div>
+
+                <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>
+                    确认答案
+                </button>
+            </div>
+        </div>
+
+        <!-- 修炼场界面 -->
+        <div class="screen" id="practiceScreen">
+            <div class="practice-mode">
+                <div class="practice-badge">📚 修炼场模式</div>
+                <p style="color: white; font-size: 1.2em; margin-bottom: 20px;" id="practiceTitle">随机练习</p>
+                <p style="color: rgba(255,255,255,0.8);">不计时、不扣血，专注学习</p>
+            </div>
+
+            <div class="question-card" style="margin-top: 20px;">
+                <div class="question-meta">
+                    <span class="question-type-badge" id="practiceQuestionType">选择题</span>
+                    <span class="question-progress" id="practiceProgress">1 / 25</span>
+                </div>
+
+                <div class="question-content" id="practiceQuestionContent">
+                    题目加载中...
+                </div>
+
+                <div id="practiceOptionsContainer"></div>
+
+                <button class="submit-btn" id="practiceSubmitBtn" onclick="submitPracticeAnswer()">
+                    查看答案
+                </button>
+
+                <button class="continue-btn" id="practiceNextBtn" onclick="nextPracticeQuestion()"
+                    style="display: none;">
+                    下一题 →
+                </button>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+            </div>
+        </div>
+
+        <!-- 关卡通关界面 -->
+        <div class="screen" id="levelCompleteScreen">
+            <div class="level-complete">
+                <h2 class="level-complete-title" id="completeTitle">🎉 关卡完成！</h2>
+                <div class="stars-earned" id="starsEarned">⭐⭐⭐</div>
+
+                <div class="level-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="statScore">0</div>
+                        <div class="stat-label">获得积分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statCorrect">0/5</div>
+                        <div class="stat-label">正确率</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="statTime">0s</div>
+                        <div class="stat-label">平均用时</div>
+                    </div>
+                </div>
+
+                <div class="achievements-list" id="achievementsList"></div>
+
+                <div class="level-nav-buttons">
+                    <button class="level-nav-btn menu" onclick="showLevelSelect()">🗺️ 地图</button>
+                    <button class="level-nav-btn next" id="nextLevelBtn" onclick="nextLevel()">下一关 →</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 游戏结束界面 -->
+        <div class="screen" id="gameOverScreen">
+            <div class="game-over">
+                <h2 class="game-over-title">💔 挑战失败</h2>
+                <p style="font-size: 1.2em; margin-bottom: 30px;" id="gameOverMessage">生命值耗尽，请重新挑战！</p>
+                <div class="level-stats" style="background: rgba(0,0,0,0.2);">
+                    <div class="stat-item">
+                        <div class="stat-value" id="gameOverScore">0</div>
+                        <div class="stat-label">获得积分</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="gameOverLevel">0/6</div>
+                        <div class="stat-label">到达关卡</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="gameOverCorrect">0/0</div>
+                        <div class="stat-label">正确题数</div>
+                    </div>
+                </div>
+                <button class="continue-btn" style="margin-top: 30px;" id="retryLevelBtn" onclick="retryLevel()">🔄 重新挑战</button>
+                <button class="continue-btn" style="background: rgba(255,255,255,0.1); margin-top: 15px;"
+                    onclick="showStartScreen()">← 返回主页</button>
+            </div>
+        </div>
+
+        <!-- 做题记录界面 -->
+        <div class="screen" id="recordsScreen">
+            <div style="background: rgba(255,255,255,0.95); border-radius: 25px; padding: 30px;">
+                <h2 style="text-align: center; color: #1a1a2e; margin-bottom: 30px; cursor: pointer;" onclick="_t(this);">📋 做题记录</h2>
+                <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-bottom: 30px;">
+                    <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                        <div style="font-size: 2em; font-weight: bold;" id="recordTotalQuestions">0</div>
+                        <div style="margin-top: 10px;">总做题数</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #00c853, #00e676); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                        <div style="font-size: 2em; font-weight: bold;" id="recordCorrect">0</div>
+                        <div style="margin-top: 10px;">正确题数</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                        <div style="font-size: 2em; font-weight: bold;" id="recordAccuracy">0%</div>
+                        <div style="margin-top: 10px;">正确率</div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #ffb300, #ff6f00); color: white; padding: 20px; border-radius: 15px; text-align: center;">
+                        <div style="font-size: 2em; font-weight: bold;" id="recordTotalStars">0⭐</div>
+                        <div style="margin-top: 10px;">总星星数</div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(255, 179, 0, 0.1); border-left: 4px solid #ff9800; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="color: #ff9800; margin-bottom: 15px;">🏅 荣誉徽章</h3>
+                    <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; color: #555;">
+                        <div style="background: rgba(255,255,255,0.65); border-radius: 12px; padding: 16px;">
+                            <div style="color: #ff9800; font-weight: bold; margin-bottom: 8px;">👑 极限模式通关次数</div>
+                            <div style="font-size: 1.25em; font-weight: bold;"><span id="recordExtremePasses">0</span> 次</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.65); border-radius: 12px; padding: 16px;">
+                            <div style="color: #ff9800; font-weight: bold; margin-bottom: 8px;">🏆 综合大考通关次数</div>
+                            <div style="font-size: 1.25em; font-weight: bold;"><span id="recordExtremeDualPasses">0</span> 次</div>
+                        </div>
+                        <div style="background: rgba(255,255,255,0.65); border-radius: 12px; padding: 16px;">
+                            <div style="color: #ff9800; font-weight: bold; margin-bottom: 8px;">🧘 修炼场完成题数</div>
+                            <div style="font-size: 1.25em; font-weight: bold;"><span id="recordPracticeCount">0</span> 题</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="background: rgba(102, 126, 234, 0.1); border-left: 4px solid #667eea; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                    <h3 style="color: #667eea; margin-bottom: 15px;">📈 分单元关卡进度</h3>
+                    <div id="recordProgressTabs" class="segmented-tabs"></div>
+                    <div id="recordLevelStats" style="color: #555; line-height: 2;"></div>
+                </div>
+
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="continue-btn" style="margin-right: 10px;" onclick="showWrongAnalysis()">🔍 错误分析</button>
+                    <button class="continue-btn" style="margin-right: 10px;" onclick="resetRecords()">🔄 重置记录</button>
+                    <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 错误分析界面 -->
+        <div class="screen" id="wrongAnalysisScreen">
+            <div style="background: rgba(255,255,255,0.95); border-radius: 25px; padding: 30px;">
+                <h2 style="text-align: center; color: #ff6b6b; margin-bottom: 30px;">🔍 错误分析</h2>
+                <div id="wrongAnalysisTabs" class="segmented-tabs"></div>
+                <div id="wrongAnalysisContainer" style="max-height: 600px; overflow-y: auto;"></div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="continue-btn" style="margin-right: 10px;" onclick="clearWrongQuestions('active')">🧹 清空当前单元</button>
+                    <button class="continue-btn" style="margin-right: 10px;" onclick="clearWrongQuestions('all')">🗑️ 清空全部错误</button>
+                    <button class="continue-btn" onclick="showRecords()">← 返回</button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 成就界面 -->
+        <div class="screen" id="achievementScreen">
+            <div style="background: rgba(255,255,255,0.95); border-radius: 25px; padding: 30px;">
+                <h2 style="text-align: center; color: #1a1a2e; margin-bottom: 30px;">🏆 成就一览</h2>
+                <div id="achievementsContainer"></div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="devMenuScreen" style="position: fixed; top: -100%; left: 0; width: 100%; height: 100%; z-index: 5000; display: none; transition: top 0.3s ease; align-items: center; justify-content: center;">
+            <div style="background: rgba(0,0,0,0.95); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;">
+                <div style="background: #1a1a2e; border: 3px solid #ffd700; border-radius: 25px; padding: 40px; max-width: 500px; color: white; text-align: center;">
+                    <h2 style="color: #ffd700; margin-bottom: 20px;">验证</h2>
+                    <p style="color: #a0a0a0; margin-bottom: 30px;">请输入密码</p>
+                    <input type="password" id="devPassInput" placeholder="••••••" style="width: 100%; padding: 12px; border-radius: 10px; border: none; margin-bottom: 20px; font-size: 1em;" onkeypress="if(event.key==='Enter') verifyDevPass()">
+                    <button class="continue-btn" onclick="verifyDevPass()" style="width: 100%; margin-bottom: 10px;">确认</button>
+                    <button class="continue-btn" style="width: 100%; background: rgba(255,255,255,0.1);" onclick="closeDevMenu()">取消</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="screen" id="adminScreen">
+            <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 25px; padding: 40px; color: white;">
+                <h2 style="text-align: center; color: #ffd700; margin-bottom: 40px;">⚙ 系统设置</h2>
+                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
+                    <button class="continue-btn" onclick="adminUnlockAll()" style="background: linear-gradient(135deg, #00d9ff, #00ff88); color: #1a1a2e; font-weight: bold;">解锁全部关卡</button>
+                    <button class="continue-btn" onclick="adminLockAll()" style="background: linear-gradient(135deg, #ff6b6b, #ff4757); color: white; font-weight: bold;">锁定关卡</button>
+                    <button class="continue-btn" onclick="adminUnlockAchievements()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-weight: bold;">✓ 解锁成就</button>
+                    <button class="continue-btn" onclick="adminClearAchievements()" style="background: linear-gradient(135deg, #ff9f43, #f0932b); color: white; font-weight: bold;">✗ 清除成就</button>
+                    <button class="continue-btn" onclick="adminSetMaxStars()" style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: #1a1a2e; font-weight: bold;">★ 满星</button>
+                    <button class="continue-btn" onclick="adminClearWrongs()" style="background: linear-gradient(135deg, #ff6b9d, #c44569); color: white; font-weight: bold;">✓ 清空错题</button>
+                </div>
+                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                    <p id="adminStatus" style="color: #a0a0a0; font-size: 0.95em;">...</p>
+                </div>
+                <div style="text-align: center;">
+                    <button class="continue-btn" style="background: rgba(255,255,255,0.1);" onclick="closeAdminMenu()">← 返回</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果弹窗 -->
+    <div class="result-overlay" id="resultOverlay">
+        <div class="result-card">
+            <div class="result-icon" id="resultIcon">✓</div>
+            <div class="result-title" id="resultTitle">回答正确！</div>
+            <div class="result-score" id="resultScore">+100</div>
+            <div class="result-bonus" id="resultBonus"></div>
+            <div class="knowledge-box" id="knowledgeBox"></div>
+            <button class="continue-btn" onclick="closeResult()">继续</button>
+        </div>
+    </div>
+
+    <!-- 成就弹窗 -->
+    <div class="achievement-popup" id="achievementPopup" style="display: none;">
+        <div class="achievement-popup-icon" id="popupIcon">🏆</div>
+        <div class="achievement-popup-title" id="popupTitle">成就解锁！</div>
+        <div class="achievement-popup-desc" id="popupDesc"></div>
+    </div>
+
+    <script>
+// 单元配置
+        const units = [
+            {
+                id: 0,
+                name: '第一单元：运算符进阶',
+                icon: '➕',
+                subtitle: '各类运算符的详解',
+                description: '深入学习算术、比较、逻辑、赋值、成员等运算符的用法',
+                levels: 6,
+                color: '#ffd700'
+            },
+            {
+                id: 1,
+                name: '第二单元：If语句基础',
+                icon: '🚦',
+                subtitle: '条件判断的基础概念',
+                description: '学习Python的If语句，包括基础if、if-else、elif等多种条件结构',
+                levels: 6,
+                color: '#667eea'
+            }
+        ];
+
+// 第一单元：If语句题目数据
+        const unit1Questions = [
+            // ================= 第1关：基础if语句 (5道) =================
+            {
+                id: 101,
+                category: '基础if语句',
+                categoryId: 0,
+                type: '选择题',
+                content: '在Python中，<code>if</code> 语句条件部分的末尾必须使用什么符号？',
+                answer: 'C',
+                options: [
+                    { letter: 'A', text: '分号 ;' },
+                    { letter: 'B', text: '逗号 ,' },
+                    { letter: 'C', text: '冒号 :' },
+                    { letter: 'D', text: '句号 .' }
+                ],
+                knowledge: {
+                    meaning: '冒号在Python中代表接下来是一个代码块（需要缩进）。',
+                    rule: '所有复合语句（如 if, for, while, def 等）的首行都必须以冒号结尾。',
+                    error: '初学者极易漏写冒号，这会导致 SyntaxError（语法错误）。',
+                    example: '<code>if x > 0:</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;print("Yes")</code>'
+                }
+            },
+            {
+                id: 102,
+                category: '基础if语句',
+                categoryId: 0,
+                type: '判断题',
+                content: '在 <code>if</code> 语句下方属于该条件分支的代码，必须要有相同的缩进。',
+                answer: 'true',
+                knowledge: {
+                    meaning: 'Python通过缩进来判断代码的层级关系，缩进相同的代码属于同一个代码块。',
+                    rule: '标准缩进是4个空格，同一代码块内的缩进空格数必须绝对一致。',
+                    error: '不要混用Tab和空格，否则会报 IndentationError（缩进错误）。',
+                    example: '<code>if True:</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;a = 1</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;b = 2</code>'
+                }
+            },
+            {
+                id: 103,
+                category: '基础if语句',
+                categoryId: 0,
+                type: '填空题',
+                content: '执行代码：<br><code>x = 5<br>if x > 3:<br>&nbsp;&nbsp;&nbsp;&nbsp;x = x + 2<br>print(x)</code><br>输出结果是 ',
+                answer: '7',
+                knowledge: {
+                    meaning: '5大于3，条件成立，执行缩进块内的代码，x变为7。',
+                    rule: '只有if条件结果为True时，才会执行其内部的缩进代码。',
+                    error: '如果不注意判断条件是否成立，容易算错最终的变量值。',
+                    example: '条件成立，执行 <code>x = 5 + 2</code>。'
+                }
+            },
+            {
+                id: 104,
+                category: '基础if语句',
+                categoryId: 0,
+                type: '选择题',
+                content: '以下哪个 <code>if</code> 语句的写法是正确的？',
+                answer: 'A',
+                options: [
+                    { letter: 'A', text: '<code>if a == 10:</code>' },
+                    { letter: 'B', text: '<code>if a = 10:</code>' },
+                    { letter: 'C', text: '<code>if (a == 10)</code>' },
+                    { letter: 'D', text: '<code>if a == 10</code>' }
+                ],
+                knowledge: {
+                    meaning: '正确写法必须包含比较运算符(==)和末尾的冒号(:)。',
+                    rule: '在条件判断中，判断相等必须用双等号 `==`，单等号 `=` 是赋值。',
+                    error: '写成 `if a = 10:` 是最常见的语法错误，Python不支持在if中直接赋值。',
+                    example: '<code>if a == 10:</code>'
+                }
+            },
+            {
+                id: 105,
+                category: '基础if语句',
+                categoryId: 0,
+                type: '填空题',
+                content: '执行代码：<br><code>a = 10<br>if a < 5:<br>&nbsp;&nbsp;&nbsp;&nbsp;a = 0<br>print(a)</code><br>输出结果是 ',
+                answer: '10',
+                knowledge: {
+                    meaning: '因为10 < 5为假（False），所以跳过缩进的代码，a的值保持不变。',
+                    rule: '如果条件为False，程序会跳过整个if代码块，继续执行后面的未缩进代码。',
+                    error: '不要盲目执行代码块里的内容，先判断条件真假！',
+                    example: '跳过 <code>a = 0</code>，直接执行 <code>print(a)</code>。'
+                }
+            },
+
+            // ================= 第2关：if-else双分支 (5道) =================
+            {
+                id: 106,
+                category: 'if-else双分支',
+                categoryId: 1,
+                type: '判断题',
+                content: '<code>else</code> 语句可以单独使用，不需要前面有 <code>if</code> 语句。',
+                answer: 'false',
+                knowledge: {
+                    meaning: '`else` 的意思是"否则"，它必须依附于前面的 `if`（或 for/while/try）存在，不能孤立存在。',
+                    rule: '一个标准的双分支结构是 `if...else...`，它们成对出现且缩进级别相同。',
+                    error: '单独写 `else:` 会直接报语法错误（SyntaxError）。',
+                    example: '正确：<code>if a > 0: ... else: ...</code>'
+                }
+            },
+            {
+                id: 107,
+                category: 'if-else双分支',
+                categoryId: 1,
+                type: '填空题',
+                content: '执行代码：<br><code>n = 4<br>if n % 2 == 0:<br>&nbsp;&nbsp;&nbsp;&nbsp;res = 1<br>else:<br>&nbsp;&nbsp;&nbsp;&nbsp;res = 2</code><br>res 的值是 ',
+                answer: '1',
+                knowledge: {
+                    meaning: '4能被2整除（余数为0），所以执行 if 分支，不执行 else 分支。',
+                    rule: '`if-else` 是互斥的，条件为True走if，为False走else，必定只走其中一条路。',
+                    error: '切忌两条路都执行。判断为真后，else块会被直接忽略。',
+                    example: '判断奇偶数是if-else的经典应用场景。'
+                }
+            },
+            {
+                id: 108,
+                category: 'if-else双分支',
+                categoryId: 1,
+                type: '选择题',
+                content: '关于 <code>else</code> 语句，以下说法错误的是？',
+                answer: 'C',
+                options: [
+                    { letter: 'A', text: '<code>else</code> 后面不能加条件表达式' },
+                    { letter: 'B', text: '<code>else</code> 必须和对应的 <code>if</code> 对齐' },
+                    { letter: 'C', text: '一个 <code>if</code> 后面可以跟多个 <code>else</code>' },
+                    { letter: 'D', text: '<code>else</code> 后面也必须加冒号' }
+                ],
+                knowledge: {
+                    meaning: '一个 if 语句只能搭配最多一个 else（作为最后的保底分支）。',
+                    rule: '结构只能是 `if -> (0个或多个elif) -> (0或1个else)`。',
+                    error: '如果在代码中写两个并列的else，Python会报错。',
+                    example: '错误示范：<code>if x>0: ... else: ... else: ...</code>'
+                }
+            },
+            {
+                id: 109,
+                category: 'if-else双分支',
+                categoryId: 1,
+                type: '填空题',
+                content: '执行代码：<br><code>x = -5<br>if x >= 0:<br>&nbsp;&nbsp;&nbsp;&nbsp;x = x + 5<br>else:<br>&nbsp;&nbsp;&nbsp;&nbsp;x = x - 5</code><br>最后 x 的值是 ',
+                answer: '-10',
+                knowledge: {
+                    meaning: '-5 >= 0 为假，进入 else 分支，执行 -5 - 5 = -10。',
+                    rule: '仔细代入初始变量值，按照条件走向计算最终结果。',
+                    error: '注意负数的加减法，-5减去5是-10，不是0！',
+                    example: '走else分支：<code>x = -5 - 5</code>'
+                }
+            },
+            {
+                id: 110,
+                category: 'if-else双分支',
+                categoryId: 1,
+                type: '选择题',
+                content: '如果想判断一个数 <code>x</code> 是否非负，并在负数时将其变正，应该选？',
+                answer: 'B',
+                options: [
+                    { letter: 'A', text: '<code>if x > 0: x = -x</code>' },
+                    { letter: 'B', text: '<code>if x < 0: x = -x</code>' },
+                    { letter: 'C', text: '<code>else x < 0: x = -x</code>' },
+                    { letter: 'D', text: '<code>if x < 0 else: x = -x</code>' }
+                ],
+                knowledge: {
+                    meaning: '负数才需要变正，所以条件是 `x < 0`，将其变成相反数 `-x` 即为正数。',
+                    rule: '这也是求绝对值（abs）的基础底层逻辑。',
+                    error: 'C错在else后面不能加条件；D错在语法完全不通。',
+                    example: '当 x = -3 时，进入 `if x < 0`，执行 `x = -(-3)`，x变为3。'
+                }
+            },
+
+            // ================= 第3关：elif多重分支 (5道) =================
+            {
+                id: 111,
+                category: 'elif多重分支',
+                categoryId: 2,
+                type: '选择题',
+                content: '在多分支判断中，<code>elif</code> 是哪个英文短语的缩写？',
+                answer: 'A',
+                options: [
+                    { letter: 'A', text: 'else if' },
+                    { letter: 'B', text: 'every if' },
+                    { letter: 'C', text: 'either if' },
+                    { letter: 'D', text: 'end if' }
+                ],
+                knowledge: {
+                    meaning: 'Python为了让代码更简洁，将 else if 组合成了 elif。',
+                    rule: 'elif 必须用在 if 之后，else 之前。后面必须跟条件表达式和冒号。',
+                    error: '不要在Python里写 `else if`，会报语法错误，必须写成 `elif`。',
+                    example: '<code>elif score >= 80:</code>'
+                }
+            },
+            {
+                id: 112,
+                category: 'elif多重分支',
+                categoryId: 2,
+                type: '填空题',
+                content: '执行代码：<br><code>x = 8<br>if x > 10:<br>&nbsp;&nbsp;&nbsp;&nbsp;y = 1<br>elif x > 5:<br>&nbsp;&nbsp;&nbsp;&nbsp;y = 2<br>elif x > 0:<br>&nbsp;&nbsp;&nbsp;&nbsp;y = 3</code><br>y 的值是 ',
+                answer: '2',
+                knowledge: {
+                    meaning: 'x是8，不大于10，看下一个条件；8大于5，条件成立，执行 y=2。',
+                    rule: '从上到下按顺序判断，只要有一个条件成立，执行后就会**立刻跳出**整个 if-elif 结构。',
+                    error: '不要因为8也大于0就执行 y=3。匹配到第一个满足的条件后就不会再往下判断了！',
+                    example: '这就是为什么多分支结构要注意条件的先后顺序。'
+                }
+            },
+            {
+                id: 113,
+                category: 'elif多重分支',
+                categoryId: 2,
+                type: '判断题',
+                content: '一个多分支结构可以只有 <code>if</code> 和多个 <code>elif</code>，而不需要 <code>else</code> 结尾。',
+                answer: 'true',
+                knowledge: {
+                    meaning: '`else` 是可选的（作为所有条件都不满足时的默认操作）。如果不需要默认操作，完全可以省略。',
+                    rule: '`if-elif` 结构合法。如果没有任何条件满足，程序就直接略过整个结构继续向下执行。',
+                    error: '很多人误以为if语句最后必须用else兜底，其实不是强制的。',
+                    example: '<code>if a == 1: print("A")<br>elif a == 2: print("B")</code> （没有else完全合法）'
+                }
+            },
+            {
+                id: 114,
+                category: 'elif多重分支',
+                categoryId: 2,
+                type: '选择题',
+                content: '下面这段评级代码有一个逻辑漏洞，输入什么分数会得到错误的结果？<br><code>if score >= 60: return "及格"<br>elif score >= 90: return "优秀"</code>',
+                answer: 'D',
+                options: [
+                    { letter: 'A', text: '50' },
+                    { letter: 'B', text: '70' },
+                    { letter: 'C', text: '85' },
+                    { letter: 'D', text: '95' }
+                ],
+                knowledge: {
+                    meaning: '输入95时，95>=60满足条件，直接返回"及格"并跳出，永远无法执行到"优秀"。',
+                    rule: '在使用大于(>)判断时，条件范围小的（如>=90）应该写在前面，范围大的写在后面。',
+                    error: '条件发生覆盖和重叠时，排在前面的条件会拦截排在后面的条件。',
+                    example: '正确写法应先判断 <code>if score >= 90</code>，再判断 <code>elif score >= 60</code>。'
+                }
+            },
+            {
+                id: 115,
+                category: 'elif多重分支',
+                categoryId: 2,
+                type: '填空题',
+                content: '执行代码：<br><code>a = 3<br>if a == 1: a += 1<br>elif a == 2: a += 2<br>else: a += 3</code><br>最终 a 的值是 ',
+                answer: '6',
+                knowledge: {
+                    meaning: '3既不等于1也不等于2，所以落入最后的else分支，执行 a = 3 + 3 = 6。',
+                    rule: 'else 作为"垃圾桶"分支，收纳所有不符合前面条件的情况。',
+                    error: '别看错了初始值和运算符号，a += 3 就是 a = a + 3。',
+                    example: '<code>else:</code> 处理所有其他情况。'
+                }
+            },
+
+            // ================= 第4关：嵌套条件结构 (5道) =================
+            {
+                id: 116,
+                category: '嵌套条件结构',
+                categoryId: 3,
+                type: '判断题',
+                content: '在Python中，<code>if</code> 语句内部不可以再包含另一个 <code>if-else</code> 结构。',
+                answer: 'false',
+                knowledge: {
+                    meaning: '条件语句是可以嵌套的，你可以在一个if里面再写if，层次理论上不限。',
+                    rule: '嵌套时一定要严格注意**缩进**。内部的if要比外部的if多一层缩进（通常多4个空格）。',
+                    error: '嵌套层数过多（超过3层）会导致代码像"箭头"一样，可读性极差，被称为"回调地狱/嵌套地狱"。',
+                    example: '<code>if 晴天:<br>&nbsp;&nbsp;if 有空:<br>&nbsp;&nbsp;&nbsp;&nbsp;去打球</code>'
+                }
+            },
+            {
+                id: 117,
+                category: '嵌套条件结构',
+                categoryId: 3,
+                type: '填空题',
+                content: '执行代码：<br><code>x, y = 10, 5<br>if x > 5:<br>&nbsp;&nbsp;&nbsp;&nbsp;if y > 5:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ans = "A"<br>&nbsp;&nbsp;&nbsp;&nbsp;else:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;ans = "B"<br>else:<br>&nbsp;&nbsp;&nbsp;&nbsp;ans = "C"</code><br>ans 的值是 ',
+                answer: 'B',
+                knowledge: {
+                    meaning: '第一层 x>5(10>5) 成立；进入内层判断 y>5(5>5) 为假，走内层的 else，得到 "B"。',
+                    rule: '外层条件满足后，才会进入内层判断；内层的 else 只与同缩进级别的内层 if 匹配。',
+                    error: '不要把内层的 else 和外层的 else 看混了，对齐（缩进）是谁，就和谁配对！',
+                    example: '缩进决定了代码的归属关系。'
+                }
+            },
+            {
+                id: 118,
+                category: '嵌套条件结构',
+                categoryId: 3,
+                type: '选择题',
+                content: '下面哪段代码等价于 <code>if a > 0 and b > 0:</code> ？',
+                answer: 'A',
+                options: [
+                    { letter: 'A', text: '<code>if a > 0:<br>&nbsp;&nbsp;if b > 0:</code>' },
+                    { letter: 'B', text: '<code>if a > 0:<br>if b > 0:</code>' },
+                    { letter: 'C', text: '<code>if a > 0 or b > 0:</code>' },
+                    { letter: 'D', text: '<code>if a > 0 elif b > 0:</code>' }
+                ],
+                knowledge: {
+                    meaning: '嵌套的两个 if，意味着必须同时满足条件a且满足条件b才能进入最深层，逻辑上等同于 `and`。',
+                    rule: '可以通过逻辑运算符（and）来合并简单的嵌套 if，让代码更扁平化。',
+                    error: 'B选项没有缩进，是两个并列的if，逻辑完全不同。',
+                    example: '优先使用 `and`，避免不必要的嵌套。'
+                }
+            },
+            {
+                id: 119,
+                category: '嵌套条件结构',
+                categoryId: 3,
+                type: '填空题',
+                content: '执行代码：<br><code>a = 0<br>if a == 0:<br>&nbsp;&nbsp;&nbsp;&nbsp;a += 1<br>&nbsp;&nbsp;&nbsp;&nbsp;if a == 1:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;a += 2<br>print(a)</code><br>输出结果是 ',
+                answer: '3',
+                knowledge: {
+                    meaning: '外层 a==0 成立，a变成1；继续往下走遇到内层 if a==1，条件成立，a变成1+2=3。',
+                    rule: '代码是自上而下执行的，外层修改了变量的值，内层使用的就是修改后的新值。',
+                    error: '不要拿初始值 a=0 去判断内层的 if！变量的值是在动态变化的。',
+                    example: '程序执行过程：0 -> 1 -> 3'
+                }
+            },
+            {
+                id: 120,
+                category: '嵌套条件结构',
+                categoryId: 3,
+                type: '选择题',
+                content: '关于嵌套条件，在排版时最容易出现的错误是什么？',
+                answer: 'D',
+                options: [
+                    { letter: 'A', text: '变量名写错' },
+                    { letter: 'B', text: '忘记导入模块' },
+                    { letter: 'C', text: '条件全部为真' },
+                    { letter: 'D', text: '缩进混乱导致逻辑错乱' }
+                ],
+                knowledge: {
+                    meaning: '嵌套越深，对缩进的要求就越严格。少缩进或多缩进，会完全改变代码的执行流。',
+                    rule: 'Python强制使用缩进来划分代码块，因此缩进就是逻辑本身。',
+                    error: '一旦缩进对齐错误，原本属于内层的代码可能会被解析到外层，导致难以排查的Bug。',
+                    example: '多使用IDE的自动缩进和格式化工具(如Shift+Tab回退缩进)。'
+                }
+            },
+
+            // ================= 第5关：隐式真假值 (5道) =================
+            {
+                id: 121,
+                category: '隐式真假值',
+                categoryId: 4,
+                type: '选择题',
+                content: '在Python中，如果直接将变量作为条件（如 <code>if x:</code>），下列哪个值会被判定为 <code>False</code>？',
+                answer: 'C',
+                options: [
+                    { letter: 'A', text: '<code>"0"</code> (字符串)' },
+                    { letter: 'B', text: '<code>[1]</code> (列表)' },
+                    { letter: 'C', text: '<code>0</code> (整数)' },
+                    { letter: 'D', text: '<code>-1</code> (整数)' }
+                ],
+                knowledge: {
+                    meaning: 'Python中，数字 0 被视为 False。非零数字（包括-1）都是 True。',
+                    rule: '常用的 False 隐式值：0, 0.0, ""(空字符串), [](空列表), {}(空字典), None。',
+                    error: '初学者常以为字符串 `"0"` 是 False。只要字符串不为空（里面有字符），哪怕是"0"或"False"，它就是True！',
+                    example: '<code>if 0:</code> 不会执行，<code>if "0":</code> 会执行。'
+                }
+            },
+            {
+                id: 122,
+                category: '隐式真假值',
+                categoryId: 4,
+                type: '判断题',
+                content: '代码 <code>if "":</code> 中的条件被认为是 <code>True</code>。',
+                answer: 'false',
+                knowledge: {
+                    meaning: '空字符串 `""` 在布尔语境下会被转换为 False。',
+                    rule: '所有为空的数据结构（空列表、空元组、空字符串、空字典、空集合）都是 False。',
+                    error: '非空为真，空为假。非常适合用来检查用户是否输入了内容。',
+                    example: '<code>name = ""<br>if not name: print("名字不能为空")</code>'
+                }
+            },
+            {
+                id: 123,
+                category: '隐式真假值',
+                categoryId: 4,
+                type: '填空题',
+                content: '执行代码：<br><code>a = []<br>if a:<br>&nbsp;&nbsp;&nbsp;&nbsp;res = "满"<br>else:<br>&nbsp;&nbsp;&nbsp;&nbsp;res = "空"</code><br>res 的值是 ',
+                answer: '空',
+                knowledge: {
+                    meaning: '`a` 是一个空列表 `[]`，被视为 False，因此走 else 分支。',
+                    rule: '利用 `if 列表:` 可以非常优雅地判断列表是否为空，无需使用 `len(a) > 0`。',
+                    error: '写成 `if len(a) > 0:` 虽然对，但不符合Pythonic（优雅的Python代码）风格。',
+                    example: '推荐写法：<code>if a:</code> 而不是 <code>if len(a) != 0:</code>'
+                }
+            },
+            {
+                id: 124,
+                category: '隐式真假值',
+                categoryId: 4,
+                type: '填空题',
+                content: '执行代码：<br><code>if "False":<br>&nbsp;&nbsp;&nbsp;&nbsp;ans = "T"<br>else:<br>&nbsp;&nbsp;&nbsp;&nbsp;ans = "F"</code><br>ans 的值是 ',
+                answer: 'T',
+                knowledge: {
+                    meaning: '"False" 是一个包含5个字母的字符串，不是空的！非空字符串即为 True。',
+                    rule: '带引号的布尔词只是普通字符串，不要被文字含义迷惑。',
+                    error: '很多人会条件反射地认为它代表假，这是极易踩坑的地方。',
+                    example: '只有不带引号的 <code>False</code> 才是真正的假。'
+                }
+            },
+            {
+                id: 125,
+                category: '隐式真假值',
+                categoryId: 4,
+                type: '选择题',
+                content: '关于 <code>None</code>，以下哪个表达式等价于检查变量 <code>x</code> 是不是 <code>None</code>？',
+                answer: 'D',
+                options: [
+                    { letter: 'A', text: '<code>if x == False:</code>' },
+                    { letter: 'B', text: '<code>if x == 0:</code>' },
+                    { letter: 'C', text: '<code>if x == "":</code>' },
+                    { letter: 'D', text: '<code>if x is None:</code>' }
+                ],
+                knowledge: {
+                    meaning: 'None 是Python中一个特殊类型（NoneType），代表"什么都没有"。',
+                    rule: '判断是否为None，官方推荐使用身份运算符 `is`，即 `if x is None:`。',
+                    error: 'None不是0，不是False，更不是空字符串，它就是单独存在的None。',
+                    example: '<code>if x is not None:</code> （判断x有实际值）'
+                }
+            },
+
+            // ================= 第6关：综合与进阶 (5道) =================
+            {
+                id: 126,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '选择题',
+                content: '执行代码：<code>res = 10 if 5 > 3 else 20</code>，res 的值是多少？',
+                answer: 'A',
+                options: [
+                    { letter: 'A', text: '10' },
+                    { letter: 'B', text: '20' },
+                    { letter: 'C', text: '5' },
+                    { letter: 'D', text: '3' }
+                ],
+                knowledge: {
+                    meaning: '这是Python的三元条件表达式。因为 5>3 为True，所以返回 if 前面的值 10。',
+                    rule: '语法格式：`为真时的值 if 条件 else 为假时的值`。',
+                    error: '不要和C/Java里的 `条件 ? 真值 : 假值` 搞混，Python把条件写在中间。',
+                    example: '<code>status = "成年" if age >= 18 else "未成年"</code>'
+                }
+            },
+            {
+                id: 127,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '判断题',
+                content: '三元条件表达式 (<code>A if cond else B</code>) 中，可以嵌入 <code>elif</code> 逻辑。',
+                answer: 'false',
+                knowledge: {
+                    meaning: '三元表达式只支持简单的 if-else 双向分支，不支持 elif。',
+                    rule: '如果需要多分支，必须使用标准的多行 if-elif-else 语句，或者嵌套三元表达式（极度不推荐）。',
+                    error: '尝试在单行表达式里写 elif 会导致 SyntaxError。',
+                    example: '不推荐的嵌套写法：<code>A if c1 else (B if c2 else C)</code>，可读性很差。'
+                }
+            },
+            {
+                id: 128,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '填空题',
+                content: '执行代码：<br><code>a = 5<br>b = 3<br>if a > 2 and b < 5:<br>&nbsp;&nbsp;&nbsp;&nbsp;c = a + b<br>else:<br>&nbsp;&nbsp;&nbsp;&nbsp;c = a - b</code><br>c 的值是 ',
+                answer: '8',
+                knowledge: {
+                    meaning: 'a>2(True) 且 b<5(True)，两边都成立，and结果为True。执行 c = 5 + 3 = 8。',
+                    rule: '条件分支经常结合逻辑运算符 `and`, `or`, `not` 一起使用。',
+                    error: 'and 需要左右两边都是 True 整体才算 True。',
+                    example: '如果改为 <code>a > 2 or b > 5</code>，结果依然为True。'
+                }
+            },
+            {
+                id: 129,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '选择题',
+                content: '有如下代码：<br><code>if not (x > 10): print("A")</code><br>如果想让它输出 "A"，x 的值可以是？',
+                answer: 'B',
+                options: [
+                    { letter: 'A', text: '15' },
+                    { letter: 'B', text: '5' },
+                    { letter: 'C', text: '11' },
+                    { letter: 'D', text: '100' }
+                ],
+                knowledge: {
+                    meaning: '`not (x > 10)` 要为 True，说明 `x > 10` 必须为 False。所以 x 不能大于 10。',
+                    rule: '`not` 会将条件的布尔值取反。`not (x > 10)` 在数学上等价于 `x <= 10`。',
+                    error: '遇到 not 时，先算括号里面的结果，然后再翻转真假。',
+                    example: '当 x=5 时，5>10为False，not False即为True。'
+                }
+            },
+            {
+                id: 130,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '填空题',
+                content: '执行下面这行紧凑的代码：<br><code>x = "偶" if 8 % 2 == 0 else "奇"</code><br>x 的值是 ',
+                answer: '偶',
+                knowledge: {
+                    meaning: '8 % 2 的余数是 0，0 == 0 为 True，所以取 if 前面的值 "偶"。',
+                    rule: '三元表达式非常适合给变量做快速赋值。',
+                    error: '先计算条件 `8 % 2 == 0`，再决定选用前面还是后面的值。',
+                    example: '这是代替简单 `if-else` 给单个变量赋值的最佳实践方案。'
+                }
+            }
+        ];
+
+// 第二单元：运算符题目
+        const unit2Questions = [
+            {
+                id: 1,
+                category: '算术运算符',
+                categoryId: 0,
+                type: '填空题',
+                content: '<code>10 + 5 * 2</code> 的结果是 ',
+                answer: '20',
+                knowledge: {
+                    meaning: '先算乘法5×2=10，再算加法10+10=20。',
+                    rule: '乘除比加减优先级高，先算5×2。',
+                    error: '容易先算10+5=15，再×2=30。记住：先乘除后加减！',
+                    example: '<code>10 + 5 * 2 = 20</code><br><code>(10 + 5) * 2 = 30</code>'
+                }
+            },
+            {
+                id: 2,
+                category: '算术运算符',
+                categoryId: 0,
+                type: '选择题',
+                content: '下列哪个表达式结果为奇数？',
+                answer: 'B',
+                options: [
+                    { letter: 'A', text: '<code>10 % 2</code>' },
+                    { letter: 'B', text: '<code>15 % 2</code>' },
+                    { letter: 'C', text: '<code>20 % 2</code>' },
+                    { letter: 'D', text: '<code>100 % 2</code>' }
+                ],
+                knowledge: {
+                    meaning: '%是取余数，15÷2=7余1，所以15%2=1（奇数）。',
+                    rule: '对2取余：结果0是偶数，结果1是奇数。',
+                    error: '不要把%和/搞混，/是除法，%是取余数。',
+                    example: '<code>15 % 2 = 1</code>（奇数）<br><code>14 % 2 = 0</code>（偶数）'
+                }
+            },
+            {
+                id: 3,
+                category: '算术运算符',
+                categoryId: 0,
+                type: '填空题',
+                content: '<code>17 // 5</code> 的结果是 ',
+                answer: '3',
+                knowledge: {
+                    meaning: '17÷5=3.4，//是整除，只取整数部分3。',
+                    rule: '//只取结果的整数部分，小数部分不要。',
+                    error: '不是四舍五入！17//5=3，不是3.4，也不是4。',
+                    example: '<code>17 // 5 = 3</code><br><code>17 / 5 = 3.4</code>'
+                }
+            },
+            {
+                id: 4,
+                category: '算术运算符',
+                categoryId: 0,
+                type: '判断题',
+                content: '<code>2 ** 3 ** 2</code> 的结果是 <code>64</code>。',
+                answer: 'false',
+                knowledge: {
+                    meaning: '**从右往左算：先算3**2=9，再算2**9=512。',
+                    rule: '**是右结合的，a**b**c等于a**(b**c)。',
+                    error: '容易从左往右算成(2**3)**2=8**2=64。',
+                    example: '<code>2 ** 3 ** 2 = 2 ** 9 = 512</code><br><code>(2 ** 3) ** 2 = 64</code>'
+                }
+            },
+            {
+                id: 5,
+                category: '算术运算符',
+                categoryId: 0,
+                type: '选择题',
+                content: '表达式 <code>(-10) % 3</code> 的结果是？',
+                answer: 'D',
+                options: [
+                    { letter: 'A', text: '-1' },
+                    { letter: 'B', text: '-2' },
+                    { letter: 'C', text: '1' },
+                    { letter: 'D', text: '2' }
+                ],
+                knowledge: {
+                    meaning: '(-10)÷3=-3余-1，但Python规定结果要与除数同号，所以结果是2。简单记：Python取模结果永远是正的（当除数是正数时）。',
+                    rule: 'Python的%结果符号与除数相同，除数3是正数，所以结果是正数。',
+                    error: '不要以为负数取模结果是负数！Python保证结果和除数同号。',
+                    example: '<code>(-10) % 3 = 2</code><br><code>10 % (-3) = -2</code>'
+                }
+            },
+            {
+                id: 6,
+                category: '比较运算符',
+                categoryId: 1,
+                type: '判断题',
+                content: '<code>3 == 3.0</code> 的结果是 <code>True</code>。',
+                answer: 'true',
+                knowledge: {
+                    meaning: '3和3.0数值相等，==只比较值，不比较类型。',
+                    rule: '整数和浮点数只要数值相等，==就返回True。',
+                    error: '不要把==和is搞混！==比较值，is比较内存地址。',
+                    example: '<code>3 == 3.0</code> → <code>True</code><br><code>3 is 3.0</code> → <code>False</code>'
+                }
+            },
+            {
+                id: 7,
+                category: '比较运算符',
+                categoryId: 1,
+                type: '选择题',
+                content: '下列表达式中，结果为 <code>False</code> 的是？',
+                answer: 'D',
+                options: [
+                    { letter: 'A', text: '<code>"hello" == "hello"</code>' },
+                    { letter: 'B', text: '<code>[1,2] == [1,2]</code>' },
+                    { letter: 'C', text: '<code>"abc" < "bcd"</code>' },
+                    { letter: 'D', text: '<code>"abc" > "abcd"</code>' }
+                ],
+                knowledge: {
+                    meaning: '"abc"比"abcd"短，所以"abc"小于"abcd"，"abc">"abcd"是错的。',
+                    rule: '字符串比较时，较短的字符串更小（当前缀相同时）。',
+                    error: '不要觉得"abc"更长所以更大！字典序中短的在前。',
+                    example: '<code>"abc" > "abcd"</code> → <code>False</code><br><code>"abc" < "abd"</code> → <code>True</code>'
+                }
+            },
+            {
+                id: 8,
+                category: '比较运算符',
+                categoryId: 1,
+                type: '填空题',
+                content: '<code>10 != 9</code> 的结果是 ',
+                answer: 'True',
+                knowledge: {
+                    meaning: '10不等于9，所以正确。!=就是"不等于"的意思。',
+                    rule: '!=表示不等于，相等返回False，不等返回True。',
+                    error: '注意不要写成=!，那是错的。!=是!=，顺序不能换。',
+                    example: '<code>10 != 9</code> → <code>True</code><br><code>10 != 10</code> → <code>False</code>'
+                }
+            },
+            {
+                id: 9,
+                category: '比较运算符',
+                categoryId: 1,
+                type: '选择题',
+                content: '表达式 <code>5 <= 5.0</code> 的结果是？',
+                answer: 'A',
+                options: [
+                    { letter: 'A', text: 'True' },
+                    { letter: 'B', text: 'False' },
+                    { letter: 'C', text: '报错' },
+                    { letter: 'D', text: 'None' }
+                ],
+                knowledge: {
+                    meaning: '5和5.0相等，5<=5.0当然成立，返回True。',
+                    rule: 'Python中整数和浮点数可以直接比较，会自动转换类型。',
+                    error: '不要以为不同类型不能比较！Python数值类型可以跨类型比较。',
+                    example: '<code>5 <= 5.0</code> → <code>True</code><br><code>5 == 5.0</code> → <code>True</code>'
+                }
+            },
+            {
+                id: 10,
+                category: '比较运算符',
+                categoryId: 1,
+                type: '判断题',
+                content: '在Python中，<code>None == 0</code> 的结果是 <code>True</code>。',
+                answer: 'false',
+                knowledge: {
+                    meaning: 'None是Python的"空"，不等于0，也不等于False，各是各的。',
+                    rule: 'None只和None相等，和其他任何值都不等。',
+                    error: 'None不是0，不是空字符串，不是False，就是个特殊的"空"。',
+                    example: '<code>None == 0</code> → <code>False</code><br><code>None == False</code> → <code>False</code><br><code>None == None</code> → <code>True</code>'
+                }
+            },
+            {
+                id: 11,
+                category: '逻辑运算符',
+                categoryId: 2,
+                type: '填空题',
+                content: '<code>3 > 2 and 5 > 4</code> 的结果是 ',
+                answer: 'True',
+                knowledge: {
+                    meaning: '3>2是真，5>4是真，真and真=真。',
+                    rule: 'and两边都为True结果才是True，有一个是False就是False。',
+                    error: 'and不是"和"的意思，是"并且"，两边都要满足才成立。',
+                    example: '<code>True and True</code> → <code>True</code><br><code>True and False</code> → <code>False</code>'
+                }
+            },
+            {
+                id: 12,
+                category: '逻辑运算符',
+                categoryId: 2,
+                type: '选择题',
+                content: '表达式 <code>not (3 < 5)</code> 的结果是？',
+                answer: 'D',
+                options: [
+                    { letter: 'A', text: '3 < 5' },
+                    { letter: 'B', text: 'True' },
+                    { letter: 'C', text: '报错' },
+                    { letter: 'D', text: 'False' }
+                ],
+                knowledge: {
+                    meaning: '先算括号里3<5=真，再not真=假，所以结果是False。',
+                    rule: 'not是取反：not True=False，not False=True。',
+                    error: 'not 3<5容易报错，因为<优先级高于not。要加括号not(3<5)。',
+                    example: '<code>not (3 < 5)</code> = <code>not True</code> = <code>False</code>'
+                }
+            },
+            {
+                id: 13,
+                category: '逻辑运算符',
+                categoryId: 2,
+                type: '填空题',
+                content: '<code>True or False and False</code> 的结果是 ',
+                answer: 'True',
+                knowledge: {
+                    meaning: 'and优先级高于or，先算False and False=False，再算True or False=True。',
+                    rule: '优先级：not > and > or。记忆：N-A-O（不打啊哦？）',
+                    error: '容易从左往右算成True or False=True就结束了，忘了先算and。',
+                    example: '<code>True or False and False</code> = <code>True or False</code> = <code>True</code><br><code>(True or False) and False</code> = <code>False</code>'
+                }
+            },
+            {
+                id: 14,
+                category: '逻辑运算符',
+                categoryId: 2,
+                type: '选择题',
+                content: '下列哪个表达式会输出 <code>hello</code>？',
+                answer: 'C',
+                options: [
+                    { letter: 'A', text: '<code>False and "hello"</code>' },
+                    { letter: 'B', text: '<code>True and ""</code>' },
+                    { letter: 'C', text: '<code>True and "hello"</code>' },
+                    { letter: 'D', text: '<code>"" and "hello"</code>' }
+                ],
+                knowledge: {
+                    meaning: 'and/or不只是返回True/False，它返回实际参与的值！True and "hello"返回"hello"。',
+                    rule: 'a and b：a为真返回b，a为假返回a。<br>a or b：a为真返回a，a为假返回b。',
+                    error: '不要以为and/or只返回布尔值，它们返回的是实际的值！',
+                    example: '<code>True and "hello"</code> → <code>"hello"</code><br><code>False and "hello"</code> → <code>False</code>'
+                }
+            },
+            {
+                id: 15,
+                category: '逻辑运算符',
+                categoryId: 2,
+                type: '判断题',
+                content: '<code>1 and 0</code> 的结果是 <code>False</code>。',
+                answer: 'true',
+                knowledge: {
+                    meaning: '1是真，0是假。1 and 0返回的是第二个值0（0就是False）。',
+                    rule: '1 and 0：第一个值1为真，所以返回第二个值0。',
+                    error: '注意！返回的是0，不是False。虽然0在布尔语境下等于False，但它们不一样。',
+                    example: '<code>1 and 0</code> → <code>0</code>（返回的是0，不是False）<br><code>bool(1 and 0)</code> → <code>False</code>'
+                }
+            },
+            {
+                id: 16,
+                category: '赋值运算符',
+                categoryId: 3,
+                type: '选择题',
+                content: '执行 <code>x = 5; x += 3</code> 后，x 的值是？',
+                answer: 'B',
+                options: [
+                    { letter: 'A', text: '3' },
+                    { letter: 'B', text: '8' },
+                    { letter: 'C', text: '5' },
+                    { letter: 'D', text: '53' }
+                ],
+                knowledge: {
+                    meaning: 'x+=3就是x=x+3，所以5+3=8。',
+                    rule: 'x += n 等于 x = x + n。+=就是"加上再赋值"。',
+                    error: '不要把+=当成字符串连接！+=是数学加法。',
+                    example: '<code>x = 5</code><br><code>x += 3</code> → <code>x = 5 + 3 = 8</code>'
+                }
+            },
+            {
+                id: 17,
+                category: '赋值运算符',
+                categoryId: 3,
+                type: '填空题',
+                content: '执行以下代码后：<br><code>x = 10<br>x -= 3<br>x *= 2</code><br>x 的值是 ',
+                answer: '14',
+                knowledge: {
+                    meaning: 'x=10→x=10-3=7→x=7×2=14。每一步都用最新的x值。',
+                    rule: '复合赋值从左到右执行，每一步都用上一步的结果。',
+                    error: '容易用初始值10算：10-3=7，10×2=20。记住每次都基于上一步的结果！',
+                    example: '<code>x = 10</code><br><code>x -= 3</code> → <code>x = 7</code><br><code>x *= 2</code> → <code>x = 14</code>'
+                }
+            },
+            {
+                id: 18,
+                category: '赋值运算符',
+                categoryId: 3,
+                type: '选择题',
+                content: '表达式 <code>y = 5; y /= 2; y</code> 的结果是？',
+                answer: 'C',
+                options: [
+                    { letter: 'A', text: '2' },
+                    { letter: 'B', text: '2.0' },
+                    { letter: 'C', text: '2.5' },
+                    { letter: 'D', text: '报错' }
+                ],
+                knowledge: {
+                    meaning: 'y/=2就是y=y/2，5除以2等于2.5。/总是返回浮点数。',
+                    rule: 'y /= 2 = y = y / 2。注意/是普通除法，返回浮点数。',
+                    error: '不要和//搞混！/返回小数，//才是整除。',
+                    example: '<code>y = 5</code><br><code>y /= 2</code> → <code>y = 5 / 2 = 2.5</code>'
+                }
+            },
+            {
+                id: 19,
+                category: '赋值运算符',
+                categoryId: 3,
+                type: '判断题',
+                content: '<code>x = 10; x %= 3</code> 执行后，x 的值是 1。',
+                answer: 'true',
+                knowledge: {
+                    meaning: 'x%=3就是x=x%3，10除以3余1，所以x=1。',
+                    rule: 'x %= n = x = x % n。%是取余数。',
+                    error: '不要把%当成除法！10%3是取余数，不是10除以3。',
+                    example: '<code>x = 10</code><br><code>x %= 3</code> → <code>x = 10 % 3 = 1</code>'
+                }
+            },
+            {
+                id: 20,
+                category: '赋值运算符',
+                categoryId: 3,
+                type: '选择题',
+                content: '关于赋值运算符，以下说法正确的是？',
+                answer: 'D',
+                options: [
+                    { letter: 'A', text: '<code>x += y</code> 等价于 <code>x =+ y</code>' },
+                    { letter: 'B', text: '<code>x -= y</code> 等价于 <code>x = y - x</code>' },
+                    { letter: 'C', text: '<code>x *= y</code> 等价于 <code>x = x * (y - 1)</code>' },
+                    { letter: 'D', text: '<code>x **= y</code> 等价于 <code>x = x ** y</code>' }
+                ],
+                knowledge: {
+                    meaning: 'x**=y就是x=x**y，即x的y次方。比如x=2,y=3，则x=2**3=8。',
+                    rule: 'x op= y 等于 x = x op y，顺序是固定的。',
+                    error: '+=是+和=挨着写的，不能写成=+！顺序很重要。',
+                    example: '<code>x **= y</code> = <code>x = x ** y</code><br><code>x = 2, x **= 3</code> → <code>x = 8</code>'
+                }
+            },
+            {
+                id: 21,
+                category: '成员运算符',
+                categoryId: 4,
+                type: '判断题',
+                content: '<code>"a" in "apple"</code> 的结果是 <code>True</code>。',
+                answer: 'true',
+                knowledge: {
+                    meaning: '"a"在"apple"里能找到，所以返回True。in就是"在...里"的意思。',
+                    rule: 'x in y：检查x是否是y的子串/元素。找到了返回True。',
+                    error: '注意大小写！"A" in "apple"是False，Python区分大小写。',
+                    example: '<code>"a" in "apple"</code> → <code>True</code><br><code>"A" in "apple"</code> → <code>False</code>'
+                }
+            },
+            {
+                id: 22,
+                category: '成员运算符',
+                categoryId: 4,
+                type: '选择题',
+                content: '表达式 <code>3 in [1, 2, 3, 4]</code> 的结果是？',
+                answer: 'A',
+                options: [
+                    { letter: 'A', text: 'True' },
+                    { letter: 'B', text: 'False' },
+                    { letter: 'C', text: '3' },
+                    { letter: 'D', text: '报错' }
+                ],
+                knowledge: {
+                    meaning: '3在列表[1,2,3,4]中能找到，所以返回True。',
+                    rule: 'in检查元素是否在列表/元组/集合中，找到了就是True。',
+                    error: '不要把in当成索引！3是元素，不是索引（索引是0,1,2,3）。',
+                    example: '<code>3 in [1, 2, 3, 4]</code> → <code>True</code><br><code>0 in [1, 2, 3, 4]</code> → <code>False</code>'
+                }
+            },
+            {
+                id: 23,
+                category: '成员运算符',
+                categoryId: 4,
+                type: '填空题',
+                content: '<code>"key" not in {"name": "Tom", "key": "value"}</code> 的结果是 ',
+                answer: 'False',
+                knowledge: {
+                    meaning: '字典里有"key"这个键，所以"key not in"是False。not in就是"不在...里"。',
+                    rule: 'not in是in的反面。在里面返回False，不在里面返回True。',
+                    error: '字典的成员是键不是值！"name" in dict检查的是键，不是"Tom"。',
+                    example: '<code>"key" in {"name": "Tom"}</code> → <code>True</code><br><code>"Tom" in {"name": "Tom"}</code> → <code>False</code>'
+                }
+            },
+            {
+                id: 24,
+                category: '成员运算符',
+                categoryId: 4,
+                type: '选择题',
+                content: '以下哪个表达式的结果是 <code>True</code>？',
+                answer: 'B',
+                options: [
+                    { letter: 'A', text: '<code>"3" in [1, 2, 3]</code>' },
+                    { letter: 'B', text: '<code>3 in [1, 2, 3]</code>' },
+                    { letter: 'C', text: '<code>"ab" in "a,b,c"</code>' },
+                    { letter: 'D', text: '<code>None in [None, 1, 2]</code>' }
+                ],
+                knowledge: {
+                    meaning: '3是整数，和列表里的3匹配。A错是因为"3"是字符串。C错是因为"ab"不是"a,b,c"的子串。',
+                    rule: 'in检查类型和值都匹配。字符串"3"不等于整数3。',
+                    error: '注意类型！"3"不等于3，"ab"不等于"a,b,c"（后者包含逗号）。',
+                    example: '<code>"3" in [1, 2, 3]</code> → <code>False</code>（类型不同）<br><code>3 in [1, 2, 3]</code> → <code>True</code>'
+                }
+            },
+            {
+                id: 25,
+                category: '成员运算符',
+                categoryId: 4,
+                type: '判断题',
+                content: '<code>(1, 2) in [(1, 2), (3, 4)]</code> 的结果是 <code>True</code>。',
+                answer: 'true',
+                knowledge: {
+                    meaning: '(1,2)作为整体是列表的第一个元素，所以能找到，返回True。',
+                    rule: '元组可以整体作为列表的元素，in是完整匹配。',
+                    error: '注意是整体匹配！(1,2)是查"元组(1,2)"在不在，不是查1或2在不在。',
+                    example: '<code>(1, 2) in [(1, 2), (3, 4)]</code> → <code>True</code><br><code>1 in [(1, 2), (3, 4)]</code> → <code>False</code>'
+                }
+            },
+            {
+                id: 26,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '选择题',
+                content: '表达式 <code>not 0</code> 的结果是？',
+                answer: 'B',
+                options: [
+                    { letter: 'A', text: 'False' },
+                    { letter: 'B', text: 'True' },
+                    { letter: 'C', text: '0' },
+                    { letter: 'D', text: '报错' }
+                ],
+                knowledge: {
+                    meaning: '0在Python里是假，not假=真，所以not 0=True。',
+                    rule: 'not真=假，not假=真。0等于假，非0等于真。',
+                    error: '不要以为not 0=False！0是假，取反后是True。',
+                    example: '<code>not 0</code> → <code>True</code><br><code>not 1</code> → <code>False</code>'
+                }
+            },
+            {
+                id: 27,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '填空题',
+                content: '<code>10 // 3 + 10 % 3</code> 的结果是 ',
+                answer: '4',
+                knowledge: {
+                    meaning: '先算//：10//3=3；再算%：10%3=1；最后算+：3+1=4。',
+                    rule: '//和%优先级相同，比+高。从左到右算。',
+                    error: '容易忘记优先级，应该先算整除和取模，再做加法。',
+                    example: '<code>10 // 3 = 3</code><br><code>10 % 3 = 1</code><br><code>3 + 1 = 4</code>'
+                }
+            },
+            {
+                id: 28,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '判断题',
+                content: '<code>"py" and "thon"</code> 的结果是 <code>"thon"</code>。',
+                answer: 'true',
+                knowledge: {
+                    meaning: '"py"是真（非空字符串），所以返回第二个值"thon"。and/or返回的是实际值，不只是True/False！',
+                    rule: 'a and b：a为真返回b，a为假返回a。',
+                    error: '不要以为"py" and "thon"返回True！它返回的是"thon"这个字符串。',
+                    example: '<code>"py" and "thon"</code> → <code>"thon"</code><br><code>"" and "thon"</code> → <code>""</code>'
+                }
+            },
+            {
+                id: 29,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '选择题',
+                content: '执行 <code>x = 5; x *= 3 + 2</code> 后，x 的值是？',
+                answer: 'C',
+                options: [
+                    { letter: 'A', text: '20' },
+                    { letter: 'B', text: '21' },
+                    { letter: 'C', text: '25' },
+                    { letter: 'D', text: '30' }
+                ],
+                knowledge: {
+                    meaning: '先算右边3+2=5，再算x*=5，即5*5=25。记住先算右边！',
+                    rule: 'x *= a + b 等于 x = x * (a + b)，不是 x = x * a + b。',
+                    error: '容易错把右边表达式拆开算，正确做法是先完整计算右侧。',
+                    example: '<code>x = 5</code><br><code>x *= 3 + 2</code> = <code>x *= 5</code> = <code>x = 5 * 5 = 25</code>'
+                }
+            },
+            {
+                id: 30,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '填空题',
+                content: '<code>"hello"[-1]</code> 的结果是 ',
+                answer: 'o',
+                knowledge: {
+                    meaning: '"hello"的最后一个字符是"o"。-1就是倒数第一个。',
+                    rule: '正数从0开始，负数从-1开始表示倒数位置。',
+                    error: '不要以为-1是第一个！-1表示最后一个字符。',
+                    example: '<code>"hello"[-1]</code> → <code>"o"</code><br><code>"hello"[-2]</code> → <code>"l"</code>'
+                }
+            }
+        ];
+
+// 单元对应的题目数据
+        const unitQuestionsMap = {
+            0: unit2Questions,
+            1: unit1Questions
+        };
+
+// 单元关卡配置
+        const unitLevelsMap = {
+            0: [
+                { name: '算术运算符', icon: '➕', bg: '🌄', questions: 5 },
+                { name: '比较运算符', icon: '⚖️', bg: '🏛️', questions: 5 },
+                { name: '逻辑运算符', icon: '🧠', bg: '⚡', questions: 5 },
+                { name: '赋值运算符', icon: '📝', bg: '📜', questions: 5 },
+                { name: '成员运算符', icon: '🔍', bg: '🔮', questions: 5 },
+                { name: '综合挑战', icon: '🏆', bg: '🎯', questions: 5 }
+            ],
+            1: [
+                { name: '基础if语句', icon: '🚦', bg: '🔰', questions: 5 },
+                { name: 'if-else双分支', icon: '🔀', bg: '🛤️', questions: 5 },
+                { name: 'elif多重分支', icon: '🚥', bg: '🌈', questions: 5 },
+                { name: '嵌套条件结构', icon: '🪆', bg: '🕸️', questions: 5 },
+                { name: '隐式真假值', icon: '🎭', bg: '☯️', questions: 5 },
+                { name: '综合挑战', icon: '🏆', bg: '🎯', questions: 5 }
+            ]
+        };
+
+// 成就配置
+        const achievementList = [
+            { id: 'first_win', name: '初试锋芒', icon: '🌱', desc: '首次答对题目', condition: (stats) => stats.totalCorrect >= 1 },
+            { id: 'speed_demon', name: '速算达人', icon: '⚡', desc: '5秒内答对一道题', condition: (stats) => stats.fastAnswer },
+            { id: 'combo_master', name: '连击大师', icon: '🔥', desc: '连续答对5题', condition: (stats) => stats.maxCombo >= 5 },
+            { id: 'perfect_clear', name: '满分通关', icon: '💎', desc: '一关不扣血通关', condition: (stats) => stats.perfectLevel },
+            { id: 'master_of_operators', name: '闯关大师', icon: '👑', desc: '通关全部关卡', condition: (stats) => stats.allLevelsClear },
+            { id: 'survivor', name: '九死一生', icon: '🌟', desc: '只剩1条命通关', condition: (stats) => stats.oneLifeWin },
+            { id: 'scholar', name: '勤学苦练', icon: '📚', desc: '在修炼场完成10道题', condition: (stats) => stats.practiceCount >= 10 },
+            { id: 'speed_5', name: '快如闪电', icon: '💨', desc: '连续5题都在5秒内答对', condition: (stats) => stats.fastStreak >= 5 },
+            { id: 'no_mistake', name: '零失误', icon: '🎯', desc: '一整关答对所有题', condition: (stats) => stats.perfectStreak },
+            { id: 'practice_veteran', name: '修炼老将', icon: '🧘', desc: '在修炼场完成30道题', condition: (stats) => stats.practiceCount >= 30 },
+            { id: 'question_hunter', name: '百题斩', icon: '🗡️', desc: '累计完成100道题', condition: (stats) => stats.totalQuestions >= 100 },
+            { id: 'star_collector', name: '星光收藏家', icon: '🌠', desc: '累计获得12颗星星', condition: (stats) => stats.totalStars >= 12 },
+            { id: 'dual_unit_clear', name: '双线通关', icon: '🧭', desc: '完成全部两个单元', condition: (stats) => stats.completedUnits >= stats.totalUnits },
+            { id: 'extreme_conqueror', name: '零失误通关', icon: '👑', desc: '通过一次双单元综合大考', condition: (stats) => stats.extremeDualPasses >= 1 }
+        ];
+
+</script>
+    <script>
+// 当前选中的单元
+        let currentUnit = 0;
+
+        function getLevelsForUnit(unitIndex = gameState.currentUnit) {
+            return unitLevelsMap[unitIndex] || unitLevelsMap[0];
+        }
+
+        // 游戏状态
+        let gameState = {
+            currentUnit: 0,
+            currentLevel: 0,
+            currentQuestion: 0,
+            lives: 3,
+            score: 0,
+            combo: 0,
+            maxCombo: 0,
+            levelScore: 0,
+            levelCorrect: 0,
+            levelTime: 0,
+            questionStartTime: 0,
+            selectedAnswer: null,
+            isPracticeMode: false,
+            practiceQuestionIndex: 0,
+            unitLevelUnlocked: [[true, false, false, false, false, false], [true, false, false, false, false, false]],
+            unitLevelStars: [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]],
+            achievements: [],
+            totalCorrect: 0,
+            totalQuestions: 0,
+            fastAnswer: false,
+            fastStreak: 0,
+            perfectLevel: false,
+            oneLifeWin: false,
+            practiceCount: 0,
+            extremePasses: 0,
+            extremeDualPasses: 0,
+            pendingMode: 'adventure',
+            levelLivesAtStart: 3,
+            isPaused: false,
+            wrongQuestions: [],
+            wrongAnalysisUnit: 0,
+            isExtremeMode: false,
+            extremeScope: null,
+            extremeSegments: [],
+            extremeSegmentIndex: 0
+        };
+
+        let devMenuClickCount = 0;
+        let devMenuClickTimer = null;
+        let timerInterval = null;
+        let currentLevelQuestions = [];
+
+        // 渲染单元选择卡片
+        function renderUnits() {
+            const container = document.getElementById('unitsContainer');
+            container.innerHTML = units.map((unit, idx) => {
+                const unitLevels = getLevelsForUnit(idx);
+                const stars = gameState.unitLevelStars[idx].reduce((a, b) => a + b, 0);
+                const totalStars = unitLevels.length * 3;
+                const unlockedCount = gameState.unitLevelUnlocked[idx].filter(Boolean).length;
+
+                return `
+                    <div class="unit-card" onclick="chooseUnit(${idx})">
+                        <div class="unit-icon">${unit.icon}</div>
+                        <div class="unit-title">${unit.name}</div>
+                        <div class="unit-subtitle">${unit.subtitle}</div>
+                        <div class="unit-desc">${unit.description}</div>
+                        <div class="unit-progress">已解锁 ${unlockedCount}/${unitLevels.length} 关 ・ ⭐ ${stars}/${totalStars}</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 选择单元
+        function chooseUnit(unitIndex) {
+            gameState.currentUnit = unitIndex;
+            if (gameState.pendingMode === 'practice') {
+                openPracticeMode();
+                return;
+            }
+            renderLevelMap();
+            switchScreen('levelSelectScreen');
+        }
+
+        // 显示单元选择界面
+        function selectUnit() {
+            renderUnits();
+            switchScreen('unitSelectScreen');
+        }
+
+        // 初始化
+        function init() {
+            loadGameState();
+            createParticles();
+            renderUnits();
+            renderAchievements();
+        }
+
+        // 创建粒子效果
+        function createParticles() {
+            const container = document.getElementById('particles');
+            for (let i = 0; i < 20; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 15 + 's';
+                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                container.appendChild(particle);
+            }
+        }
+
+        function createDefaultUnitProgress(defaultValue) {
+            return units.map((_, unitIndex) => Array(getLevelsForUnit(unitIndex).length).fill(defaultValue));
+        }
+
+        function normalizeUnitProgress(savedProgress, fallbackValue) {
+            const defaultProgress = createDefaultUnitProgress(fallbackValue);
+
+            if (!Array.isArray(savedProgress)) {
+                return defaultProgress;
+            }
+
+            return units.map((_, unitIndex) => {
+                const unitProgress = savedProgress[unitIndex];
+                const unitLevels = getLevelsForUnit(unitIndex);
+                if (!Array.isArray(unitProgress)) {
+                    return [...defaultProgress[unitIndex]];
+                }
+
+                return unitLevels.map((__, levelIndex) => {
+                    const value = unitProgress[levelIndex];
+                    return value === undefined ? defaultProgress[unitIndex][levelIndex] : value;
+                });
+            });
+        }
+
+        function swapUnitOrder(progressList) {
+            if (!Array.isArray(progressList) || progressList.length < 2) {
+                return progressList;
+            }
+
+            return [progressList[1], progressList[0], ...progressList.slice(2)];
+        }
+
+        function getTotalStars() {
+            return gameState.unitLevelStars.reduce(
+                (sum, unitStars) => sum + unitStars.reduce((unitSum, stars) => unitSum + stars, 0),
+                0
+            );
+        }
+
+        function getCompletedUnitCount() {
+            return units.filter((_, unitIndex) => {
+                const unitStars = gameState.unitLevelStars[unitIndex] || [];
+                return unitStars.length > 0 && unitStars.every(stars => stars > 0);
+            }).length;
+        }
+
+        function buildAchievementStats(overrides = {}) {
+            return Object.assign({
+                fastAnswer: gameState.fastAnswer,
+                maxCombo: gameState.maxCombo,
+                perfectLevel: gameState.perfectLevel,
+                allLevelsClear: false,
+                oneLifeWin: gameState.lives === 1,
+                practiceCount: gameState.practiceCount,
+                fastStreak: gameState.fastStreak,
+                perfectStreak: gameState.levelCorrect === currentLevelQuestions.length && currentLevelQuestions.length > 0,
+                totalCorrect: gameState.totalCorrect,
+                totalQuestions: gameState.totalQuestions,
+                totalStars: getTotalStars(),
+                completedUnits: getCompletedUnitCount(),
+                totalUnits: units.length,
+                score: gameState.score,
+                extremePasses: gameState.extremePasses,
+                extremeDualPasses: gameState.extremeDualPasses
+            }, overrides);
+        }
+
+        function getUnitDisplayName(unitIndex) {
+            const rawName = units[unitIndex] ? units[unitIndex].name : `第${unitIndex + 1}单元`;
+            return rawName.split(/[：:]/)[0].trim();
+        }
+
+        function getQuestionMetaById(questionId) {
+            for (const [unitKey, questionList] of Object.entries(unitQuestionsMap)) {
+                const question = questionList.find(item => item.id === questionId);
+                if (question) {
+                    const unitIndex = Number(unitKey);
+                    const levels = getLevelsForUnit(unitIndex);
+                    const levelIndex = Number(question.categoryId || 0);
+                    const level = levels[levelIndex] || levels[0];
+                    return {
+                        question,
+                        unitIndex,
+                        unitName: units[unitIndex].name,
+                        unitDisplayName: getUnitDisplayName(unitIndex),
+                        levelIndex,
+                        levelName: level ? level.name : question.category
+                    };
+                }
+            }
+
+            return null;
+        }
+
+        function enrichWrongQuestionRecord(record) {
+            const meta = getQuestionMetaById(record.id);
+            if (!meta) {
+                return Object.assign({}, record, {
+                    unitIndex: Number(record.unitIndex || 0),
+                    levelIndex: Number(record.levelIndex || 0),
+                    unitName: record.unitName || units[0].name,
+                    levelName: record.levelName || record.category || '未知关卡',
+                    sourceLabel: `[${getUnitDisplayName(Number(record.unitIndex || 0))} - ${record.levelName || record.category || '未知关卡'}]`
+                });
+            }
+
+            return Object.assign({}, record, {
+                unitIndex: meta.unitIndex,
+                levelIndex: meta.levelIndex,
+                unitName: meta.unitName,
+                levelName: meta.levelName,
+                sourceLabel: `[${meta.unitDisplayName} - ${meta.levelName}]`
+            });
+        }
+
+        function createWrongQuestionRecord(question, userAnswer) {
+            const level = getLevelsForUnit(gameState.currentUnit)[gameState.currentLevel];
+            return {
+                id: question.id,
+                category: question.category,
+                type: question.type,
+                content: question.content,
+                answer: question.answer,
+                userAnswer: userAnswer,
+                timestamp: new Date().toLocaleString(),
+                knowledge: question.knowledge,
+                unitIndex: gameState.currentUnit,
+                levelIndex: gameState.currentLevel,
+                unitName: units[gameState.currentUnit].name,
+                levelName: level ? level.name : question.category,
+                sourceLabel: `[${getUnitDisplayName(gameState.currentUnit)} - ${level ? level.name : question.category}]`
+            };
+        }
+
+        function resetExtremeMode() {
+            gameState.isExtremeMode = false;
+            gameState.extremeScope = null;
+            gameState.extremeSegments = [];
+            gameState.extremeSegmentIndex = 0;
+        }
+
+        function getExtremeSegments(scope) {
+            if (scope === 'unit0') {
+                return getLevelsForUnit(0).map((_, levelIndex) => ({ unitIndex: 0, levelIndex }));
+            }
+            if (scope === 'unit1') {
+                return getLevelsForUnit(1).map((_, levelIndex) => ({ unitIndex: 1, levelIndex }));
+            }
+
+            const firstUnitSegments = getLevelsForUnit(0).map((_, levelIndex) => ({ unitIndex: 0, levelIndex }));
+            const secondUnitSegments = getLevelsForUnit(1).map((_, levelIndex) => ({ unitIndex: 1, levelIndex }));
+            return firstUnitSegments.concat(secondUnitSegments);
+        }
+
+        function getExtremeScopeLabel(scope = gameState.extremeScope) {
+            if (scope === 'unit0') return '极限测试 · 第一单元';
+            if (scope === 'unit1') return '极限测试 · 第二单元';
+            return '极限测试 · 双单元综合大考';
+        }
+
+        function unlockAchievements(stats) {
+            const newAchievements = [];
+
+            achievementList.forEach(achievement => {
+                if (!gameState.achievements.includes(achievement.id) && achievement.condition(stats)) {
+                    gameState.achievements.push(achievement.id);
+                    newAchievements.push(achievement);
+                    showAchievementPopup(achievement);
+                }
+            });
+
+            return newAchievements;
+        }
+
+        // 加载游戏状态
+        function loadGameState() {
+            const saved = localStorage.getItem('pythonOperatorGame');
+            if (saved) {
+                const data = JSON.parse(saved);
+                let migrated = false;
+                const legacyLevels = getLevelsForUnit(0);
+
+                if (Array.isArray(data.levelUnlocked) && !Array.isArray(data.unitLevelUnlocked)) {
+                    data.unitLevelUnlocked = createDefaultUnitProgress(false);
+                    data.unitLevelUnlocked[0] = legacyLevels.map((_, levelIndex) => Boolean(data.levelUnlocked[levelIndex]));
+                    migrated = true;
+                }
+
+                if (Array.isArray(data.levelStars) && !Array.isArray(data.unitLevelStars)) {
+                    data.unitLevelStars = createDefaultUnitProgress(0);
+                    data.unitLevelStars[0] = legacyLevels.map((_, levelIndex) => Number(data.levelStars[levelIndex] || 0));
+                    migrated = true;
+                }
+
+                if (data.levelUnlocked !== undefined) {
+                    delete data.levelUnlocked;
+                    migrated = true;
+                }
+
+                if (data.levelStars !== undefined) {
+                    delete data.levelStars;
+                    migrated = true;
+                }
+
+                gameState.unitLevelUnlocked = normalizeUnitProgress(data.unitLevelUnlocked, false);
+                gameState.unitLevelUnlocked = gameState.unitLevelUnlocked.map((unitProgress, unitIndex) =>
+                    unitProgress.map((isUnlocked, levelIndex) => levelIndex === 0 ? true : Boolean(isUnlocked))
+                );
+                gameState.unitLevelStars = normalizeUnitProgress(data.unitLevelStars, 0).map(unitProgress =>
+                    unitProgress.map(stars => Math.max(0, Number(stars) || 0))
+                );
+                if ((data.unitOrderVersion || 1) < 2) {
+                    gameState.unitLevelUnlocked = swapUnitOrder(gameState.unitLevelUnlocked);
+                    gameState.unitLevelStars = swapUnitOrder(gameState.unitLevelStars);
+                    migrated = true;
+                }
+                gameState.achievements = data.achievements || [];
+                gameState.wrongQuestions = Array.isArray(data.wrongQuestions)
+                    ? data.wrongQuestions.map(enrichWrongQuestionRecord)
+                    : [];
+                gameState.totalCorrect = Number(data.totalCorrect || 0);
+                gameState.totalQuestions = Number(data.totalQuestions || 0);
+                gameState.score = Number(data.score || 0);
+                gameState.practiceCount = Number(data.practiceCount || 0);
+                gameState.extremePasses = Number(data.extremePasses || 0);
+                gameState.extremeDualPasses = Number(data.extremeDualPasses || 0);
+
+                if (migrated) {
+                    saveGameState();
+                }
+            }
+        }
+
+        // 保存游戏状态
+        function saveGameState() {
+            localStorage.setItem('pythonOperatorGame', JSON.stringify({
+                unitOrderVersion: 2,
+                unitLevelUnlocked: gameState.unitLevelUnlocked,
+                unitLevelStars: gameState.unitLevelStars,
+                achievements: gameState.achievements,
+                wrongQuestions: gameState.wrongQuestions,
+                totalCorrect: gameState.totalCorrect,
+                totalQuestions: gameState.totalQuestions,
+                score: gameState.score,
+                practiceCount: gameState.practiceCount,
+                extremePasses: gameState.extremePasses,
+                extremeDualPasses: gameState.extremeDualPasses
+            }));
+        }
+
+        // 显示开始界面
+        function showStartScreen() {
+            stopTimer();
+            gameState.pendingMode = 'adventure';
+            gameState.isPracticeMode = false;
+            resetExtremeMode();
+            switchScreen('startScreen');
+            document.getElementById('statusBar').classList.add('hidden');
+        }
+
+        // 切换界面
+        function switchScreen(screenId) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(screenId).classList.add('active');
+        }
+
+        // 开始冒险
+        function startAdventure() {
+            gameState.pendingMode = 'adventure';
+            gameState.isPracticeMode = false;
+            resetExtremeMode();
+            selectUnit();
+        }
+
+        function showExtremeModeSelect() {
+            gameState.pendingMode = 'adventure';
+            gameState.isPracticeMode = false;
+            resetExtremeMode();
+            switchScreen('extremeModeScreen');
+        }
+
+        function startExtremeTest(scope) {
+            gameState.pendingMode = 'adventure';
+            gameState.isPracticeMode = false;
+            gameState.isExtremeMode = true;
+            gameState.extremeScope = scope;
+            gameState.extremeSegments = getExtremeSegments(scope);
+            gameState.extremeSegmentIndex = 0;
+
+            if (gameState.extremeSegments.length === 0) {
+                showStartScreen();
+                return;
+            }
+
+            const firstSegment = gameState.extremeSegments[0];
+            gameState.currentUnit = firstSegment.unitIndex;
+            startLevel(firstSegment.levelIndex);
+        }
+
+        function openPracticeMode() {
+            gameState.isPracticeMode = true;
+            gameState.practiceQuestionIndex = 0;
+
+            const unitQuestions = unitQuestionsMap[gameState.currentUnit];
+            currentLevelQuestions = [...unitQuestions].sort(() => Math.random() - 0.5);
+
+            document.getElementById('practiceTitle').textContent = `${units[gameState.currentUnit].name} · 随机练习`;
+            switchScreen('practiceScreen');
+            renderPracticeQuestion();
+        }
+
+        // 渲染关卡地图
+        function renderLevelMap() {
+            const mapPath = document.getElementById('mapPath');
+            const unit = units[gameState.currentUnit];
+            const activeLevels = getLevelsForUnit();
+            const mapTitle = document.querySelector('.map-title');
+            if (mapTitle) {
+                mapTitle.textContent = `🗺️ ${unit.name} 地图`;
+            }
+            
+            mapPath.innerHTML = activeLevels.map((level, idx) => {
+                const isUnlocked = gameState.unitLevelUnlocked[gameState.currentUnit][idx];
+                const stars = gameState.unitLevelStars[gameState.currentUnit][idx];
+                const starsStr = stars > 0 ? '⭐'.repeat(stars) : '';
+
+                return `
+                    <div class="map-node ${isUnlocked ? 'unlocked' : 'locked'} ${stars === 3 ? 'completed' : ''}"
+                         onclick="${isUnlocked ? `startLevel(${idx})` : ''}">
+                        <span class="map-node-icon">${level.icon}</span>
+                        <span class="map-node-name">${level.name}</span>
+                        <span class="map-node-stars">${starsStr}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 开始关卡
+        function startLevel(levelIndex) {
+            gameState.currentLevel = levelIndex;
+            gameState.currentQuestion = 0;
+            gameState.lives = gameState.isExtremeMode ? 1 : 3;
+            gameState.levelScore = 0;
+            gameState.levelCorrect = 0;
+            gameState.levelTime = 0;
+            gameState.combo = 0;
+            gameState.maxCombo = 0;
+            gameState.fastStreak = 0;
+            gameState.perfectLevel = true;
+            gameState.levelLivesAtStart = gameState.lives;
+            gameState.fastAnswer = false;
+
+            // 获取该单元该关卡的题目
+            const unitQuestions = unitQuestionsMap[gameState.currentUnit];
+            currentLevelQuestions = unitQuestions.filter(q => q.categoryId === levelIndex);
+
+            // 更新UI
+            document.getElementById('statusBar').classList.remove('hidden');
+            updateLivesDisplay();
+            updateScoreDisplay();
+            updateComboDisplay();
+
+            switchScreen('gameScreen');
+            renderLevelHeader();
+            renderQuestion();
+            startTimer();
+        }
+
+        // 渲染关卡头部
+        function renderLevelHeader() {
+            const level = getLevelsForUnit()[gameState.currentLevel];
+            document.getElementById('levelBg').textContent = level.bg;
+            if (gameState.isExtremeMode) {
+                const segmentText = `${gameState.extremeSegmentIndex + 1}/${gameState.extremeSegments.length}`;
+                document.getElementById('levelTitle').textContent = `${getExtremeScopeLabel()} · 第${segmentText}段：${level.name}`;
+                document.getElementById('levelIndicator').textContent = `考核 ${segmentText}`;
+            } else {
+                document.getElementById('levelTitle').textContent = `第${gameState.currentLevel + 1}关：${level.name}`;
+                document.getElementById('levelIndicator').textContent = `第${gameState.currentLevel + 1}关`;
+            }
+        }
+
+        // 渲染题目
+        function renderQuestion() {
+            const q = currentLevelQuestions[gameState.currentQuestion];
+
+            document.getElementById('questionType').textContent = q.type;
+            document.getElementById('questionProgress').textContent =
+                `${gameState.currentQuestion + 1} / ${currentLevelQuestions.length}`;
+            document.getElementById('questionContent').innerHTML = q.content;
+
+            const optionsContainer = document.getElementById('optionsContainer');
+            gameState.selectedAnswer = null;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').style.display = 'block';
+
+            // 清除旧的答题反馈效果
+            const questionCard = document.querySelector('.question-card');
+            if (questionCard) {
+                questionCard.classList.remove('answered-correct', 'answered-wrong');
+                const feedback = questionCard.querySelector('.answer-feedback');
+                if (feedback) feedback.remove();
+                const tip = questionCard.querySelector('.correct-answer-tip');
+                if (tip) tip.remove();
+            }
+
+            if (q.type === '选择题') {
+                optionsContainer.innerHTML = `
+                    <div class="options-grid">
+                        ${q.options.map(opt => `
+                            <div class="option-card" onclick="clickChoiceSubmit('${opt.letter}', this)">
+                                <span class="option-letter">${opt.letter}</span>
+                                <span>${opt.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (q.type === '判断题') {
+                optionsContainer.innerHTML = `
+                    <div class="judge-options">
+                        <div class="judge-card true-btn" onclick="clickJudgeSubmit('true', this)">
+                            <div class="icon">✓</div>
+                            <div>正确</div>
+                        </div>
+                        <div class="judge-card false-btn" onclick="clickJudgeSubmit('false', this)">
+                            <div class="icon">✗</div>
+                            <div>错误</div>
+                        </div>
+                    </div>
+                `;
+            } else if (q.type === '填空题') {
+                optionsContainer.innerHTML = `
+                    <div class="fill-blank">
+                        <input type="text" class="fill-input" id="fillInput" 
+                               placeholder="请输入答案" oninput="checkFillAnswer(this.value)">
+                    </div>
+                `;
+            }
+
+            gameState.questionStartTime = Date.now();
+        }
+
+        // 选择答案
+        function selectAnswer(answer, element) {
+            // 清除其他选中状态
+            document.querySelectorAll('.option-card, .judge-card').forEach(el => {
+                el.classList.remove('selected');
+            });
+            element.classList.add('selected');
+            gameState.selectedAnswer = answer;
+            document.getElementById('submitBtn').disabled = false;
+        }
+
+        // 冒险模式-选择题点击即提交
+        function clickChoiceSubmit(answer, element) {
+            // 禁用所有选项防止重复点击
+            document.querySelectorAll('.option-card').forEach(el => {
+                el.style.pointerEvents = 'none';
+            });
+            gameState.selectedAnswer = answer;
+            submitAnswer();
+        }
+
+        // 冒险模式-判断题点击即提交
+        function clickJudgeSubmit(answer, element) {
+            // 禁用所有判断按钮防止重复点击
+            document.querySelectorAll('.judge-card').forEach(el => {
+                el.style.pointerEvents = 'none';
+            });
+            gameState.selectedAnswer = answer;
+            submitAnswer();
+        }
+
+        // 检查填空答案
+        function checkFillAnswer(value) {
+            if (value.trim()) {
+                gameState.selectedAnswer = value.trim();
+                document.getElementById('submitBtn').disabled = false;
+            } else {
+                gameState.selectedAnswer = null;
+                document.getElementById('submitBtn').disabled = true;
+            }
+        }
+        // 提交答案
+        function submitAnswer() {
+            const q = currentLevelQuestions[gameState.currentQuestion];
+            const userAnswer = gameState.selectedAnswer;
+            const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(q.answer);
+
+            // 计算用时
+            const timeSpent = (Date.now() - gameState.questionStartTime) / 1000;
+            gameState.levelTime += timeSpent;
+
+            // 停止计时器
+            stopTimer();
+
+            // 检查是否快速答题
+            if (isCorrect && timeSpent <= 5) {
+                gameState.fastAnswer = true;
+                gameState.fastStreak++;
+            } else {
+                gameState.fastStreak = 0;
+            }
+
+            let points = 0;
+            let bonus = '';
+
+            // 1. 更新分数与状态
+            if (isCorrect) {
+                points = 100;
+
+                // 快速答题加成
+                if (timeSpent <= 5) {
+                    points += Math.floor((5 - timeSpent) * 20);
+                    bonus = `⚡ 速度加成 +${Math.floor((5 - timeSpent) * 20)}`;
+                }
+
+                // 连击加成
+                gameState.combo++;
+                if (gameState.combo > 1) {
+                    const comboBonus = Math.min(gameState.combo * 10, 50);
+                    points += comboBonus;
+                    bonus += bonus ? ` | 🔥 连击 +${comboBonus}` : `🔥 连击 +${comboBonus}`;
+                }
+
+                gameState.maxCombo = Math.max(gameState.maxCombo, gameState.combo);
+                gameState.levelScore += points;
+                gameState.levelCorrect++;
+                gameState.totalCorrect++;
+                gameState.score += points;
+
+                showCorrectEffect();
+                showFloatingCoins();
+                showFloatingStars();
+            } else {
+                // 答错
+                gameState.combo = 0;
+                gameState.perfectLevel = false;
+                gameState.lives--;
+                gameState.fastStreak = 0;
+
+                // 记录错误题
+                const wrongRecord = createWrongQuestionRecord(q, userAnswer);
+                if (!gameState.wrongQuestions.find(w => w.id === q.id)) {
+                    gameState.wrongQuestions.push(wrongRecord);
+                }
+
+                showWrongEffect();
+            }
+
+            // 更新顶部UI
+            updateScoreDisplay();
+            updateComboDisplay();
+            updateLivesDisplay();
+            gameState.totalQuestions++;
+
+            // 2. 立即在卡片上显示动画和对错反馈文字
+            const questionCard = document.querySelector('.question-card');
+            if (questionCard) {
+                questionCard.classList.remove('answered-correct', 'answered-wrong');
+                questionCard.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+
+                const existingFeedback = questionCard.querySelector('.answer-feedback');
+                if (existingFeedback) existingFeedback.remove();
+
+                const feedback = document.createElement('div');
+                feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'wrong'}`;
+                feedback.textContent = isCorrect ? '✓ 正确！' : '✗ 错误！';
+                questionCard.appendChild(feedback);
+
+                if (!isCorrect) {
+                    const existingTip = questionCard.querySelector('.correct-answer-tip');
+                    if (existingTip) existingTip.remove();
+
+                    const tip = document.createElement('div');
+                    tip.className = 'correct-answer-tip';
+                    const correctAnswer = q.answer === 'true' ? '正确' : q.answer === 'false' ? '错误' : q.answer;
+                    tip.innerHTML = `<strong>正确答案：${correctAnswer}</strong>`;
+                    questionCard.appendChild(tip);
+                }
+            }
+
+            highlightAnswer(q.answer, isCorrect);
+
+            saveGameState();
+
+            if (gameState.isExtremeMode && !isCorrect) {
+                setTimeout(() => {
+                    gameOver();
+                }, 500);
+                return;
+            }
+
+            // 3. 延迟 800 毫秒，让卡片飞一会儿，再弹出详细解析遮罩
+            setTimeout(() => {
+                showResult(isCorrect, points, bonus);
+            }, 800);
+        }
+
+        // 标准化答案
+        function normalizeAnswer(answer) {
+            const str = String(answer).trim().toLowerCase();
+            if (str === 'true' || str === 't') return 'true';
+            if (str === 'false' || str === 'f') return 'false';
+            return str;
+        }
+
+        // 显示结果
+        function showResult(isCorrect, points, bonus) {
+            const overlay = document.getElementById('resultOverlay');
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const scoreDiv = document.getElementById('resultScore');
+            const bonusDiv = document.getElementById('resultBonus');
+            const knowledgeBox = document.getElementById('knowledgeBox');
+
+            icon.textContent = isCorrect ? '✓' : '✗';
+            icon.style.fontSize = isCorrect ? '80px' : '80px';
+            title.className = `result-title ${isCorrect ? 'correct' : 'wrong'}`;
+            title.textContent = isCorrect ? '回答正确！🎉' : '回答错误';
+
+            scoreDiv.textContent = isCorrect ? `+${points}` : '+0';
+            scoreDiv.style.display = isCorrect ? 'block' : 'none';
+            bonusDiv.textContent = bonus;
+            bonusDiv.style.display = bonus ? 'block' : 'none';
+
+            const q = currentLevelQuestions[gameState.currentQuestion];
+            const k = q.knowledge;
+            knowledgeBox.innerHTML = `
+                <h4>📚 知识点解析</h4>
+                <p><strong>运算符含义：</strong>${k.meaning}</p>
+                <p><strong>运算规则：</strong>${k.rule}</p>
+                <p><strong>常见易错点：</strong>${k.error}</p>
+                <p><strong>相关示例：</strong>${k.example}</p>
+            `;
+
+            overlay.classList.add('show');
+        }
+
+        function closeResult() {
+            document.getElementById('resultOverlay').classList.remove('show');
+            if (gameState.lives <= 0) {
+                gameOver();
+                return;
+            }
+            if (gameState.currentQuestion >= currentLevelQuestions.length - 1) {
+                levelComplete();
+            } else {
+                gameState.currentQuestion++;
+                renderQuestion();
+                startTimer();
+            }
+        }
+
+        // 高亮答案
+        function highlightAnswer(correctAnswer, wasCorrect) {
+            const options = document.querySelectorAll('.option-card');
+            const judges = document.querySelectorAll('.judge-card');
+
+            if (options.length > 0) {
+                options.forEach(opt => {
+                    const letter = opt.querySelector('.option-letter').textContent;
+                    if (letter === correctAnswer) {
+                        opt.classList.add('correct');
+                    } else if (opt.classList.contains('selected') && !wasCorrect) {
+                        opt.classList.add('wrong');
+                    }
+                });
+            }
+
+            if (judges.length > 0) {
+                judges.forEach(btn => {
+                    const isTrueBtn = btn.classList.contains('true-btn');
+                    const shouldBeTrue = correctAnswer === 'true';
+                    if (isTrueBtn === shouldBeTrue) {
+                        btn.classList.add('correct');
+                    } else if (btn.classList.contains('selected') && !wasCorrect) {
+                        btn.classList.add('wrong');
+                    }
+                });
+            }
+
+            // 填空题答案显示
+            if (document.getElementById('fillInput')) {
+                const input = document.getElementById('fillInput');
+                if (!wasCorrect) {
+                    input.style.borderColor = '#ff4757';
+                } else {
+                    input.style.borderColor = '#00ff88';
+                }
+            }
+
+            document.getElementById('submitBtn').style.display = 'none';
+        }
+
+        // 显示正确效果
+        function showCorrectEffect() {
+            const icon = document.getElementById('resultIcon');
+            icon.style.animation = 'correctPulse 0.5s ease';
+        }
+
+        // 显示错误效果
+        function showWrongEffect() {
+            // 伤害效果
+            const damage = document.createElement('div');
+            damage.className = 'damage-effect';
+            document.body.appendChild(damage);
+            setTimeout(() => damage.remove(), 500);
+
+            // 生命值动画
+            const lives = document.querySelectorAll('.life:not(.lost)');
+            if (lives.length > 0) {
+                lives[lives.length - 1].classList.add('damage');
+                setTimeout(() => {
+                    lives[lives.length - 1].classList.add('lost');
+                    lives[lives.length - 1].classList.remove('damage');
+                }, 500);
+            }
+        }
+
+        // 显示漂浮金币
+        function showFloatingCoins() {
+            const container = document.getElementById('floatingCoins');
+            for (let i = 0; i < 5; i++) {
+                const coin = document.createElement('div');
+                coin.className = 'coin';
+                coin.textContent = '🪙';
+                coin.style.left = (50 + (Math.random() - 0.5) * 30) + '%';
+                coin.style.top = '50%';
+                coin.style.animationDelay = (i * 0.1) + 's';
+                container.appendChild(coin);
+                setTimeout(() => coin.remove(), 1000);
+            }
+        }
+
+        // 显示漂浮星星
+        function showFloatingStars() {
+            const container = document.getElementById('floatingStars');
+            for (let i = 0; i < 3; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.textContent = '⭐';
+                star.style.left = (40 + Math.random() * 20) + '%';
+                star.style.top = '40%';
+                star.style.animationDelay = (i * 0.15) + 's';
+                container.appendChild(star);
+                setTimeout(() => star.remove(), 800);
+            }
+        }
+
+        // 更新生命显示
+        function updateLivesDisplay() {
+            const container = document.getElementById('livesContainer');
+            let html = '';
+            for (let i = 0; i < 3; i++) {
+                const lost = i >= gameState.lives ? 'lost' : '';
+                html += `<span class="life ${lost}">💖</span>`;
+            }
+            container.innerHTML = html;
+        }
+
+        // 更新分数显示
+        function updateScoreDisplay() {
+            document.getElementById('scoreDisplay').textContent = gameState.score;
+        }
+
+        // 更新连击显示
+        function updateComboDisplay() {
+            const display = document.getElementById('comboDisplay');
+            const count = document.getElementById('comboCount');
+            if (gameState.combo >= 2) {
+                display.style.display = 'flex';
+                count.textContent = gameState.combo;
+            } else {
+                display.style.display = 'none';
+            }
+        }
+
+        // 开始计时器
+        function startTimer() {
+            let timeLeft = 100;
+            const fill = document.getElementById('timerFill');
+            fill.style.width = '100%';
+            fill.className = 'timer-fill';
+
+            if (timerInterval) clearInterval(timerInterval);
+
+            timerInterval = setInterval(() => {
+                if (gameState.isPaused) return;
+
+                timeLeft -= 1;
+                fill.style.width = timeLeft + '%';
+
+                if (timeLeft <= 30) {
+                    fill.className = 'timer-fill danger';
+                } else if (timeLeft <= 50) {
+                    fill.className = 'timer-fill warning';
+                }
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (!gameState.selectedAnswer) {
+                        gameState.selectedAnswer = '';
+                    }
+                    submitAnswer(); // 挪到 if 语句外面
+                }
+            }, 100);
+        }
+
+        // 停止计时器
+        function stopTimer() {
+            if (timerInterval) {
+                clearInterval(timerInterval);
+                timerInterval = null;
+            }
+        }
+
+        // 关卡完成
+        function levelComplete() {
+            stopTimer();
+            if (gameState.isExtremeMode) {
+                handleExtremeLevelComplete();
+                return;
+            }
+
+            const activeLevels = getLevelsForUnit();
+
+            const avgTime = (gameState.levelTime / currentLevelQuestions.length).toFixed(1);
+            const correctRate = `${gameState.levelCorrect}/${currentLevelQuestions.length}`;
+
+            // 计算星星
+            let stars = 1;
+            if (gameState.levelCorrect >= currentLevelQuestions.length * 0.8) stars = 2;
+            if (gameState.levelCorrect === currentLevelQuestions.length) stars = 3;
+
+            // 更新星星记录
+            gameState.unitLevelStars[gameState.currentUnit][gameState.currentLevel] = Math.max(
+                gameState.unitLevelStars[gameState.currentUnit][gameState.currentLevel],
+                stars
+            );
+
+            // 解锁下一关
+            if (gameState.currentLevel < activeLevels.length - 1) {
+                gameState.unitLevelUnlocked[gameState.currentUnit][gameState.currentLevel + 1] = true;
+            }
+
+            // 检查成就
+            const newAchievements = checkAchievements(stars);
+
+            // 更新保存
+            saveGameState();
+
+            // 显示结算
+            document.getElementById('completeTitle').textContent =
+                stars === 3 ? '🏆 完美通关！' : '🎉 关卡完成！';
+            document.getElementById('starsEarned').textContent = '⭐'.repeat(stars);
+            document.getElementById('statScore').textContent = gameState.levelScore;
+            document.getElementById('statCorrect').textContent = correctRate;
+            document.getElementById('statTime').textContent = avgTime + 's';
+
+            // 成就列表
+            const list = document.getElementById('achievementsList');
+            if (newAchievements.length > 0) {
+                list.innerHTML = '<h3 style="color: #ffd700; margin-bottom: 10px;">🏆 新成就解锁！</h3>' +
+                    newAchievements.map(a => `
+                        <div class="achievement-item">
+                            <span class="achievement-icon">${a.icon}</span>
+                            <div class="achievement-info">
+                                <h5>${a.name}</h5>
+                                <p>${a.desc}</p>
+                            </div>
+                        </div>
+                    `).join('');
+            } else {
+                list.innerHTML = '';
+            }
+
+            // 下一关按钮
+            const nextBtn = document.getElementById('nextLevelBtn');
+            const mapBtn = document.querySelector('.level-nav-btn.menu');
+            if (mapBtn) {
+                mapBtn.textContent = '🗺️ 地图';
+                mapBtn.onclick = showLevelSelect;
+            }
+            if (gameState.currentLevel >= activeLevels.length - 1) {
+                nextBtn.textContent = '🌟 单元完成！';
+                nextBtn.onclick = () => {
+                    selectUnit();
+                };
+            } else {
+                nextBtn.textContent = '下一关 →';
+                nextBtn.onclick = nextLevel;
+            }
+
+            switchScreen('levelCompleteScreen');
+        }
+
+        // 检查成就
+        function checkAchievements(stars) {
+            const activeLevels = getLevelsForUnit();
+
+            const stats = buildAchievementStats({
+                allLevelsClear: gameState.currentLevel >= activeLevels.length - 1 && stars > 0,
+                oneLifeWin: gameState.lives === 1 && stars > 0,
+                perfectStreak: gameState.levelCorrect === currentLevelQuestions.length
+            });
+
+            return unlockAchievements(stats);
+        }
+
+        function handleExtremeLevelComplete() {
+            const avgTime = (gameState.levelTime / currentLevelQuestions.length).toFixed(1);
+            const correctRate = `${gameState.levelCorrect}/${currentLevelQuestions.length}`;
+            const hasNextSegment = gameState.extremeSegmentIndex < gameState.extremeSegments.length - 1;
+
+            document.getElementById('completeTitle').textContent = hasNextSegment ? '⚔️ 本段通过！' : '👑 极限测试通过！';
+            document.getElementById('starsEarned').textContent = hasNextSegment ? '🔥 无伤推进' : '🏆 零失误通关';
+            document.getElementById('statScore').textContent = gameState.levelScore;
+            document.getElementById('statCorrect').textContent = correctRate;
+            document.getElementById('statTime').textContent = avgTime + 's';
+
+            let newAchievements = [];
+            if (!hasNextSegment) {
+                gameState.extremePasses++;
+                if (gameState.extremeScope === 'dual') {
+                    gameState.extremeDualPasses++;
+                }
+                newAchievements = unlockAchievements(buildAchievementStats());
+                saveGameState();
+            }
+
+            const list = document.getElementById('achievementsList');
+            if (newAchievements.length > 0) {
+                list.innerHTML = '<h3 style="color: #ffd700; margin-bottom: 10px;">🏆 新成就解锁！</h3>' +
+                    newAchievements.map(a => `
+                        <div class="achievement-item">
+                            <span class="achievement-icon">${a.icon}</span>
+                            <div class="achievement-info">
+                                <h5>${a.name}</h5>
+                                <p>${a.desc}</p>
+                            </div>
+                        </div>
+                    `).join('');
+            } else {
+                list.innerHTML = hasNextSegment
+                    ? '<div style="color: #fff; opacity: 0.9;">继续保持，全程不能出错。</div>'
+                    : '<div style="color: #fff; opacity: 0.9;">本次极限测试已计入你的荣誉记录。</div>';
+            }
+
+            const nextBtn = document.getElementById('nextLevelBtn');
+            if (hasNextSegment) {
+                nextBtn.textContent = '进入下一段 →';
+                nextBtn.onclick = nextLevel;
+            } else {
+                nextBtn.textContent = '返回主页';
+                nextBtn.onclick = showStartScreen;
+            }
+
+            const mapBtn = document.querySelector('.level-nav-btn.menu');
+            if (mapBtn) {
+                mapBtn.textContent = hasNextSegment ? '结束考核' : '查看记录';
+                mapBtn.onclick = hasNextSegment ? showStartScreen : showRecords;
+            }
+
+            switchScreen('levelCompleteScreen');
+        }
+
+        // 显示成就弹窗
+        function showAchievementPopup(achievement) {
+            const popup = document.getElementById('achievementPopup');
+            document.getElementById('popupIcon').textContent = achievement.icon;
+            document.getElementById('popupTitle').textContent = achievement.name;
+            document.getElementById('popupDesc').textContent = achievement.desc;
+
+            popup.style.display = 'block';
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 2500);
+        }
+
+        // 下一关
+        function nextLevel() {
+            if (gameState.isExtremeMode) {
+                const nextSegment = gameState.extremeSegments[gameState.extremeSegmentIndex + 1];
+                if (nextSegment) {
+                    gameState.extremeSegmentIndex++;
+                    gameState.currentUnit = nextSegment.unitIndex;
+                    startLevel(nextSegment.levelIndex);
+                } else {
+                    showStartScreen();
+                }
+                return;
+            }
+
+            if (gameState.currentLevel < getLevelsForUnit().length - 1) {
+                startLevel(gameState.currentLevel + 1);
+            } else {
+                selectUnit();
+            }
+        }
+
+        // 显示关卡选择
+        function showLevelSelect() {
+            stopTimer();
+            document.getElementById('statusBar').classList.add('hidden');
+            if (gameState.isExtremeMode) {
+                showExtremeModeSelect();
+                return;
+            }
+            renderLevelMap();
+            switchScreen('levelSelectScreen');
+        }
+
+        // 游戏结束
+        function gameOver() {
+            stopTimer();
+            document.getElementById('gameOverScore').textContent = gameState.levelScore;
+            if (gameState.isExtremeMode) {
+                document.querySelector('.game-over-title').textContent = '💥 考核失败';
+                document.getElementById('gameOverMessage').textContent = '极限测试中答错 1 题即终止，本次考核已结束。';
+                document.getElementById('retryLevelBtn').textContent = '🔄 从起点重考';
+                document.getElementById('gameOverLevel').textContent =
+                    `${gameState.extremeSegmentIndex + 1}/${gameState.extremeSegments.length}`;
+                document.getElementById('gameOverCorrect').textContent =
+                    `${gameState.levelCorrect}/${currentLevelQuestions.length}`;
+            } else {
+                document.querySelector('.game-over-title').textContent = '💔 挑战失败';
+                document.getElementById('gameOverMessage').textContent = '生命值耗尽，请重新挑战！';
+                document.getElementById('retryLevelBtn').textContent = '🔄 重新挑战';
+                document.getElementById('gameOverLevel').textContent =
+                    `${gameState.currentLevel + 1}/${getLevelsForUnit().length}`;
+                document.getElementById('gameOverCorrect').textContent =
+                    `${gameState.totalCorrect}/${gameState.totalQuestions}`;
+            }
+
+            switchScreen('gameOverScreen');
+        }
+
+        // 重试关卡
+        function retryLevel() {
+            if (gameState.isExtremeMode) {
+                startExtremeTest(gameState.extremeScope);
+                return;
+            }
+            startLevel(gameState.currentLevel);
+        }
+
+        // 修炼场模式
+        function startPractice() {
+            resetExtremeMode();
+            gameState.isPracticeMode = true;
+            gameState.pendingMode = 'practice';
+            selectUnit();
+        }
+
+        // 渲染修炼场题目
+        function renderPracticeQuestion() {
+            const q = currentLevelQuestions[gameState.practiceQuestionIndex];
+
+            document.getElementById('practiceQuestionType').textContent = q.type;
+            document.getElementById('practiceProgress').textContent =
+                `${gameState.practiceQuestionIndex + 1} / ${currentLevelQuestions.length}`;
+            document.getElementById('practiceQuestionContent').innerHTML = q.content;
+
+            const optionsContainer = document.getElementById('practiceOptionsContainer');
+            gameState.selectedAnswer = null;
+
+            // 清除旧的答题反馈效果
+            const practiceCard = document.querySelector('#practiceScreen .question-card');
+            if (practiceCard) {
+                practiceCard.classList.remove('answered-correct', 'answered-wrong');
+                const feedback = practiceCard.querySelector('.answer-feedback');
+                if (feedback) feedback.remove();
+                const tip = practiceCard.querySelector('.correct-answer-tip');
+                if (tip) tip.remove();
+            }
+
+            document.getElementById('practiceSubmitBtn').style.display = 'inline-block';
+            document.getElementById('practiceSubmitBtn').textContent = '查看答案';
+            document.getElementById('practiceNextBtn').style.display = 'none';
+
+            if (q.type === '选择题') {
+                optionsContainer.innerHTML = `
+                    <div class="options-grid">
+                        ${q.options.map(opt => `
+                            <div class="option-card" onclick="practiceClickSubmit('choice', '${opt.letter}', this)">
+                                <span class="option-letter">${opt.letter}</span>
+                                <span>${opt.text}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+            } else if (q.type === '判断题') {
+                optionsContainer.innerHTML = `
+                    <div class="judge-options">
+                        <div class="judge-card true-btn" onclick="practiceClickSubmit('judge', 'true', this)">
+                            <div class="icon">✓</div>
+                            <div>正确</div>
+                        </div>
+                        <div class="judge-card false-btn" onclick="practiceClickSubmit('judge', 'false', this)">
+                            <div class="icon">✗</div>
+                            <div>错误</div>
+                        </div>
+                    </div>
+                `;
+            } else if (q.type === '填空题') {
+                optionsContainer.innerHTML = `
+                    <div class="fill-blank">
+                        <input type="text" class="fill-input" id="practiceFillInput" 
+                               placeholder="请输入答案" oninput="selectPracticeAnswer(this.value, this)">
+                    </div>
+                `;
+            }
+
+            document.getElementById('practiceNextBtn').style.display = 'none';
+        }
+
+        // 选择修炼场答案
+        function selectPracticeAnswer(answer, element) {
+            document.querySelectorAll('.option-card, .judge-card').forEach(el => {
+                el.classList.remove('selected');
+            });
+            if (element) element.classList.add('selected');
+            gameState.selectedAnswer = typeof answer === 'string' ? answer : answer.trim();
+        }
+
+        // 修炼场-选择题/判断题点击即提交
+        function practiceClickSubmit(type, answer, element) {
+            // 禁用所有选项/判断按钮防止重复点击
+            if (type === 'choice') {
+                document.querySelectorAll('#practiceOptionsContainer .option-card').forEach(el => {
+                    el.style.pointerEvents = 'none';
+                });
+            } else if (type === 'judge') {
+                document.querySelectorAll('#practiceOptionsContainer .judge-card').forEach(el => {
+                    el.style.pointerEvents = 'none';
+                });
+            }
+            gameState.selectedAnswer = answer;
+            // 直接提交并显示答案
+            submitPracticeAnswer();
+        }
+
+        // 提交修炼场答案
+        function submitPracticeAnswer() {
+            const q = currentLevelQuestions[gameState.practiceQuestionIndex];
+            const userAnswer = gameState.selectedAnswer || '';
+            const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(q.answer);
+
+            gameState.practiceCount++;
+            if (isCorrect) {
+                gameState.totalCorrect++;
+            }
+            gameState.totalQuestions++;
+
+            // 修炼场题目卡片反馈效果
+            const practiceCard = document.querySelector('#practiceScreen .question-card');
+            if (practiceCard) {
+                practiceCard.classList.remove('answered-correct', 'answered-wrong');
+                practiceCard.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
+
+                // 添加大字反馈
+                const existingFeedback = practiceCard.querySelector('.answer-feedback');
+                if (existingFeedback) existingFeedback.remove();
+
+                const feedback = document.createElement('div');
+                feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'wrong'}`;
+                feedback.textContent = isCorrect ? '✓ 正确！' : '✗ 错误！';
+                practiceCard.appendChild(feedback);
+
+                // 如果答错，添加正确答案提示
+                if (!isCorrect) {
+                    const existingTip = practiceCard.querySelector('.correct-answer-tip');
+                    if (existingTip) existingTip.remove();
+
+                    const tip = document.createElement('div');
+                    tip.className = 'correct-answer-tip';
+                    const correctAnswer = q.answer === 'true' ? '正确' : q.answer === 'false' ? '错误' : q.answer;
+                    tip.innerHTML = `<strong>正确答案：${correctAnswer}</strong>`;
+                    practiceCard.appendChild(tip);
+                }
+            }
+
+            // 高亮答案
+            highlightPracticeAnswer(q.answer, isCorrect);
+
+            // 显示知识点
+            const k = q.knowledge;
+            const knowledgeBox = document.createElement('div');
+            knowledgeBox.className = 'knowledge-box';
+            knowledgeBox.style.marginTop = '20px';
+            knowledgeBox.innerHTML = `
+                <h4>📚 知识点解析</h4>
+                <p><strong>运算符含义：</strong>${k.meaning}</p>
+                <p><strong>运算规则：</strong>${k.rule}</p>
+                <p><strong>常见易错点：</strong>${k.error}</p>
+                <p><strong>相关示例：</strong>${k.example}</p>
+            `;
+            document.getElementById('practiceOptionsContainer').appendChild(knowledgeBox);
+
+            // 隐藏填空题的提交按钮（如果存在）
+            const submitBtn = document.getElementById('practiceSubmitBtn');
+            if (submitBtn) submitBtn.style.display = 'none';
+
+            // 显示下一题按钮
+            document.getElementById('practiceNextBtn').style.display = 'inline-block';
+            document.getElementById('practiceNextBtn').textContent = '下一题 →';
+
+            saveGameState();
+            checkPracticeAchievement();
+        }
+
+        // 高亮修炼场答案
+        function highlightPracticeAnswer(correctAnswer, wasCorrect) {
+            const options = document.querySelectorAll('#practiceOptionsContainer .option-card');
+            const judges = document.querySelectorAll('#practiceOptionsContainer .judge-card');
+
+            if (options.length > 0) {
+                options.forEach(opt => {
+                    const letter = opt.querySelector('.option-letter').textContent;
+                    if (letter === correctAnswer) {
+                        opt.classList.add('correct');
+                    } else if (opt.classList.contains('selected') && !wasCorrect) {
+                        opt.classList.add('wrong');
+                    }
+                });
+            }
+
+            if (judges.length > 0) {
+                judges.forEach(btn => {
+                    const isTrueBtn = btn.classList.contains('true-btn');
+                    const shouldBeTrue = correctAnswer === 'true';
+                    if (isTrueBtn === shouldBeTrue) {
+                        btn.classList.add('correct');
+                    } else if (btn.classList.contains('selected')) {
+                        btn.classList.add('wrong');
+                    }
+                });
+            }
+
+            if (document.getElementById('practiceFillInput')) {
+                const input = document.getElementById('practiceFillInput');
+                input.disabled = true;
+                if (!wasCorrect) {
+                    input.style.borderColor = '#ff4757';
+                } else {
+                    input.style.borderColor = '#00ff88';
+                }
+            }
+        }
+
+        // 检查修炼场成就
+        function checkPracticeAchievement() {
+            const newAchievements = unlockAchievements(buildAchievementStats());
+            if (newAchievements.length > 0) {
+                saveGameState();
+            }
+        }
+
+        // 下一题
+        function nextPracticeQuestion() {
+            gameState.practiceQuestionIndex++;
+            const unitQuestions = unitQuestionsMap[gameState.currentUnit];
+            if (gameState.practiceQuestionIndex >= unitQuestions.length) {
+                gameState.practiceQuestionIndex = 0;
+            }
+            renderPracticeQuestion();
+        }
+
+        // 渲染成就列表
+        function renderAchievements() {
+            const container = document.getElementById('achievementsContainer');
+            container.innerHTML = achievementList.map(a => {
+                const unlocked = gameState.achievements.includes(a.id);
+                return `
+                    <div class="achievement-item" style="opacity: ${unlocked ? 1 : 0.5}; background: ${unlocked ? 'linear-gradient(135deg, #ffd70020, #ffaa0020)' : '#f5f5f5'};">
+                        <span class="achievement-icon">${unlocked ? a.icon : '🔒'}</span>
+                        <div class="achievement-info">
+                            <h5 style="color: ${unlocked ? '#ffd700' : '#999'};">${a.name}</h5>
+                            <p>${a.desc}</p>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 显示成就界面
+        function showAchievements() {
+            gameState.pendingMode = 'adventure';
+            gameState.isPracticeMode = false;
+            resetExtremeMode();
+            renderAchievements();
+            switchScreen('achievementScreen');
+        }
+
+        function renderRecordTabs(activeIndex) {
+            const tabsContainer = document.getElementById('recordProgressTabs');
+            tabsContainer.innerHTML = units.map((_, idx) => {
+                const totalStars = (gameState.unitLevelStars[idx] || []).reduce((sum, stars) => sum + stars, 0);
+                return `<button class="segmented-tab ${idx === activeIndex ? 'active' : ''}" onclick="updateRecordLevelStats(${idx})">${getUnitDisplayName(idx)} (${totalStars}⭐)</button>`;
+            }).join('');
+        }
+
+        function updateRecordLevelStats(unitIndex) {
+            const safeUnitIndex = units[unitIndex] ? unitIndex : 0;
+            const levels = getLevelsForUnit(safeUnitIndex);
+            const starsByLevel = gameState.unitLevelStars[safeUnitIndex] || [];
+            const container = document.getElementById('recordLevelStats');
+
+            renderRecordTabs(safeUnitIndex);
+
+            container.innerHTML = levels.map((level, idx) => {
+                const stars = Math.max(0, Number(starsByLevel[idx]) || 0);
+                const starsDisplay = stars > 0 ? '⭐'.repeat(stars) : '未完成';
+                return `
+                    <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; margin-bottom: 10px; background: rgba(255,255,255,0.7); border-radius: 10px;">
+                        <span style="font-weight: bold; color: #334;">第${idx + 1}关：${level.name}</span>
+                        <span style="color: ${stars > 0 ? '#ff9800' : '#999'}; font-weight: bold;">${starsDisplay}</span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // 显示做题记录
+        function showRecords() {
+            gameState.pendingMode = 'adventure';
+            gameState.isPracticeMode = false;
+            resetExtremeMode();
+            const stats = gameState;
+            const totalQuestions = stats.totalQuestions;
+            const correct = stats.totalCorrect;
+            const accuracy = totalQuestions > 0 ? Math.round((correct / totalQuestions) * 100) : 0;
+            const totalStars = getTotalStars();
+
+            // 更新统计数据
+            document.getElementById('recordTotalQuestions').textContent = totalQuestions;
+            document.getElementById('recordCorrect').textContent = correct;
+            document.getElementById('recordAccuracy').textContent = accuracy + '%';
+            document.getElementById('recordTotalStars').textContent = totalStars + '⭐';
+            document.getElementById('recordExtremePasses').textContent = stats.extremePasses;
+            document.getElementById('recordExtremeDualPasses').textContent = stats.extremeDualPasses;
+            document.getElementById('recordPracticeCount').textContent = stats.practiceCount;
+
+            updateRecordLevelStats(0);
+
+            switchScreen('recordsScreen');
+        }
+
+        // 重置记录
+        function resetRecords() {
+            if (confirm('确定要重置所有做题记录吗？此操作无法撤销！')) {
+                gameState.totalCorrect = 0;
+                gameState.totalQuestions = 0;
+                gameState.practiceCount = 0;
+                gameState.extremePasses = 0;
+                gameState.extremeDualPasses = 0;
+                gameState.unitLevelStars = createDefaultUnitProgress(0);
+                gameState.unitLevelUnlocked = createDefaultUnitProgress(false).map(unitProgress =>
+                    unitProgress.map((_, levelIndex) => levelIndex === 0)
+                );
+                gameState.achievements = [];
+                gameState.score = 0;
+                saveGameState();
+                showRecords();
+            }
+        }
+
+        // 确认退出关卡
+        function confirmQuitLevel() {
+            const confirmMessage = gameState.isExtremeMode
+                ? '确定要退出极限测试吗？退出后本次考核直接作废，再次挑战必须从起点重来。'
+                : '确定要退出关卡吗？本关的进度将不会被保存。';
+
+            if (confirm(confirmMessage)) {
+                stopTimer();
+                document.getElementById('statusBar').classList.add('hidden');
+                if (gameState.isExtremeMode) {
+                    showStartScreen();
+                    return;
+                }
+                renderLevelMap();
+                switchScreen('levelSelectScreen');
+            }
+        }
+
+        function renderWrongAnalysisTabs() {
+            const tabsContainer = document.getElementById('wrongAnalysisTabs');
+            tabsContainer.innerHTML = units.map((unit, idx) => {
+                const count = gameState.wrongQuestions.filter(item => item.unitIndex === idx).length;
+                return `<button class="segmented-tab ${idx === gameState.wrongAnalysisUnit ? 'active' : ''}" onclick="showWrongAnalysis(${idx})">${getUnitDisplayName(idx)} (${count})</button>`;
+            }).join('');
+        }
+
+        // 错误分析画面
+        function showWrongAnalysis(unitIndex = 0) {
+            gameState.wrongAnalysisUnit = units[unitIndex] ? unitIndex : 0;
+            renderWrongAnalysisTabs();
+            const container = document.getElementById('wrongAnalysisContainer');
+            if (gameState.wrongQuestions.length === 0) {
+                container.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">🌟 没有错误记录，继续加油！</div>';
+            } else {
+                const filteredWrongs = gameState.wrongQuestions.filter(item => item.unitIndex === gameState.wrongAnalysisUnit);
+
+                if (filteredWrongs.length === 0) {
+                    container.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">这个单元暂时没有错题记录。</div>';
+                    switchScreen('wrongAnalysisScreen');
+                    return;
+                }
+
+                container.innerHTML = filteredWrongs.map((w, idx) => {
+                    const meta = getQuestionMetaById(w.id);
+                    const q = meta ? meta.question : null;
+                    const sourceLabel = meta
+                        ? `[${meta.unitDisplayName} - ${meta.levelName}]`
+                        : `[${getUnitDisplayName(Number(w.unitIndex || 0))} - ${w.levelName || w.category || '未知关卡'}]`;
+                    let optionsHtml = '';
+                    
+                    if (w.type === '选择题' && q && q.options) {
+                        optionsHtml = `
+                            <div style="margin: 15px 0;">
+                                <div style="font-weight: bold; color: #333; margin-bottom: 10px;">📋 选项：</div>
+                                ${q.options.map(opt => {
+                                    let optStyle = 'background: #fff; border: 2px solid #ddd;';
+                                    let highlight = '';
+                                    
+                                    if (opt.letter === w.answer) {
+                                        optStyle = 'background: linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,230,118,0.1)); border: 2px solid #00c853;';
+                                        highlight = ' ✓ 正确';
+                                    }
+                                    if (opt.letter === w.userAnswer) {
+                                        optStyle = 'background: linear-gradient(135deg, rgba(255,23,68,0.15), rgba(255,82,82,0.1)); border: 2px solid #ff1744;';
+                                        highlight = ' ✗ 你选了这个';
+                                    }
+                                    
+                                    return `
+                                        <div style="${optStyle} padding: 12px 15px; margin-bottom: 8px; border-radius: 8px; cursor: default;">
+                                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                                <span style="font-weight: bold; color: #667eea;">${opt.letter}.</span>
+                                                <span style="flex: 1; margin: 0 10px; color: #333;">${opt.text}</span>
+                                                <span style="font-size: 0.85em; font-weight: bold; ${ opt.letter === w.answer ? 'color: #00c853;' : opt.letter === w.userAnswer ? 'color: #ff1744;' : 'color: #999;' }">${highlight}</span>
+                                            </div>
+                                        </div>
+                                    `;
+                                }).join('')}
+                            </div>
+                        `;
+                    } else if (w.type === '判断题') {
+                        const correctText = w.answer.toLowerCase() === 'true' ? '✓ 正确' : '✗ 错误';
+                        const userText = w.userAnswer.toLowerCase() === 'true' ? '✓ 正确' : '✗ 错误';
+                        optionsHtml = `
+                            <div style="margin: 15px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                                <div style="background: linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,230,118,0.1)); border: 2px solid #00c853; padding: 15px; border-radius: 8px; text-align: center;">
+                                    <div style="color: #999; font-size: 0.85em; margin-bottom: 5px;">正确答案</div>
+                                    <div style="font-size: 1.3em; font-weight: bold; color: #00c853;">${correctText}</div>
+                                </div>
+                                <div style="background: linear-gradient(135deg, rgba(255,23,68,0.15), rgba(255,82,82,0.1)); border: 2px solid #ff1744; padding: 15px; border-radius: 8px; text-align: center;">
+                                    <div style="color: #999; font-size: 0.85em; margin-bottom: 5px;">你的答案</div>
+                                    <div style="font-size: 1.3em; font-weight: bold; color: #ff1744;">${userText}</div>
+                                </div>
+                            </div>
+                        `;
+                    } else if (w.type === '填空题') {
+                        optionsHtml = `
+                            <div style="margin: 15px 0;">
+                                <div style="background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
+                                    <div style="color: #667eea; font-size: 0.9em; margin-bottom: 8px;"><strong>✓ 正确答案：</strong></div>
+                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #00c853; font-weight: bold; font-family: monospace;">${w.answer}</div>
+                                </div>
+                                <div style="background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,82,82,0.1)); padding: 15px; border-radius: 8px;">
+                                    <div style="color: #ff6b6b; font-size: 0.9em; margin-bottom: 8px;"><strong>✗ 你的答案：</strong></div>
+                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #ff1744; font-weight: bold; font-family: monospace;">${w.userAnswer || '未答'}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
+                    return `
+                        <div style="background: rgba(255, 107, 107, 0.1); border-left: 4px solid #ff6b6b; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                <span style="color: #ff6b6b; font-weight: bold; font-size: 1.1em;">${idx + 1}. ${sourceLabel} ${w.type}</span>
+                                <span style="color: #999; font-size: 0.85em;">${w.timestamp}</span>
+                            </div>
+                            <div style="color: #333; margin-bottom: 15px; font-size: 1.05em; line-height: 1.6;">${w.content}</div>
+                            ${optionsHtml}
+                            <div style="background: linear-gradient(135deg, #667eea20, #764ba220); border-left: 4px solid #667eea; border-radius: 5px; padding: 15px; margin-top: 15px;">
+                                <div style="color: #667eea; font-weight: bold; margin-bottom: 8px;">📚 知识解析：</div>
+                                <div style="color: #555; font-size: 0.95em; line-height: 1.8;">
+                                    <div style="margin-bottom: 8px;"><strong>• 含义：</strong>${w.knowledge.meaning}</div>
+                                    <div style="margin-bottom: 8px;"><strong>• 规则：</strong>${w.knowledge.rule}</div>
+                                    <div style="margin-bottom: 8px;"><strong>• 常见错误：</strong>${w.knowledge.error}</div>
+                                    <div><strong>• 示例：</strong>${w.knowledge.example}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+            switchScreen('wrongAnalysisScreen');
+        }
+
+        // 清除错误记录
+        function clearWrongQuestions(scope = 'all') {
+            const isActiveOnly = scope === 'active';
+            const confirmMessage = isActiveOnly
+                ? `确定要清空${units[gameState.wrongAnalysisUnit].name}的错题记录吗？`
+                : '确定要清空所有错误记录吗？';
+
+            if (confirm(confirmMessage)) {
+                if (isActiveOnly) {
+                    gameState.wrongQuestions = gameState.wrongQuestions.filter(item => item.unitIndex !== gameState.wrongAnalysisUnit);
+                } else {
+                    gameState.wrongQuestions = [];
+                }
+                saveGameState();
+                showWrongAnalysis(gameState.wrongAnalysisUnit);
+            }
+        }
+
+        function _t(el) {
+            devMenuClickCount++;
+            clearTimeout(devMenuClickTimer);
+            devMenuClickTimer = setTimeout(() => { devMenuClickCount = 0; }, 800);
+            if (devMenuClickCount >= 5) {
+                devMenuClickCount = 0;
+                showDevMenu();
+            }
+        }
+
+        function showDevMenu() {
+            const devScreen = document.getElementById('devMenuScreen');
+            devScreen.style.display = 'flex';
+            devScreen.style.top = '0';
+            document.getElementById('devPassInput').value = '';
+            document.getElementById('devPassInput').focus();
+        }
+
+        function closeDevMenu() {
+            const devScreen = document.getElementById('devMenuScreen');
+            devScreen.style.top = '-100%';
+            setTimeout(() => { devScreen.style.display = 'none'; }, 300);
+        }
+
+        // 升级版：SHA-256 哈希加密验证
+        async function verifyDevPass() {
+            const input = document.getElementById('devPassInput').value;
+
+            // 1. 将用户输入的密码转换为字节数据并进行 SHA-256摘要加密
+            const msgUint8 = new TextEncoder().encode(input);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+
+            // 2. 将加密后的 Buffer 数据转换为 16 进制的字符串
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+            // 3. 目标密文 (对应明文密码的 SHA-256 Hex 值)
+            const expectedHash = "e18e010158ed9479ce5b953795a789a79ba6599b1b6e70528ed7b262f8681aa0";
+
+            // 4. 对比密文
+            if (inputHash === expectedHash) {
+                closeDevMenu();
+                switchScreen('adminScreen');
+                updateAdminStatus('✓ 验证成功');
+            } else {
+                document.getElementById('devPassInput').value = '';
+                updateAdminStatus('密码错误');
+            }
+        }
+
+        function updateAdminStatus(msg) {
+            document.getElementById('adminStatus').textContent = msg;
+        }
+
+        function adminUnlockAll() {
+            gameState.unitLevelUnlocked[gameState.currentUnit] = [true, true, true, true, true, true];
+            saveGameState();
+            renderUnits();
+            renderLevelMap();
+            updateAdminStatus('✓ 已解锁当前单元全部关卡');
+        }
+
+        function adminLockAll() {
+            gameState.unitLevelUnlocked[gameState.currentUnit] = [true, false, false, false, false, false];
+            gameState.unitLevelStars[gameState.currentUnit] = [0, 0, 0, 0, 0, 0];
+            saveGameState();
+            renderUnits();
+            renderLevelMap();
+            updateAdminStatus('✓ 已重置当前单元进度');
+        }
+
+        function adminUnlockAchievements() {
+            gameState.achievements = achievementList.map(a => a.id);
+            saveGameState();
+            updateAdminStatus('✓ 成就已解锁');
+        }
+
+        function adminClearAchievements() {
+            gameState.achievements = [];
+            saveGameState();
+            updateAdminStatus('✓ 成就已清除');
+        }
+
+        function adminSetMaxStars() {
+            gameState.unitLevelStars[gameState.currentUnit] = [3, 3, 3, 3, 3, 3];
+            gameState.unitLevelUnlocked[gameState.currentUnit] = [true, true, true, true, true, true];
+            saveGameState();
+            renderUnits();
+            renderLevelMap();
+            updateAdminStatus('✓ 当前单元已设置满星');
+        }
+
+        function adminClearWrongs() {
+            gameState.wrongQuestions = [];
+            saveGameState();
+            updateAdminStatus('✓ 错题已清空');
+        }
+
+        function closeAdminMenu() {
+            switchScreen('recordsScreen');
+        }
+
+        // 初始化
+        init();
+
+</script>
+</body>
+
+</html>
