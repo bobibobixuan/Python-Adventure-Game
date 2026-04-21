@@ -254,7 +254,7 @@
         <!-- 做题记录界面 -->
         <div class="screen" id="recordsScreen">
             <div style="background: rgba(255,255,255,0.95); border-radius: 25px; padding: 30px;">
-                <h2 style="text-align: center; color: #1a1a2e; margin-bottom: 30px; cursor: pointer;" onclick="_t(this);">📋 做题记录</h2>
+                <h2 style="text-align: center; color: #1a1a2e; margin-bottom: 30px; cursor: pointer;" onclick="triggerDevAccess()">📋 做题记录</h2>
                 <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; margin-bottom: 30px;">
                     <div style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; padding: 20px; border-radius: 15px; text-align: center;">
                         <div style="font-size: 2em; font-weight: bold;" id="recordTotalQuestions">0</div>
@@ -331,34 +331,85 @@
             </div>
         </div>
 
-        <div id="devMenuScreen" style="position: fixed; top: -100%; left: 0; width: 100%; height: 100%; z-index: 5000; display: none; transition: top 0.3s ease; align-items: center; justify-content: center;">
-            <div style="background: rgba(0,0,0,0.95); width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; padding: 20px;">
-                <div style="background: #1a1a2e; border: 3px solid #ffd700; border-radius: 25px; padding: 40px; max-width: 500px; color: white; text-align: center;">
-                    <h2 style="color: #ffd700; margin-bottom: 20px;">验证</h2>
-                    <p style="color: #a0a0a0; margin-bottom: 30px;">请输入密码</p>
-                    <input type="password" id="devPassInput" placeholder="••••••" style="width: 100%; padding: 12px; border-radius: 10px; border: none; margin-bottom: 20px; font-size: 1em;" onkeypress="if(event.key==='Enter') verifyDevPass()">
-                    <button class="continue-btn" onclick="verifyDevPass()" style="width: 100%; margin-bottom: 10px;">确认</button>
+        <div id="devMenuScreen" class="dev-access-screen">
+            <div class="dev-access-mask">
+                <div class="dev-access-panel">
+                    <div class="dev-access-badge">开发者模式</div>
+                    <h2 class="dev-access-title">验证开发者口令</h2>
+                    <p class="dev-access-desc" id="devPassHint">请输入口令以打开开发者控制台。</p>
+                    <input type="password" id="devPassInput" placeholder="请输入口令" class="dev-access-input" onkeypress="if(event.key==='Enter') verifyDevPass()">
+                    <button class="continue-btn" onclick="verifyDevPass()" style="width: 100%; margin-bottom: 10px;">进入控制台</button>
                     <button class="continue-btn" style="width: 100%; background: rgba(255,255,255,0.1);" onclick="closeDevMenu()">取消</button>
                 </div>
             </div>
         </div>
 
         <div class="screen" id="adminScreen">
-            <div style="background: linear-gradient(135deg, #1a1a2e, #16213e); border-radius: 25px; padding: 40px; color: white;">
-                <h2 style="text-align: center; color: #ffd700; margin-bottom: 40px;">⚙ 系统设置</h2>
-                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; margin-bottom: 30px;">
-                    <button class="continue-btn" onclick="adminUnlockAll()" style="background: linear-gradient(135deg, #00d9ff, #00ff88); color: #1a1a2e; font-weight: bold;">解锁全部关卡</button>
-                    <button class="continue-btn" onclick="adminLockAll()" style="background: linear-gradient(135deg, #ff6b6b, #ff4757); color: white; font-weight: bold;">锁定关卡</button>
-                    <button class="continue-btn" onclick="adminUnlockAchievements()" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white; font-weight: bold;">✓ 解锁成就</button>
-                    <button class="continue-btn" onclick="adminClearAchievements()" style="background: linear-gradient(135deg, #ff9f43, #f0932b); color: white; font-weight: bold;">✗ 清除成就</button>
-                    <button class="continue-btn" onclick="adminSetMaxStars()" style="background: linear-gradient(135deg, #ffd700, #ffaa00); color: #1a1a2e; font-weight: bold;">★ 满星</button>
-                    <button class="continue-btn" onclick="adminClearWrongs()" style="background: linear-gradient(135deg, #ff6b9d, #c44569); color: white; font-weight: bold;">✓ 清空错题</button>
+            <div class="dev-console">
+                <div class="dev-console-header">
+                    <div>
+                        <div class="dev-access-badge">Developer Console</div>
+                        <h2 class="dev-console-title">开发者控制台</h2>
+                        <p class="dev-console-subtitle">重置后的管理面板支持按单元操作、全局进度管理和存档清理。</p>
+                    </div>
                 </div>
-                <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; margin-bottom: 20px;">
-                    <p id="adminStatus" style="color: #a0a0a0; font-size: 0.95em;">...</p>
+
+                <div class="dev-summary-grid" id="devQuickSummary"></div>
+
+                <div class="dev-panel-section">
+                    <div class="dev-section-head">
+                        <h3>单元控制</h3>
+                        <p>切换目标单元后执行对应进度操作。</p>
+                    </div>
+                    <div id="devUnitTabs" class="segmented-tabs"></div>
+                    <div class="dev-unit-summary" id="devUnitSummary"></div>
+                    <div class="dev-actions-grid">
+                        <button class="dev-action-btn success" onclick="devUnlockSelectedUnit()">解锁本单元全部关卡</button>
+                        <button class="dev-action-btn primary" onclick="devSetSelectedUnitMaxStars()">本单元直接满星</button>
+                        <button class="dev-action-btn warn" onclick="devResetSelectedUnit()">重置本单元进度</button>
+                    </div>
                 </div>
+
+                <div class="dev-panel-section">
+                    <div class="dev-section-head">
+                        <h3>全局进度</h3>
+                        <p>面向整个存档的批量操作。</p>
+                    </div>
+                    <div class="dev-actions-grid">
+                        <button class="dev-action-btn success" onclick="devUnlockAllUnits()">解锁全部单元</button>
+                        <button class="dev-action-btn primary" onclick="devSetAllUnitsMaxStars()">全部单元满星</button>
+                        <button class="dev-action-btn danger" onclick="devResetAllProgress()">重置全部关卡进度</button>
+                    </div>
+                </div>
+
+                <div class="dev-panel-section">
+                    <div class="dev-section-head">
+                        <h3>成就与错题</h3>
+                        <p>用于快速验证成就、错题分析和统计画面。</p>
+                    </div>
+                    <div class="dev-actions-grid">
+                        <button class="dev-action-btn primary" onclick="devUnlockAllAchievements()">解锁全部成就</button>
+                        <button class="dev-action-btn warn" onclick="devClearAchievements()">清空全部成就</button>
+                        <button class="dev-action-btn warn" onclick="devClearSelectedWrongQuestions()">清空本单元错题</button>
+                        <button class="dev-action-btn danger" onclick="devClearAllWrongQuestions()">清空全部错题</button>
+                    </div>
+                </div>
+
+                <div class="dev-panel-section">
+                    <div class="dev-section-head">
+                        <h3>记录与重置</h3>
+                        <p>精确控制统计数据，或直接恢复默认存档。</p>
+                    </div>
+                    <div class="dev-actions-grid">
+                        <button class="dev-action-btn ghost" onclick="devResetStatsOnly()">仅重置统计数据</button>
+                        <button class="dev-action-btn danger" onclick="devResetEverything()">恢复默认存档</button>
+                    </div>
+                </div>
+
+                <div class="dev-status" id="adminStatus">控制台待命中。</div>
+
                 <div style="text-align: center;">
-                    <button class="continue-btn" style="background: rgba(255,255,255,0.1);" onclick="closeAdminMenu()">← 返回</button>
+                    <button class="continue-btn" style="background: rgba(255,255,255,0.1);" onclick="closeAdminMenu()">← 返回记录页</button>
                 </div>
             </div>
         </div>
