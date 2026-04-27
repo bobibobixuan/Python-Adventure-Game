@@ -6,7 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>🐍 Python基础闯关游戏</title>
     <style>
-* {
+:root {
+            --motion-fast: 180ms;
+            --motion-base: 320ms;
+            --motion-slow: 680ms;
+            --ease-fluid: cubic-bezier(0.22, 1, 0.36, 1);
+            --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+            --shadow-soft: 0 18px 48px rgba(6, 11, 26, 0.22);
+        }
+
+        * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
@@ -17,6 +26,33 @@
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
             overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            inset: -12% -8%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.32;
+            background:
+                radial-gradient(circle at 18% 22%, rgba(255, 209, 102, 0.26), transparent 34%),
+                radial-gradient(circle at 82% 18%, rgba(0, 217, 255, 0.18), transparent 30%),
+                radial-gradient(circle at 50% 84%, rgba(118, 75, 162, 0.24), transparent 32%);
+            filter: blur(18px);
+            animation: auroraShift 18s ease-in-out infinite alternate;
+        }
+
+        @keyframes auroraShift {
+
+            0% {
+                transform: translate3d(-1%, -1%, 0) scale(1);
+            }
+
+            100% {
+                transform: translate3d(1.5%, 1%, 0) scale(1.04);
+            }
         }
 
         /* 粒子背景 */
@@ -33,17 +69,20 @@
 
         .particle {
             position: absolute;
-            width: 10px;
-            height: 10px;
-            background: rgba(255, 215, 0, 0.6);
+            width: var(--particle-size, 10px);
+            height: var(--particle-size, 10px);
+            background: rgba(255, 215, 0, var(--particle-opacity, 0.45));
             border-radius: 50%;
-            animation: float 15s infinite;
+            filter: blur(1px);
+            box-shadow: 0 0 18px rgba(255, 215, 0, 0.22);
+            animation: float var(--particle-duration, 15s) linear infinite;
+            animation-delay: var(--particle-delay, 0s);
         }
 
         @keyframes float {
 
             0% {
-                transform: translateY(100vh) rotate(0deg);
+                transform: translate3d(var(--particle-shift-start, 0px), 100vh, 0) scale(0.7) rotate(0deg);
                 opacity: 0;
             }
 
@@ -56,7 +95,7 @@
             }
 
             100% {
-                transform: translateY(-100vh) rotate(720deg);
+                transform: translate3d(var(--particle-shift-end, 0px), -20vh, 0) scale(1.1) rotate(720deg);
                 opacity: 0;
             }
         }
@@ -251,6 +290,26 @@
             justify-content: center;
             gap: 10px;
         }
+        .mode-btn,
+        .continue-btn,
+        .segmented-tab,
+        .unit-card,
+        .map-node,
+        .option-card,
+        .judge-card,
+        .challenge-option,
+        .dev-action-btn,
+        .submit-btn,
+        .level-nav-btn,
+        .achievement-card {
+            transition:
+                transform var(--motion-fast) var(--ease-fluid),
+                box-shadow var(--motion-fast) var(--ease-fluid),
+                opacity var(--motion-fast) var(--ease-fluid),
+                border-color var(--motion-fast) var(--ease-fluid),
+                background var(--motion-base) var(--ease-fluid),
+                color var(--motion-fast) var(--ease-fluid);
+        }
 
         .mode-btn.primary {
             background: linear-gradient(135deg, #ffd700, #ffaa00);
@@ -272,8 +331,8 @@
         }
 
         .mode-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 15px 40px rgba(255, 215, 0, 0.4);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 18px 42px rgba(255, 215, 0, 0.4);
         }
 
         .segmented-tabs {
@@ -479,6 +538,43 @@
             gap: 14px;
         }
 
+        .dev-storage-meta {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .dev-storage-textarea {
+            width: 100%;
+            min-height: 220px;
+            resize: vertical;
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(9, 15, 30, 0.78);
+            color: #eef3ff;
+            padding: 18px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95em;
+            line-height: 1.6;
+            margin-bottom: 16px;
+            outline: none;
+        }
+
+        .dev-storage-textarea:focus {
+            border-color: rgba(82, 113, 255, 0.6);
+            box-shadow: 0 0 0 4px rgba(82, 113, 255, 0.12);
+        }
+
+        .dev-inline-tip {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.08);
+            color: #d6def3;
+            line-height: 1.7;
+        }
+
         .dev-action-btn {
             border: none;
             border-radius: 16px;
@@ -623,7 +719,8 @@
         }
 
         .map-node:hover:not(.locked) {
-            transform: scale(1.1);
+            transform: translateY(-4px) scale(1.12);
+            box-shadow: 0 14px 32px rgba(102, 126, 234, 0.28);
         }
 
         .map-node-icon {
@@ -710,24 +807,22 @@
         }
 
         .answer-feedback {
+            --answer-feedback-color: #00c853;
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 4em;
             font-weight: bold;
+            color: var(--answer-feedback-color);
             z-index: 10;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
             animation: feedbackPop 0.5s ease;
             pointer-events: none;
         }
 
-        .answer-feedback.correct {
-            color: #00c853;
-        }
-
         .answer-feedback.wrong {
-            color: #ff1744;
+            --answer-feedback-color: #ff1744;
         }
 
         .correct-answer-tip {
@@ -824,6 +919,23 @@
             font-family: 'Consolas', 'Monaco', monospace;
             color: #e91e63;
             font-size: 1.1em;
+        }
+
+        .question-content code.multiline-code,
+        .knowledge-box code.multiline-code {
+            display: block;
+            width: fit-content;
+            max-width: 100%;
+            margin: 16px auto;
+            padding: 14px 18px;
+            text-align: left;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            overflow-x: auto;
+        }
+
+        .knowledge-box code.multiline-code {
+            margin: 10px 0 0;
         }
 
         .options-grid {
@@ -995,7 +1107,9 @@
         }
 
         @media (max-width: 900px) {
+            .achievement-overview,
             .dev-summary-grid,
+            .dev-storage-meta,
             .dev-unit-summary,
             .dev-actions-grid {
                 grid-template-columns: 1fr 1fr;
@@ -1014,10 +1128,16 @@
                 align-items: flex-start;
             }
 
+            .achievement-overview,
             .dev-summary-grid,
+            .dev-storage-meta,
             .dev-unit-summary,
             .dev-actions-grid {
                 grid-template-columns: 1fr;
+            }
+
+            .achievement-card {
+                min-height: auto;
             }
         }
 
@@ -1284,8 +1404,8 @@
         }
 
         .continue-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 16px 34px rgba(102, 126, 234, 0.38);
         }
 
         /* 关卡结算 */
@@ -1337,6 +1457,11 @@
             text-align: left;
         }
 
+        .achievement-inline-list {
+            display: grid;
+            gap: 12px;
+        }
+
         .achievement-item {
             display: flex;
             align-items: center;
@@ -1345,6 +1470,38 @@
             background: rgba(255, 255, 255, 0.1);
             border-radius: 10px;
             margin-bottom: 10px;
+        }
+
+        .achievement-item--compact {
+            margin-bottom: 0;
+            padding: 14px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.08));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .achievement-inline-meta {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 6px;
+        }
+
+        .achievement-inline-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 0.78em;
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+        }
+
+        .achievement-inline-pill--rarity {
+            color: var(--achievement-accent, #ffd700);
+            border-color: rgba(255, 255, 255, 0.16);
         }
 
         .achievement-icon {
@@ -1359,6 +1516,181 @@
         .achievement-info p {
             color: #a0a0a0;
             font-size: 0.9em;
+        }
+
+        .achievement-overview {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .achievement-summary-card {
+            padding: 18px 20px;
+            border-radius: 18px;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.14), rgba(118, 75, 162, 0.08));
+            border: 1px solid rgba(102, 126, 234, 0.14);
+            box-shadow: 0 14px 30px rgba(36, 45, 78, 0.08);
+        }
+
+        .achievement-summary-label {
+            color: #667089;
+            font-size: 0.88em;
+            margin-bottom: 8px;
+        }
+
+        .achievement-summary-value {
+            color: #1a1a2e;
+            font-size: 1.4em;
+            font-weight: bold;
+        }
+
+        .achievement-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 18px;
+        }
+
+        .achievement-card {
+            position: relative;
+            overflow: hidden;
+            border-radius: 22px;
+            padding: 22px;
+            min-height: 280px;
+            display: flex;
+            flex-direction: column;
+            background: linear-gradient(180deg, #ffffff, #f7f8fc);
+            border: 1px solid rgba(31, 41, 55, 0.08);
+            box-shadow: 0 18px 40px rgba(21, 28, 45, 0.08);
+        }
+
+        .achievement-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--achievement-accent, #ffd700), rgba(255, 255, 255, 0.85));
+        }
+
+        .achievement-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 24px 48px rgba(21, 28, 45, 0.14);
+        }
+
+        .achievement-card.is-unlocked {
+            background: linear-gradient(180deg, #ffffff, rgba(255, 247, 223, 0.9));
+        }
+
+        .achievement-card.is-locked {
+            opacity: 0.86;
+            background: linear-gradient(180deg, #f7f8fc, #f0f2f7);
+        }
+
+        .achievement-card-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 14px;
+            margin-bottom: 16px;
+        }
+
+        .achievement-card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.15em;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0.68));
+            box-shadow: 0 12px 24px rgba(32, 43, 72, 0.12);
+        }
+
+        .achievement-card-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .achievement-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.78em;
+            font-weight: bold;
+            background: rgba(102, 126, 234, 0.08);
+            color: var(--achievement-category-accent, #667eea);
+            border: 1px solid rgba(102, 126, 234, 0.12);
+        }
+
+        .achievement-badge--rarity {
+            color: var(--achievement-accent, #ffd700);
+            border-color: rgba(0, 0, 0, 0.06);
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        .achievement-card-title {
+            color: #171b2e;
+            font-size: 1.2em;
+            margin-bottom: 10px;
+        }
+
+        .achievement-card-desc {
+            color: #667089;
+            line-height: 1.7;
+            margin-bottom: 18px;
+        }
+
+        .achievement-progress-block {
+            margin-top: auto;
+        }
+
+        .achievement-progress-track {
+            height: 10px;
+            border-radius: 999px;
+            overflow: hidden;
+            background: rgba(102, 126, 234, 0.12);
+        }
+
+        .achievement-progress-track span {
+            display: block;
+            height: 100%;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--achievement-accent, #ffd700), rgba(255, 255, 255, 0.88));
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.2);
+        }
+
+        .achievement-progress-meta {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            margin-top: 10px;
+            color: #5f6983;
+            font-size: 0.9em;
+        }
+
+        .achievement-card-hint {
+            margin-top: 12px;
+            color: #7c849b;
+            font-size: 0.92em;
+            line-height: 1.65;
+        }
+
+        .achievement-card.rarity-legendary {
+            box-shadow: 0 24px 56px rgba(255, 209, 102, 0.18);
+        }
+
+        .achievement-card.rarity-epic {
+            box-shadow: 0 22px 48px rgba(197, 140, 255, 0.14);
+        }
+
+        .achievement-card.rarity-rare {
+            box-shadow: 0 20px 42px rgba(103, 210, 255, 0.12);
         }
 
         .level-nav-buttons {
@@ -1408,48 +1740,90 @@
 
         /* 成就弹窗 */
         .achievement-popup {
+            --achievement-popup-accent: #ffd700;
             position: fixed;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
+            transform: translate(-50%, -42%) scale(0.92);
             background: linear-gradient(135deg, #1a1a2e, #16213e);
-            border: 3px solid #ffd700;
+            border: 2px solid var(--achievement-popup-accent);
             border-radius: 20px;
             padding: 30px 50px;
             z-index: 1001;
             text-align: center;
             color: white;
-            animation: achievementIn 0.5s ease;
-            box-shadow: 0 0 50px rgba(255, 215, 0, 0.5);
+            box-shadow: 0 0 50px rgba(255, 215, 0, 0.24);
+            opacity: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+
+        .achievement-popup::before {
+            content: '';
+            position: absolute;
+            inset: -30% -15% auto;
+            height: 70%;
+            background: linear-gradient(110deg, transparent, rgba(255, 255, 255, 0.18), transparent);
+            transform: rotate(-8deg);
+            animation: shimmerSweep 3.4s linear infinite;
+        }
+
+        .achievement-popup.show {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+            animation: achievementIn var(--motion-slow) var(--ease-bounce);
+        }
+
+        .achievement-popup.hide {
+            opacity: 0;
+            transform: translate(-50%, -56%) scale(0.96);
+            transition: opacity var(--motion-fast) var(--ease-fluid), transform var(--motion-fast) var(--ease-fluid);
         }
 
         @keyframes achievementIn {
             0% {
-                transform: translate(-50%, -50%) scale(0);
-            }
-
-            50% {
-                transform: translate(-50%, -50%) scale(1.2);
+                transform: translate(-50%, -40%) scale(0.86);
+                opacity: 0;
             }
 
             100% {
                 transform: translate(-50%, -50%) scale(1);
+                opacity: 1;
+            }
+        }
+
+        @keyframes shimmerSweep {
+            0% {
+                transform: translateX(-18%) rotate(-8deg);
+            }
+
+            100% {
+                transform: translateX(18%) rotate(-8deg);
             }
         }
 
         .achievement-popup-icon {
             font-size: 4em;
             margin-bottom: 15px;
+            text-shadow: 0 0 24px rgba(255, 255, 255, 0.18);
         }
 
         .achievement-popup-title {
-            color: #ffd700;
+            color: var(--achievement-popup-accent);
             font-size: 1.5em;
+            margin-bottom: 8px;
+        }
+
+        .achievement-popup-meta {
+            color: rgba(255, 255, 255, 0.78);
+            font-size: 0.95em;
             margin-bottom: 10px;
+            letter-spacing: 0.04em;
         }
 
         .achievement-popup-desc {
             color: #a0a0a0;
+            line-height: 1.7;
         }
 
         /* 修炼场模式 */
@@ -1525,10 +1899,14 @@
 
         .screen {
             display: none;
+            opacity: 0;
+            transform: translateY(22px) scale(0.985);
         }
 
         .screen.active {
             display: block;
+            opacity: 1;
+            transform: none;
         }
 
         /* 单元选择界面 */
@@ -1542,7 +1920,48 @@
             color: #ffd700;
             text-shadow: 0 0 20px rgba(255, 215, 0, 0.5);
             margin-bottom: 40px;
-            animation: glow 2s ease infinite;
+            animation: glow 2s ease-in-out infinite;
+        }
+
+        .screen.active.screen-enter {
+            animation: screenReveal var(--motion-base) var(--ease-fluid);
+        }
+
+        .screen.active .start-screen,
+        .screen.active .unit-select-screen,
+        .screen.active .level-map,
+        .screen.active .question-card,
+        .screen.active .practice-mode,
+        .screen.active .level-complete,
+        .screen.active .game-over,
+        .screen.active .dev-console,
+        .screen.active .challenge-select-card,
+        .screen.active #achievementsContainer {
+            animation: panelRise var(--motion-slow) var(--ease-fluid);
+        }
+
+        @keyframes screenReveal {
+            0% {
+                opacity: 0;
+                transform: translateY(24px) scale(0.985);
+            }
+
+            100% {
+                opacity: 1;
+                transform: none;
+            }
+        }
+
+        @keyframes panelRise {
+            0% {
+                opacity: 0;
+                transform: translateY(26px) scale(0.985);
+            }
+
+            100% {
+                opacity: 1;
+                transform: none;
+            }
         }
 
         .unit-subtitle {
@@ -1584,6 +2003,44 @@
             border-color: #00ff88;
             box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
             background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 136, 0.05));
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            body::before,
+            .particle,
+            .achievement-popup::before,
+            .combo-display,
+            .unit-title {
+                animation: none !important;
+            }
+
+            .screen.active.screen-enter,
+            .screen.active .start-screen,
+            .screen.active .unit-select-screen,
+            .screen.active .level-map,
+            .screen.active .question-card,
+            .screen.active .practice-mode,
+            .screen.active .level-complete,
+            .screen.active .game-over,
+            .screen.active .dev-console,
+            .screen.active .challenge-select-card,
+            .screen.active #achievementsContainer,
+            .achievement-popup.show,
+            .mode-btn,
+            .continue-btn,
+            .segmented-tab,
+            .unit-card,
+            .map-node,
+            .option-card,
+            .judge-card,
+            .challenge-option,
+            .dev-action-btn,
+            .submit-btn,
+            .level-nav-btn,
+            .achievement-card {
+                animation-duration: 140ms !important;
+                transition-duration: 140ms !important;
+            }
         }
 
         .unit-icon {
@@ -1899,7 +2356,7 @@
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="gameOverCorrect">0/0</div>
-                        <div class="stat-label">正确题数</div>
+                        <div class="stat-label">本次正确题数</div>
                     </div>
                 </div>
                 <button class="continue-btn" style="margin-top: 30px;" id="retryLevelBtn" onclick="retryLevel()">🔄 重新挑战</button>
@@ -1957,7 +2414,7 @@
 
                 <div style="text-align: center; margin-top: 30px;">
                     <button class="continue-btn" style="margin-right: 10px;" onclick="showWrongAnalysis()">🔍 错误分析</button>
-                    <button class="continue-btn" style="margin-right: 10px;" onclick="resetRecords()">🔄 重置记录</button>
+                    <button class="continue-btn" style="margin-right: 10px;" onclick="resetRecords()">🔄 重置全部记录</button>
                     <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
                 </div>
             </div>
@@ -2007,7 +2464,7 @@
                     <div>
                         <div class="dev-access-badge">Developer Console</div>
                         <h2 class="dev-console-title">开发者控制台</h2>
-                        <p class="dev-console-subtitle">重置后的管理面板支持按单元操作、全局进度管理和存档清理。</p>
+                        <p class="dev-console-subtitle">这里保留了完整后门能力，支持按单元操作、全局进度管理、存档诊断与导入导出。</p>
                     </div>
                 </div>
 
@@ -2063,6 +2520,22 @@
                     </div>
                 </div>
 
+                <div class="dev-panel-section">
+                    <div class="dev-section-head">
+                        <h3>存档工具</h3>
+                        <p>查看当前快照、手动导入 JSON，或直接清空浏览器中的存档。</p>
+                    </div>
+                    <div class="dev-storage-meta" id="devStorageMeta"></div>
+                    <textarea id="devStorageSnapshot" class="dev-storage-textarea" spellcheck="false"></textarea>
+                    <div class="dev-actions-grid">
+                        <button class="dev-action-btn primary" onclick="copyDevSaveSnapshot()">复制当前快照</button>
+                        <button class="dev-action-btn success" onclick="importDevSaveSnapshot()">导入文本中的存档</button>
+                        <button class="dev-action-btn ghost" onclick="refreshDeveloperConsole('已刷新存档快照。')">刷新快照</button>
+                        <button class="dev-action-btn danger" onclick="clearStoredSave()">清空浏览器存档</button>
+                    </div>
+                    <div class="dev-inline-tip" id="devStorageStatus">这里会显示存档诊断信息。</div>
+                </div>
+
                 <div class="dev-status" id="adminStatus">控制台待命中。</div>
 
                 <div style="text-align: center;">
@@ -2088,6 +2561,7 @@
     <div class="achievement-popup" id="achievementPopup" style="display: none;">
         <div class="achievement-popup-icon" id="popupIcon">🏆</div>
         <div class="achievement-popup-title" id="popupTitle">成就解锁！</div>
+        <div class="achievement-popup-meta" id="popupMeta">🚀 启程 · 常规</div>
         <div class="achievement-popup-desc" id="popupDesc"></div>
     </div>
 
@@ -3149,79 +3623,438 @@
             ]
         };
 
+// 成就元数据
+        const achievementRarityMeta = {
+            common: { label: '常规', accent: '#7be0a4' },
+            rare: { label: '稀有', accent: '#67d2ff' },
+            epic: { label: '史诗', accent: '#c58cff' },
+            legendary: { label: '传说', accent: '#ffd166' }
+        };
+
+        const achievementCategoryMeta = {
+            启程: { icon: '🚀', accent: '#667eea' },
+            节奏: { icon: '⚡', accent: '#00d9ff' },
+            实战: { icon: '🛡️', accent: '#00c853' },
+            修炼: { icon: '📚', accent: '#ff9f1c' },
+            探索: { icon: '🧭', accent: '#8e7dff' },
+            极限: { icon: '👑', accent: '#ff6b6b' }
+        };
+
+        function buildThresholdProgress(currentValue, targetValue, suffix = '') {
+            const current = Math.max(0, Number(currentValue) || 0);
+            const target = Math.max(1, Number(targetValue) || 1);
+            const displayCurrent = Math.min(current, target);
+
+            return {
+                current,
+                target,
+                ratio: Math.min(current / target, 1),
+                complete: current >= target,
+                label: `${displayCurrent}/${target}${suffix}`
+            };
+        }
+
+        function buildFlagProgress(complete, lockedText = '待完成') {
+            return {
+                current: complete ? 1 : 0,
+                target: 1,
+                ratio: complete ? 1 : 0,
+                complete,
+                label: complete ? '已达成' : lockedText
+            };
+        }
+
+        function createThresholdAchievement({ id, name, icon, desc, category, rarity, statKey, target, suffix = '', hint }) {
+            return {
+                id,
+                name,
+                icon,
+                desc,
+                category,
+                rarity,
+                hint,
+                getProgress: (stats) => buildThresholdProgress(stats[statKey], target, suffix),
+                condition: (stats) => Number(stats[statKey] || 0) >= target
+            };
+        }
+
+        function createFlagAchievement({ id, name, icon, desc, category, rarity, statKey, hint }) {
+            return {
+                id,
+                name,
+                icon,
+                desc,
+                category,
+                rarity,
+                hint,
+                getProgress: (stats) => buildFlagProgress(Boolean(stats[statKey]), hint || '待达成'),
+                condition: (stats) => Boolean(stats[statKey])
+            };
+        }
+
+        function createCustomAchievement(config) {
+            return config;
+        }
+
 // 成就配置
         const achievementList = [
-            { id: 'first_win', name: '初试锋芒', icon: '🌱', desc: '首次答对题目', condition: (stats) => stats.totalCorrect >= 1 },
-            { id: 'speed_demon', name: '速算达人', icon: '⚡', desc: '5秒内答对一道题', condition: (stats) => stats.fastAnswer },
-            { id: 'combo_master', name: '连击大师', icon: '🔥', desc: '连续答对5题', condition: (stats) => stats.maxCombo >= 5 },
-            { id: 'perfect_clear', name: '满分通关', icon: '💎', desc: '一关不扣血通关', condition: (stats) => stats.perfectLevel },
-            { id: 'master_of_operators', name: '闯关大师', icon: '👑', desc: '通关全部关卡', condition: (stats) => stats.allLevelsClear },
-            { id: 'survivor', name: '九死一生', icon: '🌟', desc: '只剩1条命通关', condition: (stats) => stats.oneLifeWin },
-            { id: 'scholar', name: '勤学苦练', icon: '📚', desc: '在修炼场完成10道题', condition: (stats) => stats.practiceCount >= 10 },
-            { id: 'speed_5', name: '快如闪电', icon: '💨', desc: '连续5题都在5秒内答对', condition: (stats) => stats.fastStreak >= 5 },
-            { id: 'no_mistake', name: '零失误', icon: '🎯', desc: '一整关答对所有题', condition: (stats) => stats.perfectStreak },
-            { id: 'practice_veteran', name: '修炼老将', icon: '🧘', desc: '在修炼场完成30道题', condition: (stats) => stats.practiceCount >= 30 },
-            { id: 'question_hunter', name: '百题斩', icon: '🗡️', desc: '累计完成100道题', condition: (stats) => stats.totalQuestions >= 100 },
-            { id: 'star_collector', name: '星光收藏家', icon: '🌠', desc: '累计获得12颗星星', condition: (stats) => stats.totalStars >= 12 },
-            { id: 'dual_unit_clear', name: '双线通关', icon: '🧭', desc: '完成全部两个单元', condition: (stats) => stats.completedUnits >= stats.totalUnits },
-            { id: 'extreme_conqueror', name: '零失误通关', icon: '👑', desc: '通过一次双单元综合大考', condition: (stats) => stats.extremeDualPasses >= 1 }
+            createThresholdAchievement({
+                id: 'first_win',
+                name: '初试锋芒',
+                icon: '🌱',
+                desc: '首次答对题目，正式踏入闯关之路。',
+                category: '启程',
+                rarity: 'common',
+                statKey: 'totalCorrect',
+                target: 1,
+                hint: '先答对 1 题。'
+            }),
+            createThresholdAchievement({
+                id: 'rookie_pacer',
+                name: '起步热身',
+                icon: '🥾',
+                desc: '累计完成 10 道题，熟悉游戏节奏。',
+                category: '启程',
+                rarity: 'common',
+                statKey: 'totalQuestions',
+                target: 10,
+                suffix: '题',
+                hint: '累计作答 10 题。'
+            }),
+            createThresholdAchievement({
+                id: 'question_hunter',
+                name: '百题斩',
+                icon: '🗡️',
+                desc: '累计完成 100 道题，正式迈入高强度训练。',
+                category: '启程',
+                rarity: 'epic',
+                statKey: 'totalQuestions',
+                target: 100,
+                suffix: '题',
+                hint: '累计作答 100 题。'
+            }),
+            createThresholdAchievement({
+                id: 'score_apprentice',
+                name: '积分学徒',
+                icon: '🪙',
+                desc: '总积分达到 1000，开始稳定积累。',
+                category: '启程',
+                rarity: 'rare',
+                statKey: 'score',
+                target: 1000,
+                suffix: '分',
+                hint: '累计总积分达到 1000。'
+            }),
+            createThresholdAchievement({
+                id: 'score_architect',
+                name: '积分建筑师',
+                icon: '🏛️',
+                desc: '总积分达到 5000，说明你已经刷出稳定实力。',
+                category: '启程',
+                rarity: 'legendary',
+                statKey: 'score',
+                target: 5000,
+                suffix: '分',
+                hint: '累计总积分达到 5000。'
+            }),
+            createFlagAchievement({
+                id: 'speed_demon',
+                name: '速算达人',
+                icon: '⚡',
+                desc: '在 5 秒内答对 1 题，手速与思路同时在线。',
+                category: '节奏',
+                rarity: 'rare',
+                statKey: 'fastAnswer',
+                hint: '在 5 秒内答对 1 题。'
+            }),
+            createThresholdAchievement({
+                id: 'combo_master',
+                name: '连击大师',
+                icon: '🔥',
+                desc: '连续答对 5 题，把节奏稳稳接住。',
+                category: '节奏',
+                rarity: 'rare',
+                statKey: 'maxCombo',
+                target: 5,
+                hint: '把最高连击推到 5。'
+            }),
+            createThresholdAchievement({
+                id: 'combo_emperor',
+                name: '连击帝王',
+                icon: '🌋',
+                desc: '连续答对 10 题，进入无缝输出状态。',
+                category: '节奏',
+                rarity: 'epic',
+                statKey: 'maxCombo',
+                target: 10,
+                hint: '把最高连击推到 10。'
+            }),
+            createThresholdAchievement({
+                id: 'speed_5',
+                name: '快如闪电',
+                icon: '💨',
+                desc: '连续 5 题都在 5 秒内答对，节奏直接拉满。',
+                category: '节奏',
+                rarity: 'epic',
+                statKey: 'fastStreak',
+                target: 5,
+                hint: '连续 5 题 5 秒内答对。'
+            }),
+            createFlagAchievement({
+                id: 'perfect_clear',
+                name: '零伤通关',
+                icon: '💎',
+                desc: '一关不掉血通关，说明你已经完全读懂题面。',
+                category: '实战',
+                rarity: 'rare',
+                statKey: 'perfectLevel',
+                hint: '一关内不答错任何题。'
+            }),
+            createFlagAchievement({
+                id: 'no_mistake',
+                name: '一字不差',
+                icon: '🎯',
+                desc: '一整关题目全部答对，交出满答卷。',
+                category: '实战',
+                rarity: 'epic',
+                statKey: 'perfectStreak',
+                hint: '一关全部答对。'
+            }),
+            createFlagAchievement({
+                id: 'survivor',
+                name: '九死一生',
+                icon: '🌟',
+                desc: '只剩 1 条命时仍然完成关卡。',
+                category: '实战',
+                rarity: 'epic',
+                statKey: 'oneLifeWin',
+                hint: '残血完成一关。'
+            }),
+            createThresholdAchievement({
+                id: 'scholar',
+                name: '勤学苦练',
+                icon: '📚',
+                desc: '修炼场累计完成 10 题，先把基本功练稳。',
+                category: '修炼',
+                rarity: 'common',
+                statKey: 'practiceCount',
+                target: 10,
+                suffix: '题',
+                hint: '在修炼场完成 10 题。'
+            }),
+            createThresholdAchievement({
+                id: 'practice_veteran',
+                name: '修炼老将',
+                icon: '🧘',
+                desc: '修炼场累计完成 30 题，说明你真的在持续打磨。',
+                category: '修炼',
+                rarity: 'rare',
+                statKey: 'practiceCount',
+                target: 30,
+                suffix: '题',
+                hint: '在修炼场完成 30 题。'
+            }),
+            createCustomAchievement({
+                id: 'clean_sheet',
+                name: '纸面如新',
+                icon: '🧼',
+                desc: '累计作答至少 20 题后，整体正确率仍保持在 90% 以上。',
+                category: '修炼',
+                rarity: 'rare',
+                hint: '先完成 20 题，再把正确率稳定在 90%。',
+                getProgress: (stats) => {
+                    const accuracy = Math.round((stats.accuracy || 0) * 100);
+                    return {
+                        current: accuracy,
+                        target: 90,
+                        ratio: Math.min(accuracy / 90, 1),
+                        complete: stats.totalQuestions >= 20 && accuracy >= 90,
+                        label: `${accuracy}% / 90% · 至少 20 题`
+                    };
+                },
+                condition: (stats) => stats.totalQuestions >= 20 && (stats.accuracy || 0) >= 0.9
+            }),
+            createFlagAchievement({
+                id: 'master_of_operators',
+                name: '单元毕业',
+                icon: '🎓',
+                desc: '完成当前单元的全部关卡，拿到阶段性毕业证明。',
+                category: '探索',
+                rarity: 'rare',
+                statKey: 'currentUnitCleared',
+                hint: '先把一个单元全部通关。'
+            }),
+            createThresholdAchievement({
+                id: 'star_collector',
+                name: '星光收藏家',
+                icon: '🌠',
+                desc: '累计获得 12 颗星星，说明你的稳定性开始成型。',
+                category: '探索',
+                rarity: 'rare',
+                statKey: 'totalStars',
+                target: 12,
+                hint: '累计拿到 12 颗星。'
+            }),
+            createThresholdAchievement({
+                id: 'unit_crown',
+                name: '单元加冕',
+                icon: '🏅',
+                desc: '单个单元累计拿满 18 星，说明你已经完全吃透这一章。',
+                category: '探索',
+                rarity: 'epic',
+                statKey: 'bestUnitStars',
+                target: 18,
+                hint: '把任意一个单元刷到满星。'
+            }),
+            createFlagAchievement({
+                id: 'dual_unit_clear',
+                name: '双线通关',
+                icon: '🧭',
+                desc: '完成全部学习单元，真正打通当前内容地图。',
+                category: '探索',
+                rarity: 'legendary',
+                statKey: 'allUnitsCleared',
+                hint: '完成全部单元。'
+            }),
+            createThresholdAchievement({
+                id: 'extreme_scout',
+                name: '极限侦察兵',
+                icon: '🛡️',
+                desc: '完成任意一次极限测试，证明你敢进高压区。',
+                category: '极限',
+                rarity: 'epic',
+                statKey: 'extremePasses',
+                target: 1,
+                suffix: '次',
+                hint: '先通过 1 次极限测试。'
+            }),
+            createThresholdAchievement({
+                id: 'extreme_conqueror',
+                name: '零失误通关',
+                icon: '👑',
+                desc: '通过一次双单元综合大考，把极限模式打穿。',
+                category: '极限',
+                rarity: 'legendary',
+                statKey: 'extremeDualPasses',
+                target: 1,
+                suffix: '次',
+                hint: '通过 1 次双单元综合大考。'
+            })
         ];
 
 </script>
     <script>
-// 当前选中的单元
-        let currentUnit = 0;
+        const STORAGE_KEY = 'pythonOperatorGame';
+        const STORAGE_VERSION = 3;
+        const DEV_ACCESS_HASH = 'e18e010158ed9479ce5b953795a789a79ba6599b1b6e70528ed7b262f8681aa0';
+
+        let storageStatusMessage = '尚未读取存档';
+        let devAccessGranted = false;
 
         function getLevelsForUnit(unitIndex = gameState.currentUnit) {
             return unitLevelsMap[unitIndex] || unitLevelsMap[0];
         }
 
+        function createDefaultUnitProgress(defaultValue) {
+            return units.map((_, unitIndex) => Array(getLevelsForUnit(unitIndex).length).fill(defaultValue));
+        }
+
+        function createDefaultGameState() {
+            return {
+                currentUnit: 0,
+                currentLevel: 0,
+                currentQuestion: 0,
+                lives: 3,
+                score: 0,
+                combo: 0,
+                maxCombo: 0,
+                levelScore: 0,
+                levelCorrect: 0,
+                levelTime: 0,
+                questionStartTime: 0,
+                selectedAnswer: null,
+                isPracticeMode: false,
+                practiceQuestionIndex: 0,
+                unitLevelUnlocked: createDefaultUnitProgress(false).map(unitProgress =>
+                    unitProgress.map((_, levelIndex) => levelIndex === 0)
+                ),
+                unitLevelStars: createDefaultUnitProgress(0),
+                achievements: [],
+                totalCorrect: 0,
+                totalQuestions: 0,
+                fastAnswer: false,
+                fastStreak: 0,
+                perfectLevel: false,
+                oneLifeWin: false,
+                practiceCount: 0,
+                extremePasses: 0,
+                extremeDualPasses: 0,
+                pendingMode: 'adventure',
+                levelLivesAtStart: 3,
+                isPaused: false,
+                wrongQuestions: [],
+                wrongAnalysisUnit: 0,
+                isExtremeMode: false,
+                extremeScope: null,
+                extremeSegments: [],
+                extremeSegmentIndex: 0
+            };
+        }
+
+        function formatMultilineCodeBlocks(container) {
+            if (!container) {
+                return;
+            }
+
+            container.querySelectorAll('code').forEach(code => {
+                const isMultiline = code.innerHTML.includes('<br>') || code.textContent.includes('\n');
+                code.classList.toggle('multiline-code', isMultiline);
+            });
+        }
+
+        function shuffleQuestions(questionList) {
+            const shuffled = [...questionList];
+
+            for (let index = shuffled.length - 1; index > 0; index--) {
+                const randomIndex = Math.floor(Math.random() * (index + 1));
+                [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+            }
+
+            return shuffled;
+        }
+
+        function hasNonEmptyAnswer(answer) {
+            return String(answer ?? '').trim() !== '';
+        }
+
+        function handleAdventureFillKeydown(event) {
+            if (event.key !== 'Enter' || event.isComposing || !hasNonEmptyAnswer(event.target.value)) {
+                return;
+            }
+
+            event.preventDefault();
+            submitAnswer();
+        }
+
+        function handlePracticeFillKeydown(event) {
+            if (event.key !== 'Enter' || event.isComposing || !hasNonEmptyAnswer(event.target.value)) {
+                return;
+            }
+
+            event.preventDefault();
+            submitPracticeAnswer();
+        }
+
         // 游戏状态
-        let gameState = {
-            currentUnit: 0,
-            currentLevel: 0,
-            currentQuestion: 0,
-            lives: 3,
-            score: 0,
-            combo: 0,
-            maxCombo: 0,
-            levelScore: 0,
-            levelCorrect: 0,
-            levelTime: 0,
-            questionStartTime: 0,
-            selectedAnswer: null,
-            isPracticeMode: false,
-            practiceQuestionIndex: 0,
-            unitLevelUnlocked: [[true, false, false, false, false, false], [true, false, false, false, false, false]],
-            unitLevelStars: [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]],
-            achievements: [],
-            totalCorrect: 0,
-            totalQuestions: 0,
-            fastAnswer: false,
-            fastStreak: 0,
-            perfectLevel: false,
-            oneLifeWin: false,
-            practiceCount: 0,
-            extremePasses: 0,
-            extremeDualPasses: 0,
-            pendingMode: 'adventure',
-            levelLivesAtStart: 3,
-            isPaused: false,
-            wrongQuestions: [],
-            wrongAnalysisUnit: 0,
-            isExtremeMode: false,
-            extremeScope: null,
-            extremeSegments: [],
-            extremeSegmentIndex: 0
-        };
+        let gameState = createDefaultGameState();
 
         let devMenuClickCount = 0;
         let devMenuClickTimer = null;
         let timerInterval = null;
         let currentLevelQuestions = [];
         let devSelectedUnit = 0;
-
-        const DEV_ACCESS_HASH = 'e18e010158ed9479ce5b953795a789a79ba6599b1b6e70528ed7b262f8681aa0';
+        let achievementPopupQueue = [];
+        let achievementPopupActive = false;
 
         // 渲染单元选择卡片
         function renderUnits() {
@@ -3273,18 +4106,22 @@
         // 创建粒子效果
         function createParticles() {
             const container = document.getElementById('particles');
-            for (let i = 0; i < 20; i++) {
+            container.innerHTML = '';
+            for (let i = 0; i < 28; i++) {
                 const particle = document.createElement('div');
+                const size = 6 + Math.random() * 10;
+                const duration = 10 + Math.random() * 10;
+                const delay = Math.random() * 12;
                 particle.className = 'particle';
                 particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                particle.style.setProperty('--particle-size', `${size}px`);
+                particle.style.setProperty('--particle-opacity', (0.2 + Math.random() * 0.5).toFixed(2));
+                particle.style.setProperty('--particle-shift-start', `${(-20 + Math.random() * 40).toFixed(1)}px`);
+                particle.style.setProperty('--particle-shift-end', `${(-80 + Math.random() * 160).toFixed(1)}px`);
+                particle.style.setProperty('--particle-delay', `${delay.toFixed(2)}s`);
+                particle.style.setProperty('--particle-duration', `${duration.toFixed(2)}s`);
                 container.appendChild(particle);
             }
-        }
-
-        function createDefaultUnitProgress(defaultValue) {
-            return units.map((_, unitIndex) => Array(getLevelsForUnit(unitIndex).length).fill(defaultValue));
         }
 
         function normalizeUnitProgress(savedProgress, fallbackValue) {
@@ -3323,6 +4160,38 @@
             );
         }
 
+        function getCompletedLevelCount() {
+            return gameState.unitLevelStars.reduce(
+                (sum, unitStars) => sum + unitStars.filter(stars => stars > 0).length,
+                0
+            );
+        }
+
+        function getTotalLevelCount() {
+            return units.reduce((sum, _, unitIndex) => sum + getLevelsForUnit(unitIndex).length, 0);
+        }
+
+        function getUnlockedLevelCount() {
+            return gameState.unitLevelUnlocked.reduce(
+                (sum, unitUnlocked) => sum + unitUnlocked.filter(Boolean).length,
+                0
+            );
+        }
+
+        function getBestUnitStarCount() {
+            return Math.max(
+                0,
+                ...gameState.unitLevelStars.map(unitStars => unitStars.reduce((sum, stars) => sum + stars, 0))
+            );
+        }
+
+        function isCurrentUnitCleared() {
+            const activeLevels = getLevelsForUnit(gameState.currentUnit);
+            const unitStars = gameState.unitLevelStars[gameState.currentUnit] || [];
+
+            return activeLevels.length > 0 && activeLevels.every((_, levelIndex) => (unitStars[levelIndex] || 0) > 0);
+        }
+
         function getCompletedUnitCount() {
             return units.filter((_, unitIndex) => {
                 const unitStars = gameState.unitLevelStars[unitIndex] || [];
@@ -3331,6 +4200,9 @@
         }
 
         function buildAchievementStats(overrides = {}) {
+            const totalQuestions = gameState.totalQuestions;
+            const totalCorrect = gameState.totalCorrect;
+
             return Object.assign({
                 fastAnswer: gameState.fastAnswer,
                 maxCombo: gameState.maxCombo,
@@ -3340,11 +4212,21 @@
                 practiceCount: gameState.practiceCount,
                 fastStreak: gameState.fastStreak,
                 perfectStreak: gameState.levelCorrect === currentLevelQuestions.length && currentLevelQuestions.length > 0,
-                totalCorrect: gameState.totalCorrect,
-                totalQuestions: gameState.totalQuestions,
+                totalCorrect,
+                totalQuestions,
                 totalStars: getTotalStars(),
+                completedLevels: getCompletedLevelCount(),
+                unlockedLevels: getUnlockedLevelCount(),
+                totalLevels: getTotalLevelCount(),
                 completedUnits: getCompletedUnitCount(),
                 totalUnits: units.length,
+                currentUnitCleared: isCurrentUnitCleared(),
+                bestUnitStars: getBestUnitStarCount(),
+                wrongQuestionCount: gameState.wrongQuestions.length,
+                accuracy: totalQuestions > 0 ? totalCorrect / totalQuestions : 0,
+                allUnitsCleared: getCompletedUnitCount() >= units.length,
+                unlockedAchievements: gameState.achievements.length,
+                totalAchievements: achievementList.length,
                 score: gameState.score,
                 extremePasses: gameState.extremePasses,
                 extremeDualPasses: gameState.extremeDualPasses
@@ -3378,44 +4260,270 @@
             return null;
         }
 
-        function enrichWrongQuestionRecord(record) {
-            const meta = getQuestionMetaById(record.id);
-            if (!meta) {
-                return Object.assign({}, record, {
-                    unitIndex: Number(record.unitIndex || 0),
-                    levelIndex: Number(record.levelIndex || 0),
-                    unitName: record.unitName || units[0].name,
-                    levelName: record.levelName || record.category || '未知关卡',
-                    sourceLabel: `[${getUnitDisplayName(Number(record.unitIndex || 0))} - ${record.levelName || record.category || '未知关卡'}]`
-                });
+        function normalizeWrongQuestionRecord(record) {
+            if (!record || !Number.isFinite(Number(record.id))) {
+                return null;
             }
 
-            return Object.assign({}, record, {
-                unitIndex: meta.unitIndex,
-                levelIndex: meta.levelIndex,
-                unitName: meta.unitName,
-                levelName: meta.levelName,
-                sourceLabel: `[${meta.unitDisplayName} - ${meta.levelName}]`
-            });
+            const questionId = Number(record.id);
+            const meta = getQuestionMetaById(questionId);
+            const parsedUnitIndex = Number(record.unitIndex);
+            const parsedLevelIndex = Number(record.levelIndex);
+            const unitIndex = Number.isInteger(parsedUnitIndex) && units[parsedUnitIndex]
+                ? parsedUnitIndex
+                : meta ? meta.unitIndex : 0;
+            const levelIndex = Number.isInteger(parsedLevelIndex) && parsedLevelIndex >= 0
+                ? parsedLevelIndex
+                : meta ? meta.levelIndex : 0;
+
+            return {
+                id: questionId,
+                userAnswer: record.userAnswer === undefined || record.userAnswer === null
+                    ? ''
+                    : String(record.userAnswer),
+                timestamp: typeof record.timestamp === 'string' && record.timestamp.trim()
+                    ? record.timestamp
+                    : new Date().toLocaleString(),
+                unitIndex,
+                levelIndex
+            };
+        }
+
+        function buildWrongQuestionViewModel(record) {
+            const meta = getQuestionMetaById(record.id);
+            const unitIndex = meta ? meta.unitIndex : record.unitIndex;
+            const levelIndex = meta ? meta.levelIndex : record.levelIndex;
+            const fallbackLevel = getLevelsForUnit(unitIndex)[levelIndex];
+
+            return {
+                question: meta ? meta.question : null,
+                unitIndex,
+                levelIndex,
+                sourceLabel: meta
+                    ? `[${meta.unitDisplayName} - ${meta.levelName}]`
+                    : `[${getUnitDisplayName(unitIndex)} - ${fallbackLevel ? fallbackLevel.name : '未知关卡'}]`
+            };
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function renderKnowledgeDetails(container, knowledge) {
+            if (!container || !knowledge) {
+                return;
+            }
+
+            container.innerHTML = `
+                <h4>📚 知识点解析</h4>
+                <p><strong>运算符含义：</strong>${knowledge.meaning}</p>
+                <p><strong>运算规则：</strong>${knowledge.rule}</p>
+                <p><strong>常见易错点：</strong>${knowledge.error}</p>
+                <p><strong>相关示例：</strong>${knowledge.example}</p>
+            `;
+            formatMultilineCodeBlocks(container);
+        }
+
+        function getAchievementRarityMeta(rarity = 'common') {
+            return achievementRarityMeta[rarity] || achievementRarityMeta.common;
+        }
+
+        function getAchievementCategoryMeta(category = '启程') {
+            return achievementCategoryMeta[category] || { icon: '🏆', accent: '#667eea' };
+        }
+
+        function normalizeAchievementProgress(progress, fallbackLabel = '待解锁') {
+            const current = Math.max(0, Number(progress?.current ?? 0) || 0);
+            const target = Math.max(1, Number(progress?.target ?? 1) || 1);
+            const ratioSource = progress?.ratio !== undefined ? Number(progress.ratio) : current / target;
+            const ratio = Math.max(0, Math.min(1, Number.isFinite(ratioSource) ? ratioSource : current / target));
+            const complete = progress?.complete !== undefined ? Boolean(progress.complete) : current >= target;
+
+            return {
+                current,
+                target,
+                ratio,
+                complete,
+                label: progress?.label || (complete ? '已达成' : fallbackLabel)
+            };
+        }
+
+        function getAchievementProgress(achievement, stats = buildAchievementStats()) {
+            if (typeof achievement.getProgress === 'function') {
+                return normalizeAchievementProgress(achievement.getProgress(stats), achievement.hint || '待解锁');
+            }
+
+            const complete = typeof achievement.condition === 'function' ? achievement.condition(stats) : false;
+            return normalizeAchievementProgress({ complete }, achievement.hint || '待解锁');
+        }
+
+        function isAchievementUnlocked(achievementId) {
+            return gameState.achievements.includes(achievementId);
+        }
+
+        function getAchievementCardMarkup(achievement, stats, compact = false) {
+            const unlocked = isAchievementUnlocked(achievement.id);
+            const progress = getAchievementProgress(achievement, stats);
+            const rarityMeta = getAchievementRarityMeta(achievement.rarity);
+            const categoryMeta = getAchievementCategoryMeta(achievement.category);
+            const progressWidth = Math.round(progress.ratio * 100);
+
+            if (compact) {
+                return `
+                    <div class="achievement-item achievement-item--compact rarity-${achievement.rarity || 'common'}" style="--achievement-accent: ${rarityMeta.accent}; --achievement-category-accent: ${categoryMeta.accent};">
+                        <span class="achievement-icon">${achievement.icon}</span>
+                        <div class="achievement-info">
+                            <div class="achievement-inline-meta">
+                                <span class="achievement-inline-pill">${categoryMeta.icon} ${achievement.category}</span>
+                                <span class="achievement-inline-pill achievement-inline-pill--rarity">${rarityMeta.label}</span>
+                            </div>
+                            <h5>${achievement.name}</h5>
+                            <p>${achievement.desc}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <article class="achievement-card ${unlocked ? 'is-unlocked' : 'is-locked'} rarity-${achievement.rarity || 'common'}" style="--achievement-accent: ${rarityMeta.accent}; --achievement-category-accent: ${categoryMeta.accent}; --achievement-progress: ${progressWidth}%;">
+                    <div class="achievement-card-head">
+                        <div class="achievement-card-icon">${unlocked ? achievement.icon : '🔒'}</div>
+                        <div class="achievement-card-badges">
+                            <span class="achievement-badge">${categoryMeta.icon} ${achievement.category}</span>
+                            <span class="achievement-badge achievement-badge--rarity">${rarityMeta.label}</span>
+                        </div>
+                    </div>
+                    <h3 class="achievement-card-title">${achievement.name}</h3>
+                    <p class="achievement-card-desc">${achievement.desc}</p>
+                    <div class="achievement-progress-block">
+                        <div class="achievement-progress-track"><span style="width: ${progressWidth}%;"></span></div>
+                        <div class="achievement-progress-meta">
+                            <span>${unlocked ? '已解锁' : progress.label}</span>
+                            <span>${Math.round(progress.ratio * 100)}%</span>
+                        </div>
+                    </div>
+                    <p class="achievement-card-hint">${unlocked ? '已收入勋章墙。' : (achievement.hint || '继续挑战即可解锁。')}</p>
+                </article>
+            `;
+        }
+
+        function renderUnlockedAchievements(container, newAchievements, emptyMessage = '') {
+            if (!container) {
+                return;
+            }
+
+            if (newAchievements.length > 0) {
+                const stats = buildAchievementStats();
+                container.innerHTML = '<h3 style="color: #ffd700; margin-bottom: 10px;">🏆 新成就解锁！</h3>' +
+                    `<div class="achievement-inline-list">${newAchievements.map(achievement => getAchievementCardMarkup(achievement, stats, true)).join('')}</div>`;
+                return;
+            }
+
+            container.innerHTML = emptyMessage
+                ? `<div style="color: #fff; opacity: 0.9;">${emptyMessage}</div>`
+                : '';
+        }
+
+        function getAttemptedQuestionCount() {
+            return currentLevelQuestions.length === 0
+                ? 0
+                : Math.min(gameState.currentQuestion + 1, currentLevelQuestions.length);
         }
 
         function createWrongQuestionRecord(question, userAnswer) {
-            const level = getLevelsForUnit(gameState.currentUnit)[gameState.currentLevel];
             return {
                 id: question.id,
-                category: question.category,
-                type: question.type,
-                content: question.content,
-                answer: question.answer,
-                userAnswer: userAnswer,
+                userAnswer: userAnswer === undefined || userAnswer === null ? '' : String(userAnswer),
                 timestamp: new Date().toLocaleString(),
-                knowledge: question.knowledge,
                 unitIndex: gameState.currentUnit,
-                levelIndex: gameState.currentLevel,
-                unitName: units[gameState.currentUnit].name,
-                levelName: level ? level.name : question.category,
-                sourceLabel: `[${getUnitDisplayName(gameState.currentUnit)} - ${level ? level.name : question.category}]`
+                levelIndex: gameState.currentLevel
             };
+        }
+
+        function buildPersistedGameState() {
+            return {
+                storageVersion: STORAGE_VERSION,
+                unitOrderVersion: 2,
+                unitLevelUnlocked: gameState.unitLevelUnlocked,
+                unitLevelStars: gameState.unitLevelStars,
+                achievements: gameState.achievements,
+                wrongQuestions: gameState.wrongQuestions,
+                totalCorrect: gameState.totalCorrect,
+                totalQuestions: gameState.totalQuestions,
+                score: gameState.score,
+                practiceCount: gameState.practiceCount,
+                extremePasses: gameState.extremePasses,
+                extremeDualPasses: gameState.extremeDualPasses
+            };
+        }
+
+        function applySavedGameState(data) {
+            if (!data || typeof data !== 'object' || Array.isArray(data)) {
+                throw new Error('存档根节点必须是对象。');
+            }
+
+            const nextState = createDefaultGameState();
+            let migrated = false;
+            const warnings = [];
+            const legacyLevels = getLevelsForUnit(0);
+
+            if (Array.isArray(data.levelUnlocked) && !Array.isArray(data.unitLevelUnlocked)) {
+                data.unitLevelUnlocked = createDefaultUnitProgress(false);
+                data.unitLevelUnlocked[0] = legacyLevels.map((_, levelIndex) => Boolean(data.levelUnlocked[levelIndex]));
+                migrated = true;
+            }
+
+            if (Array.isArray(data.levelStars) && !Array.isArray(data.unitLevelStars)) {
+                data.unitLevelStars = createDefaultUnitProgress(0);
+                data.unitLevelStars[0] = legacyLevels.map((_, levelIndex) => Number(data.levelStars[levelIndex] || 0));
+                migrated = true;
+            }
+
+            nextState.unitLevelUnlocked = normalizeUnitProgress(data.unitLevelUnlocked, false).map(unitProgress =>
+                unitProgress.map((isUnlocked, levelIndex) => levelIndex === 0 ? true : Boolean(isUnlocked))
+            );
+            nextState.unitLevelStars = normalizeUnitProgress(data.unitLevelStars, 0).map(unitProgress =>
+                unitProgress.map(stars => Math.max(0, Number(stars) || 0))
+            );
+
+            if ((data.unitOrderVersion || 1) < 2) {
+                nextState.unitLevelUnlocked = swapUnitOrder(nextState.unitLevelUnlocked);
+                nextState.unitLevelStars = swapUnitOrder(nextState.unitLevelStars);
+                migrated = true;
+            }
+
+            nextState.achievements = Array.isArray(data.achievements)
+                ? data.achievements.filter(id => achievementList.some(achievement => achievement.id === id))
+                : [];
+
+            const wrongQuestions = Array.isArray(data.wrongQuestions) ? data.wrongQuestions : [];
+            nextState.wrongQuestions = wrongQuestions
+                .map(normalizeWrongQuestionRecord)
+                .filter(Boolean);
+            if (nextState.wrongQuestions.length !== wrongQuestions.length) {
+                warnings.push('部分错题记录无法识别，已自动忽略。');
+                migrated = true;
+            }
+
+            nextState.totalCorrect = Math.max(0, Number(data.totalCorrect || 0));
+            nextState.totalQuestions = Math.max(0, Number(data.totalQuestions || 0));
+            nextState.score = Math.max(0, Number(data.score || 0));
+            nextState.practiceCount = Math.max(0, Number(data.practiceCount || 0));
+            nextState.extremePasses = Math.max(0, Number(data.extremePasses || 0));
+            nextState.extremeDualPasses = Math.max(0, Number(data.extremeDualPasses || 0));
+
+            if ((data.storageVersion || 0) < STORAGE_VERSION || data.levelUnlocked !== undefined || data.levelStars !== undefined) {
+                migrated = true;
+            }
+
+            gameState = nextState;
+            return { migrated, warnings };
         }
 
         function resetExtremeMode() {
@@ -3448,7 +4556,8 @@
             const newAchievements = [];
 
             achievementList.forEach(achievement => {
-                if (!gameState.achievements.includes(achievement.id) && achievement.condition(stats)) {
+                const progress = getAchievementProgress(achievement, stats);
+                if (!gameState.achievements.includes(achievement.id) && progress.complete) {
                     gameState.achievements.push(achievement.id);
                     newAchievements.push(achievement);
                     showAchievementPopup(achievement);
@@ -3460,78 +4569,58 @@
 
         // 加载游戏状态
         function loadGameState() {
-            const saved = localStorage.getItem('pythonOperatorGame');
-            if (saved) {
+            let saved = null;
+
+            try {
+                saved = localStorage.getItem(STORAGE_KEY);
+            } catch (error) {
+                console.warn('读取存档失败，已回退到默认进度。', error);
+                gameState = createDefaultGameState();
+                storageStatusMessage = '浏览器存储不可用，已回退到默认进度。';
+                return;
+            }
+
+            if (!saved) {
+                gameState = createDefaultGameState();
+                storageStatusMessage = '未发现本地存档，已使用默认进度。';
+                return;
+            }
+
+            try {
                 const data = JSON.parse(saved);
-                let migrated = false;
-                const legacyLevels = getLevelsForUnit(0);
-
-                if (Array.isArray(data.levelUnlocked) && !Array.isArray(data.unitLevelUnlocked)) {
-                    data.unitLevelUnlocked = createDefaultUnitProgress(false);
-                    data.unitLevelUnlocked[0] = legacyLevels.map((_, levelIndex) => Boolean(data.levelUnlocked[levelIndex]));
-                    migrated = true;
-                }
-
-                if (Array.isArray(data.levelStars) && !Array.isArray(data.unitLevelStars)) {
-                    data.unitLevelStars = createDefaultUnitProgress(0);
-                    data.unitLevelStars[0] = legacyLevels.map((_, levelIndex) => Number(data.levelStars[levelIndex] || 0));
-                    migrated = true;
-                }
-
-                if (data.levelUnlocked !== undefined) {
-                    delete data.levelUnlocked;
-                    migrated = true;
-                }
-
-                if (data.levelStars !== undefined) {
-                    delete data.levelStars;
-                    migrated = true;
-                }
-
-                gameState.unitLevelUnlocked = normalizeUnitProgress(data.unitLevelUnlocked, false);
-                gameState.unitLevelUnlocked = gameState.unitLevelUnlocked.map((unitProgress, unitIndex) =>
-                    unitProgress.map((isUnlocked, levelIndex) => levelIndex === 0 ? true : Boolean(isUnlocked))
-                );
-                gameState.unitLevelStars = normalizeUnitProgress(data.unitLevelStars, 0).map(unitProgress =>
-                    unitProgress.map(stars => Math.max(0, Number(stars) || 0))
-                );
-                if ((data.unitOrderVersion || 1) < 2) {
-                    gameState.unitLevelUnlocked = swapUnitOrder(gameState.unitLevelUnlocked);
-                    gameState.unitLevelStars = swapUnitOrder(gameState.unitLevelStars);
-                    migrated = true;
-                }
-                gameState.achievements = data.achievements || [];
-                gameState.wrongQuestions = Array.isArray(data.wrongQuestions)
-                    ? data.wrongQuestions.map(enrichWrongQuestionRecord)
-                    : [];
-                gameState.totalCorrect = Number(data.totalCorrect || 0);
-                gameState.totalQuestions = Number(data.totalQuestions || 0);
-                gameState.score = Number(data.score || 0);
-                gameState.practiceCount = Number(data.practiceCount || 0);
-                gameState.extremePasses = Number(data.extremePasses || 0);
-                gameState.extremeDualPasses = Number(data.extremeDualPasses || 0);
+                const { migrated, warnings } = applySavedGameState(data);
+                storageStatusMessage = warnings.length > 0
+                    ? warnings.join('；')
+                    : migrated
+                        ? '旧存档已自动迁移到最新版本。'
+                        : '本地存档已读取。';
 
                 if (migrated) {
                     saveGameState();
+                }
+            } catch (error) {
+                console.warn('存档损坏，已自动重置。', error);
+                gameState = createDefaultGameState();
+                storageStatusMessage = '检测到损坏存档，已自动重置为默认进度。';
+
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                } catch (removeError) {
+                    console.warn('清理损坏存档失败。', removeError);
                 }
             }
         }
 
         // 保存游戏状态
         function saveGameState() {
-            localStorage.setItem('pythonOperatorGame', JSON.stringify({
-                unitOrderVersion: 2,
-                unitLevelUnlocked: gameState.unitLevelUnlocked,
-                unitLevelStars: gameState.unitLevelStars,
-                achievements: gameState.achievements,
-                wrongQuestions: gameState.wrongQuestions,
-                totalCorrect: gameState.totalCorrect,
-                totalQuestions: gameState.totalQuestions,
-                score: gameState.score,
-                practiceCount: gameState.practiceCount,
-                extremePasses: gameState.extremePasses,
-                extremeDualPasses: gameState.extremeDualPasses
-            }));
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedGameState()));
+                return true;
+            } catch (error) {
+                console.warn('保存存档失败。', error);
+                storageStatusMessage = '保存失败：浏览器存储不可用。';
+                return false;
+            }
         }
 
         // 显示开始界面
@@ -3546,8 +4635,13 @@
 
         // 切换界面
         function switchScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active', 'screen-enter'));
+
+            const nextScreen = document.getElementById(screenId);
+            nextScreen.classList.add('active');
+            void nextScreen.offsetWidth;
+            nextScreen.classList.add('screen-enter');
+            window.scrollTo(0, 0);
         }
 
         // 开始冒险
@@ -3588,7 +4682,7 @@
             gameState.practiceQuestionIndex = 0;
 
             const unitQuestions = unitQuestionsMap[gameState.currentUnit];
-            currentLevelQuestions = [...unitQuestions].sort(() => Math.random() - 0.5);
+            currentLevelQuestions = shuffleQuestions(unitQuestions);
 
             document.getElementById('practiceTitle').textContent = `${units[gameState.currentUnit].name} · 随机练习`;
             switchScreen('practiceScreen');
@@ -3669,11 +4763,13 @@
         // 渲染题目
         function renderQuestion() {
             const q = currentLevelQuestions[gameState.currentQuestion];
+            const questionContent = document.getElementById('questionContent');
 
             document.getElementById('questionType').textContent = q.type;
             document.getElementById('questionProgress').textContent =
                 `${gameState.currentQuestion + 1} / ${currentLevelQuestions.length}`;
-            document.getElementById('questionContent').innerHTML = q.content;
+            questionContent.innerHTML = q.content;
+            formatMultilineCodeBlocks(questionContent);
 
             const optionsContainer = document.getElementById('optionsContainer');
             gameState.selectedAnswer = null;
@@ -3718,7 +4814,7 @@
                 optionsContainer.innerHTML = `
                     <div class="fill-blank">
                         <input type="text" class="fill-input" id="fillInput" 
-                               placeholder="请输入答案" oninput="checkFillAnswer(this.value)">
+                               placeholder="请输入答案" oninput="checkFillAnswer(this.value)" onkeydown="handleAdventureFillKeydown(event)">
                     </div>
                 `;
             }
@@ -3759,7 +4855,7 @@
 
         // 检查填空答案
         function checkFillAnswer(value) {
-            if (value.trim()) {
+            if (hasNonEmptyAnswer(value)) {
                 gameState.selectedAnswer = value.trim();
                 document.getElementById('submitBtn').disabled = false;
             } else {
@@ -3813,7 +4909,6 @@
                 gameState.levelScore += points;
                 gameState.levelCorrect++;
                 gameState.totalCorrect++;
-                gameState.score += points;
 
                 showCorrectEffect();
                 showFloatingCoins();
@@ -3886,8 +4981,8 @@
         // 标准化答案
         function normalizeAnswer(answer) {
             const str = String(answer).trim().toLowerCase();
-            if (str === 'true' || str === 't') return 'true';
-            if (str === 'false' || str === 'f') return 'false';
+            if (str === 'true' || str === '正确') return 'true';
+            if (str === 'false' || str === '错误') return 'false';
             return str;
         }
 
@@ -3911,14 +5006,7 @@
             bonusDiv.style.display = bonus ? 'block' : 'none';
 
             const q = currentLevelQuestions[gameState.currentQuestion];
-            const k = q.knowledge;
-            knowledgeBox.innerHTML = `
-                <h4>📚 知识点解析</h4>
-                <p><strong>运算符含义：</strong>${k.meaning}</p>
-                <p><strong>运算规则：</strong>${k.rule}</p>
-                <p><strong>常见易错点：</strong>${k.error}</p>
-                <p><strong>相关示例：</strong>${k.example}</p>
-            `;
+            renderKnowledgeDetails(knowledgeBox, q.knowledge);
 
             overlay.classList.add('show');
         }
@@ -4047,7 +5135,11 @@
 
         // 更新分数显示
         function updateScoreDisplay() {
-            document.getElementById('scoreDisplay').textContent = gameState.score;
+            const gameScreen = document.getElementById('gameScreen');
+            const showPendingLevelScore = Boolean(gameScreen && gameScreen.classList.contains('active') && !gameState.isPracticeMode);
+            const scoreToDisplay = gameState.score + (showPendingLevelScore ? gameState.levelScore : 0);
+
+            document.getElementById('scoreDisplay').textContent = scoreToDisplay;
         }
 
         // 更新连击显示
@@ -4129,6 +5221,8 @@
                 gameState.unitLevelUnlocked[gameState.currentUnit][gameState.currentLevel + 1] = true;
             }
 
+            gameState.score += gameState.levelScore;
+
             // 检查成就
             const newAchievements = checkAchievements(stars);
 
@@ -4145,20 +5239,7 @@
 
             // 成就列表
             const list = document.getElementById('achievementsList');
-            if (newAchievements.length > 0) {
-                list.innerHTML = '<h3 style="color: #ffd700; margin-bottom: 10px;">🏆 新成就解锁！</h3>' +
-                    newAchievements.map(a => `
-                        <div class="achievement-item">
-                            <span class="achievement-icon">${a.icon}</span>
-                            <div class="achievement-info">
-                                <h5>${a.name}</h5>
-                                <p>${a.desc}</p>
-                            </div>
-                        </div>
-                    `).join('');
-            } else {
-                list.innerHTML = '';
-            }
+            renderUnlockedAchievements(list, newAchievements);
 
             // 下一关按钮
             const nextBtn = document.getElementById('nextLevelBtn');
@@ -4178,6 +5259,7 @@
             }
 
             switchScreen('levelCompleteScreen');
+            updateScoreDisplay();
         }
 
         // 检查成就
@@ -4198,6 +5280,8 @@
             const correctRate = `${gameState.levelCorrect}/${currentLevelQuestions.length}`;
             const hasNextSegment = gameState.extremeSegmentIndex < gameState.extremeSegments.length - 1;
 
+            gameState.score += gameState.levelScore;
+
             document.getElementById('completeTitle').textContent = hasNextSegment ? '⚔️ 本段通过！' : '👑 极限测试通过！';
             document.getElementById('starsEarned').textContent = hasNextSegment ? '🔥 无伤推进' : '🏆 零失误通关';
             document.getElementById('statScore').textContent = gameState.levelScore;
@@ -4211,26 +5295,16 @@
                     gameState.extremeDualPasses++;
                 }
                 newAchievements = unlockAchievements(buildAchievementStats());
-                saveGameState();
             }
 
+            saveGameState();
+
             const list = document.getElementById('achievementsList');
-            if (newAchievements.length > 0) {
-                list.innerHTML = '<h3 style="color: #ffd700; margin-bottom: 10px;">🏆 新成就解锁！</h3>' +
-                    newAchievements.map(a => `
-                        <div class="achievement-item">
-                            <span class="achievement-icon">${a.icon}</span>
-                            <div class="achievement-info">
-                                <h5>${a.name}</h5>
-                                <p>${a.desc}</p>
-                            </div>
-                        </div>
-                    `).join('');
-            } else {
-                list.innerHTML = hasNextSegment
-                    ? '<div style="color: #fff; opacity: 0.9;">继续保持，全程不能出错。</div>'
-                    : '<div style="color: #fff; opacity: 0.9;">本次极限测试已计入你的荣誉记录。</div>';
-            }
+            renderUnlockedAchievements(
+                list,
+                newAchievements,
+                hasNextSegment ? '继续保持，全程不能出错。' : '本次极限测试已计入你的荣誉记录。'
+            );
 
             const nextBtn = document.getElementById('nextLevelBtn');
             if (hasNextSegment) {
@@ -4248,19 +5322,57 @@
             }
 
             switchScreen('levelCompleteScreen');
+            updateScoreDisplay();
         }
 
         // 显示成就弹窗
         function showAchievementPopup(achievement) {
+            achievementPopupQueue.push(achievement);
+            if (achievementPopupActive) {
+                return;
+            }
+
+            achievementPopupActive = true;
+            displayNextAchievementPopup();
+        }
+
+        function displayNextAchievementPopup() {
             const popup = document.getElementById('achievementPopup');
+            const popupMeta = document.getElementById('popupMeta');
+            const achievement = achievementPopupQueue.shift();
+
+            if (!popup || !achievement) {
+                achievementPopupActive = false;
+                return;
+            }
+
+            const rarityMeta = getAchievementRarityMeta(achievement.rarity);
+            const categoryMeta = getAchievementCategoryMeta(achievement.category);
+
+            popup.dataset.rarity = achievement.rarity || 'common';
+            popup.style.setProperty('--achievement-popup-accent', rarityMeta.accent);
             document.getElementById('popupIcon').textContent = achievement.icon;
             document.getElementById('popupTitle').textContent = achievement.name;
+            if (popupMeta) {
+                popupMeta.textContent = `${categoryMeta.icon} ${achievement.category} · ${rarityMeta.label}`;
+            }
             document.getElementById('popupDesc').textContent = achievement.desc;
 
             popup.style.display = 'block';
+            popup.classList.remove('hide');
+            void popup.offsetWidth;
+            popup.classList.add('show');
+
             setTimeout(() => {
-                popup.style.display = 'none';
-            }, 2500);
+                popup.classList.remove('show');
+                popup.classList.add('hide');
+
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                    popup.classList.remove('hide');
+                    displayNextAchievementPopup();
+                }, 240);
+            }, 2800);
         }
 
         // 下一关
@@ -4300,6 +5412,7 @@
         function gameOver() {
             stopTimer();
             document.getElementById('gameOverScore').textContent = gameState.levelScore;
+            const attemptedCount = getAttemptedQuestionCount();
             if (gameState.isExtremeMode) {
                 document.querySelector('.game-over-title').textContent = '💥 考核失败';
                 document.getElementById('gameOverMessage').textContent = '极限测试中答错 1 题即终止，本次考核已结束。';
@@ -4307,7 +5420,7 @@
                 document.getElementById('gameOverLevel').textContent =
                     `${gameState.extremeSegmentIndex + 1}/${gameState.extremeSegments.length}`;
                 document.getElementById('gameOverCorrect').textContent =
-                    `${gameState.levelCorrect}/${currentLevelQuestions.length}`;
+                    `${gameState.levelCorrect}/${attemptedCount}`;
             } else {
                 document.querySelector('.game-over-title').textContent = '💔 挑战失败';
                 document.getElementById('gameOverMessage').textContent = '生命值耗尽，请重新挑战！';
@@ -4315,10 +5428,11 @@
                 document.getElementById('gameOverLevel').textContent =
                     `${gameState.currentLevel + 1}/${getLevelsForUnit().length}`;
                 document.getElementById('gameOverCorrect').textContent =
-                    `${gameState.totalCorrect}/${gameState.totalQuestions}`;
+                    `${gameState.levelCorrect}/${attemptedCount}`;
             }
 
             switchScreen('gameOverScreen');
+            updateScoreDisplay();
         }
 
         // 重试关卡
@@ -4341,11 +5455,13 @@
         // 渲染修炼场题目
         function renderPracticeQuestion() {
             const q = currentLevelQuestions[gameState.practiceQuestionIndex];
+            const practiceQuestionContent = document.getElementById('practiceQuestionContent');
 
             document.getElementById('practiceQuestionType').textContent = q.type;
             document.getElementById('practiceProgress').textContent =
                 `${gameState.practiceQuestionIndex + 1} / ${currentLevelQuestions.length}`;
-            document.getElementById('practiceQuestionContent').innerHTML = q.content;
+            practiceQuestionContent.innerHTML = q.content;
+            formatMultilineCodeBlocks(practiceQuestionContent);
 
             const optionsContainer = document.getElementById('practiceOptionsContainer');
             gameState.selectedAnswer = null;
@@ -4362,6 +5478,7 @@
 
             document.getElementById('practiceSubmitBtn').style.display = 'inline-block';
             document.getElementById('practiceSubmitBtn').textContent = '查看答案';
+            document.getElementById('practiceSubmitBtn').disabled = q.type === '填空题';
             document.getElementById('practiceNextBtn').style.display = 'none';
 
             if (q.type === '选择题') {
@@ -4392,12 +5509,13 @@
                 optionsContainer.innerHTML = `
                     <div class="fill-blank">
                         <input type="text" class="fill-input" id="practiceFillInput" 
-                               placeholder="请输入答案" oninput="selectPracticeAnswer(this.value, this)">
+                               placeholder="请输入答案" oninput="selectPracticeAnswer(this.value, this)" onkeydown="handlePracticeFillKeydown(event)">
                     </div>
                 `;
             }
 
             document.getElementById('practiceNextBtn').style.display = 'none';
+            updatePracticeSubmitState();
         }
 
         // 选择修炼场答案
@@ -4406,7 +5524,20 @@
                 el.classList.remove('selected');
             });
             if (element) element.classList.add('selected');
-            gameState.selectedAnswer = typeof answer === 'string' ? answer : answer.trim();
+            const normalizedAnswer = String(answer ?? '').trim();
+            gameState.selectedAnswer = normalizedAnswer || null;
+            updatePracticeSubmitState();
+        }
+
+        function updatePracticeSubmitState() {
+            const submitBtn = document.getElementById('practiceSubmitBtn');
+            const currentQuestion = currentLevelQuestions[gameState.practiceQuestionIndex];
+
+            if (!submitBtn || !currentQuestion) {
+                return;
+            }
+
+            submitBtn.disabled = currentQuestion.type === '填空题' && !hasNonEmptyAnswer(gameState.selectedAnswer);
         }
 
         // 修炼场-选择题/判断题点击即提交
@@ -4429,6 +5560,14 @@
         // 提交修炼场答案
         function submitPracticeAnswer() {
             const q = currentLevelQuestions[gameState.practiceQuestionIndex];
+            if (q.type === '填空题' && !hasNonEmptyAnswer(gameState.selectedAnswer)) {
+                const input = document.getElementById('practiceFillInput');
+                if (input) {
+                    input.focus();
+                }
+                return;
+            }
+
             const userAnswer = gameState.selectedAnswer || '';
             const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(q.answer);
 
@@ -4470,17 +5609,10 @@
             highlightPracticeAnswer(q.answer, isCorrect);
 
             // 显示知识点
-            const k = q.knowledge;
             const knowledgeBox = document.createElement('div');
             knowledgeBox.className = 'knowledge-box';
             knowledgeBox.style.marginTop = '20px';
-            knowledgeBox.innerHTML = `
-                <h4>📚 知识点解析</h4>
-                <p><strong>运算符含义：</strong>${k.meaning}</p>
-                <p><strong>运算规则：</strong>${k.rule}</p>
-                <p><strong>常见易错点：</strong>${k.error}</p>
-                <p><strong>相关示例：</strong>${k.example}</p>
-            `;
+            renderKnowledgeDetails(knowledgeBox, q.knowledge);
             document.getElementById('practiceOptionsContainer').appendChild(knowledgeBox);
 
             // 隐藏填空题的提交按钮（如果存在）
@@ -4545,8 +5677,9 @@
         // 下一题
         function nextPracticeQuestion() {
             gameState.practiceQuestionIndex++;
-            const unitQuestions = unitQuestionsMap[gameState.currentUnit];
-            if (gameState.practiceQuestionIndex >= unitQuestions.length) {
+            if (gameState.practiceQuestionIndex >= currentLevelQuestions.length) {
+                const unitQuestions = unitQuestionsMap[gameState.currentUnit];
+                currentLevelQuestions = shuffleQuestions(unitQuestions);
                 gameState.practiceQuestionIndex = 0;
             }
             renderPracticeQuestion();
@@ -4555,18 +5688,34 @@
         // 渲染成就列表
         function renderAchievements() {
             const container = document.getElementById('achievementsContainer');
-            container.innerHTML = achievementList.map(a => {
-                const unlocked = gameState.achievements.includes(a.id);
-                return `
-                    <div class="achievement-item" style="opacity: ${unlocked ? 1 : 0.5}; background: ${unlocked ? 'linear-gradient(135deg, #ffd70020, #ffaa0020)' : '#f5f5f5'};">
-                        <span class="achievement-icon">${unlocked ? a.icon : '🔒'}</span>
-                        <div class="achievement-info">
-                            <h5 style="color: ${unlocked ? '#ffd700' : '#999'};">${a.name}</h5>
-                            <p>${a.desc}</p>
-                        </div>
+            const stats = buildAchievementStats();
+            const unlockedCount = gameState.achievements.length;
+            const legendaryCount = achievementList.filter(achievement => achievement.rarity === 'legendary' && isAchievementUnlocked(achievement.id)).length;
+            const rarePlusCount = achievementList.filter(achievement => ['rare', 'epic', 'legendary'].includes(achievement.rarity) && isAchievementUnlocked(achievement.id)).length;
+
+            container.innerHTML = `
+                <section class="achievement-overview">
+                    <div class="achievement-summary-card">
+                        <div class="achievement-summary-label">已解锁</div>
+                        <div class="achievement-summary-value">${unlockedCount}/${achievementList.length}</div>
                     </div>
-                `;
-            }).join('');
+                    <div class="achievement-summary-card">
+                        <div class="achievement-summary-label">稀有以上</div>
+                        <div class="achievement-summary-value">${rarePlusCount}</div>
+                    </div>
+                    <div class="achievement-summary-card">
+                        <div class="achievement-summary-label">传说勋章</div>
+                        <div class="achievement-summary-value">${legendaryCount}</div>
+                    </div>
+                    <div class="achievement-summary-card">
+                        <div class="achievement-summary-label">当前进度</div>
+                        <div class="achievement-summary-value">⭐ ${stats.totalStars} · 🔥 ${stats.maxCombo}</div>
+                    </div>
+                </section>
+                <section class="achievement-grid">
+                    ${achievementList.map(achievement => getAchievementCardMarkup(achievement, stats)).join('')}
+                </section>
+            `;
         }
 
         // 显示成就界面
@@ -4633,7 +5782,7 @@
 
         // 重置记录
         function resetRecords() {
-            if (confirm('确定要重置所有做题记录吗？此操作无法撤销！')) {
+            if (confirm('确定要重置全部做题记录吗？这会清空积分、进度、成就和错题记录，且无法撤销。')) {
                 gameState.totalCorrect = 0;
                 gameState.totalQuestions = 0;
                 gameState.practiceCount = 0;
@@ -4644,7 +5793,9 @@
                     unitProgress.map((_, levelIndex) => levelIndex === 0)
                 );
                 gameState.achievements = [];
+                gameState.wrongQuestions = [];
                 gameState.score = 0;
+                storageStatusMessage = '已通过记录页清空全部学习记录。';
                 saveGameState();
                 showRecords();
             }
@@ -4693,14 +5844,13 @@
                 }
 
                 container.innerHTML = filteredWrongs.map((w, idx) => {
-                    const meta = getQuestionMetaById(w.id);
-                    const q = meta ? meta.question : null;
-                    const sourceLabel = meta
-                        ? `[${meta.unitDisplayName} - ${meta.levelName}]`
-                        : `[${getUnitDisplayName(Number(w.unitIndex || 0))} - ${w.levelName || w.category || '未知关卡'}]`;
+                    const viewModel = buildWrongQuestionViewModel(w);
+                    const q = viewModel.question;
+                    const sourceLabel = viewModel.sourceLabel;
+                    const userAnswer = escapeHtml(w.userAnswer || '未答');
                     let optionsHtml = '';
                     
-                    if (w.type === '选择题' && q && q.options) {
+                    if (q && q.type === '选择题' && q.options) {
                         optionsHtml = `
                             <div style="margin: 15px 0;">
                                 <div style="font-weight: bold; color: #333; margin-bottom: 10px;">📋 选项：</div>
@@ -4708,7 +5858,7 @@
                                     let optStyle = 'background: #fff; border: 2px solid #ddd;';
                                     let highlight = '';
                                     
-                                    if (opt.letter === w.answer) {
+                                    if (opt.letter === q.answer) {
                                         optStyle = 'background: linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,230,118,0.1)); border: 2px solid #00c853;';
                                         highlight = ' ✓ 正确';
                                     }
@@ -4722,16 +5872,20 @@
                                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                                 <span style="font-weight: bold; color: #667eea;">${opt.letter}.</span>
                                                 <span style="flex: 1; margin: 0 10px; color: #333;">${opt.text}</span>
-                                                <span style="font-size: 0.85em; font-weight: bold; ${ opt.letter === w.answer ? 'color: #00c853;' : opt.letter === w.userAnswer ? 'color: #ff1744;' : 'color: #999;' }">${highlight}</span>
+                                                <span style="font-size: 0.85em; font-weight: bold; ${ opt.letter === q.answer ? 'color: #00c853;' : opt.letter === w.userAnswer ? 'color: #ff1744;' : 'color: #999;' }">${highlight}</span>
                                             </div>
                                         </div>
                                     `;
                                 }).join('')}
                             </div>
                         `;
-                    } else if (w.type === '判断题') {
-                        const correctText = w.answer.toLowerCase() === 'true' ? '✓ 正确' : '✗ 错误';
-                        const userText = w.userAnswer.toLowerCase() === 'true' ? '✓ 正确' : '✗ 错误';
+                    } else if (q && q.type === '判断题') {
+                        const correctText = normalizeAnswer(q.answer) === 'true' ? '✓ 正确' : '✗ 错误';
+                        const userText = normalizeAnswer(w.userAnswer) === 'true'
+                            ? '✓ 正确'
+                            : normalizeAnswer(w.userAnswer) === 'false'
+                                ? '✗ 错误'
+                                : userAnswer;
                         optionsHtml = `
                             <div style="margin: 15px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                 <div style="background: linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,230,118,0.1)); border: 2px solid #00c853; padding: 15px; border-radius: 8px; text-align: center;">
@@ -4744,17 +5898,23 @@
                                 </div>
                             </div>
                         `;
-                    } else if (w.type === '填空题') {
+                    } else if (q && q.type === '填空题') {
                         optionsHtml = `
                             <div style="margin: 15px 0;">
                                 <div style="background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
                                     <div style="color: #667eea; font-size: 0.9em; margin-bottom: 8px;"><strong>✓ 正确答案：</strong></div>
-                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #00c853; font-weight: bold; font-family: monospace;">${w.answer}</div>
+                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #00c853; font-weight: bold; font-family: monospace;">${escapeHtml(q.answer)}</div>
                                 </div>
                                 <div style="background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,82,82,0.1)); padding: 15px; border-radius: 8px;">
                                     <div style="color: #ff6b6b; font-size: 0.9em; margin-bottom: 8px;"><strong>✗ 你的答案：</strong></div>
-                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #ff1744; font-weight: bold; font-family: monospace;">${w.userAnswer || '未答'}</div>
+                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #ff1744; font-weight: bold; font-family: monospace;">${userAnswer}</div>
                                 </div>
+                            </div>
+                        `;
+                    } else {
+                        optionsHtml = `
+                            <div style="margin: 15px 0; background: rgba(255,255,255,0.7); border-radius: 8px; padding: 15px; color: #666; line-height: 1.8;">
+                                该题已从当前题库中移除，保留你的作答记录：<strong>${userAnswer}</strong>
                             </div>
                         `;
                     }
@@ -4762,23 +5922,26 @@
                     return `
                         <div style="background: rgba(255, 107, 107, 0.1); border-left: 4px solid #ff6b6b; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                <span style="color: #ff6b6b; font-weight: bold; font-size: 1.1em;">${idx + 1}. ${sourceLabel} ${w.type}</span>
-                                <span style="color: #999; font-size: 0.85em;">${w.timestamp}</span>
+                                <span style="color: #ff6b6b; font-weight: bold; font-size: 1.1em;">${idx + 1}. ${sourceLabel} ${q ? q.type : '已失效记录'}</span>
+                                <span style="color: #999; font-size: 0.85em;">${escapeHtml(w.timestamp)}</span>
                             </div>
-                            <div style="color: #333; margin-bottom: 15px; font-size: 1.05em; line-height: 1.6;">${w.content}</div>
+                            <div style="color: #333; margin-bottom: 15px; font-size: 1.05em; line-height: 1.6;">${q ? q.content : '<em>该题题干已不可用。</em>'}</div>
                             ${optionsHtml}
-                            <div style="background: linear-gradient(135deg, #667eea20, #764ba220); border-left: 4px solid #667eea; border-radius: 5px; padding: 15px; margin-top: 15px;">
-                                <div style="color: #667eea; font-weight: bold; margin-bottom: 8px;">📚 知识解析：</div>
-                                <div style="color: #555; font-size: 0.95em; line-height: 1.8;">
-                                    <div style="margin-bottom: 8px;"><strong>• 含义：</strong>${w.knowledge.meaning}</div>
-                                    <div style="margin-bottom: 8px;"><strong>• 规则：</strong>${w.knowledge.rule}</div>
-                                    <div style="margin-bottom: 8px;"><strong>• 常见错误：</strong>${w.knowledge.error}</div>
-                                    <div><strong>• 示例：</strong>${w.knowledge.example}</div>
+                            ${q ? `
+                                <div style="background: linear-gradient(135deg, #667eea20, #764ba220); border-left: 4px solid #667eea; border-radius: 5px; padding: 15px; margin-top: 15px;">
+                                    <div style="color: #667eea; font-weight: bold; margin-bottom: 8px;">📚 知识解析：</div>
+                                    <div style="color: #555; font-size: 0.95em; line-height: 1.8;">
+                                        <div style="margin-bottom: 8px;"><strong>• 含义：</strong>${q.knowledge.meaning}</div>
+                                        <div style="margin-bottom: 8px;"><strong>• 规则：</strong>${q.knowledge.rule}</div>
+                                        <div style="margin-bottom: 8px;"><strong>• 常见错误：</strong>${q.knowledge.error}</div>
+                                        <div><strong>• 示例：</strong>${q.knowledge.example}</div>
+                                    </div>
                                 </div>
-                            </div>
+                            ` : ''}
                         </div>
                     `;
                 }).join('');
+                formatMultilineCodeBlocks(container);
             }
             switchScreen('wrongAnalysisScreen');
         }
@@ -4837,6 +6000,9 @@
             const summary = document.getElementById('devQuickSummary');
             if (!summary) return;
 
+            const snapshotText = getStorageSnapshotText();
+            const snapshotSize = new Blob([snapshotText]).size;
+
             const cards = [
                 { label: '总积分', value: gameState.score },
                 { label: '总做题数', value: gameState.totalQuestions },
@@ -4845,7 +6011,9 @@
                 { label: '总星数', value: getTotalStars() },
                 { label: '修炼题数', value: gameState.practiceCount },
                 { label: '极限通关', value: gameState.extremePasses },
-                { label: '综合大考', value: gameState.extremeDualPasses }
+                { label: '综合大考', value: gameState.extremeDualPasses },
+                { label: '存档版本', value: `v${STORAGE_VERSION}` },
+                { label: '快照体积', value: `${snapshotSize} B` }
             ];
 
             summary.innerHTML = cards.map(card => `
@@ -4890,6 +6058,111 @@
             `;
         }
 
+        function getStorageSnapshotText() {
+            return JSON.stringify(buildPersistedGameState(), null, 2);
+        }
+
+        function renderDevStorageTools() {
+            const snapshot = document.getElementById('devStorageSnapshot');
+            const meta = document.getElementById('devStorageMeta');
+            const status = document.getElementById('devStorageStatus');
+            if (!snapshot || !meta || !status) return;
+
+            let rawStored = '';
+            try {
+                rawStored = localStorage.getItem(STORAGE_KEY) || '';
+            } catch (error) {
+                console.warn('读取开发者快照失败。', error);
+            }
+
+            const snapshotText = getStorageSnapshotText();
+
+            snapshot.value = snapshotText;
+            meta.innerHTML = `
+                <div class="dev-summary-card">
+                    <div class="dev-summary-label">存档 Key</div>
+                    <div class="dev-summary-value">${STORAGE_KEY}</div>
+                </div>
+                <div class="dev-summary-card">
+                    <div class="dev-summary-label">当前版本</div>
+                    <div class="dev-summary-value">v${STORAGE_VERSION}</div>
+                </div>
+                <div class="dev-summary-card">
+                    <div class="dev-summary-label">已存储字节数</div>
+                    <div class="dev-summary-value">${new Blob([rawStored || snapshotText]).size}</div>
+                </div>
+            `;
+            status.textContent = storageStatusMessage;
+        }
+
+        async function copyDevSaveSnapshot() {
+            const snapshot = document.getElementById('devStorageSnapshot');
+            if (!snapshot) return;
+
+            const snapshotText = snapshot.value.trim() || getStorageSnapshotText();
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(snapshotText);
+                } else {
+                    snapshot.focus();
+                    snapshot.select();
+                    document.execCommand('copy');
+                }
+                updateAdminStatus('已复制当前存档快照。');
+            } catch (error) {
+                updateAdminStatus('复制失败，请手动复制文本框内容。');
+            }
+        }
+
+        function importDevSaveSnapshot() {
+            const snapshot = document.getElementById('devStorageSnapshot');
+            if (!snapshot) return;
+
+            const raw = snapshot.value.trim();
+            if (!raw) {
+                updateAdminStatus('请先粘贴要导入的存档 JSON。');
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(raw);
+                const { migrated, warnings } = applySavedGameState(parsed);
+                saveGameState();
+                storageStatusMessage = warnings.length > 0
+                    ? warnings.join('；')
+                    : migrated
+                        ? '导入成功，旧存档字段已自动迁移。'
+                        : '已从开发者控制台导入存档。';
+                renderUnits();
+                renderAchievements();
+                renderLevelMap();
+                refreshDeveloperConsole('存档导入成功。');
+            } catch (error) {
+                updateAdminStatus(`导入失败：${error.message}`);
+            }
+        }
+
+        function clearStoredSave() {
+            if (!confirm('确定要清空当前浏览器里的存档吗？这会恢复到默认进度。')) {
+                return;
+            }
+
+            gameState = createDefaultGameState();
+            storageStatusMessage = '已通过开发者控制台清空浏览器存档。';
+
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (error) {
+                console.warn('清空本地存档失败。', error);
+            }
+
+            renderUnits();
+            renderAchievements();
+            renderLevelMap();
+            refreshDeveloperConsole('已清空浏览器存档并恢复默认状态。');
+        }
+
         function refreshDeveloperConsole(statusMessage) {
             if (!units[devSelectedUnit]) {
                 devSelectedUnit = units[gameState.currentUnit] ? gameState.currentUnit : 0;
@@ -4898,6 +6171,7 @@
             renderDevSummary();
             renderDevUnitTabs();
             renderDevUnitSummary();
+            renderDevStorageTools();
 
             if (statusMessage) {
                 updateAdminStatus(statusMessage);
@@ -4923,6 +6197,13 @@
         }
 
         function showDevMenu() {
+            if (devAccessGranted) {
+                devSelectedUnit = units[gameState.currentUnit] ? gameState.currentUnit : 0;
+                switchScreen('adminScreen');
+                refreshDeveloperConsole('已复用当前会话的开发者权限。');
+                return;
+            }
+
             const devScreen = document.getElementById('devMenuScreen');
             devScreen.style.display = 'flex';
             devScreen.style.top = '0';
@@ -4948,21 +6229,32 @@
                 return;
             }
 
-            const msgUint8 = new TextEncoder().encode(input);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            if (!window.crypto || !window.crypto.subtle) {
+                updateDevPassHint('当前环境不支持口令校验。', true);
+                return;
+            }
 
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            try {
+                const msgUint8 = new TextEncoder().encode(input);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
 
-            if (inputHash === DEV_ACCESS_HASH) {
-                closeDevMenu();
-                devSelectedUnit = units[gameState.currentUnit] ? gameState.currentUnit : 0;
-                switchScreen('adminScreen');
-                refreshDeveloperConsole('验证成功，开发者控制台已就绪。');
-            } else {
-                inputElement.value = '';
-                updateDevPassHint('口令错误，请重新输入。', true);
-                inputElement.focus();
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+                if (inputHash === DEV_ACCESS_HASH) {
+                    devAccessGranted = true;
+                    closeDevMenu();
+                    devSelectedUnit = units[gameState.currentUnit] ? gameState.currentUnit : 0;
+                    switchScreen('adminScreen');
+                    refreshDeveloperConsole('验证成功，开发者控制台已就绪。');
+                } else {
+                    inputElement.value = '';
+                    updateDevPassHint('口令错误，请重新输入。', true);
+                    inputElement.focus();
+                }
+            } catch (error) {
+                console.warn('开发者口令校验失败。', error);
+                updateDevPassHint('口令校验失败，请在受支持的浏览器环境中重试。', true);
             }
         }
 

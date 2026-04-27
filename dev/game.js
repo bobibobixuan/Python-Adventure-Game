@@ -1,56 +1,114 @@
-// 当前选中的单元
-        let currentUnit = 0;
+        const STORAGE_KEY = 'pythonOperatorGame';
+        const STORAGE_VERSION = 3;
+        const DEV_ACCESS_HASH = 'e18e010158ed9479ce5b953795a789a79ba6599b1b6e70528ed7b262f8681aa0';
+
+        let storageStatusMessage = '尚未读取存档';
+        let devAccessGranted = false;
 
         function getLevelsForUnit(unitIndex = gameState.currentUnit) {
             return unitLevelsMap[unitIndex] || unitLevelsMap[0];
         }
 
+        function createDefaultUnitProgress(defaultValue) {
+            return units.map((_, unitIndex) => Array(getLevelsForUnit(unitIndex).length).fill(defaultValue));
+        }
+
+        function createDefaultGameState() {
+            return {
+                currentUnit: 0,
+                currentLevel: 0,
+                currentQuestion: 0,
+                lives: 3,
+                score: 0,
+                combo: 0,
+                maxCombo: 0,
+                levelScore: 0,
+                levelCorrect: 0,
+                levelTime: 0,
+                questionStartTime: 0,
+                selectedAnswer: null,
+                isPracticeMode: false,
+                practiceQuestionIndex: 0,
+                unitLevelUnlocked: createDefaultUnitProgress(false).map(unitProgress =>
+                    unitProgress.map((_, levelIndex) => levelIndex === 0)
+                ),
+                unitLevelStars: createDefaultUnitProgress(0),
+                achievements: [],
+                totalCorrect: 0,
+                totalQuestions: 0,
+                fastAnswer: false,
+                fastStreak: 0,
+                perfectLevel: false,
+                oneLifeWin: false,
+                practiceCount: 0,
+                extremePasses: 0,
+                extremeDualPasses: 0,
+                pendingMode: 'adventure',
+                levelLivesAtStart: 3,
+                isPaused: false,
+                wrongQuestions: [],
+                wrongAnalysisUnit: 0,
+                isExtremeMode: false,
+                extremeScope: null,
+                extremeSegments: [],
+                extremeSegmentIndex: 0
+            };
+        }
+
+        function formatMultilineCodeBlocks(container) {
+            if (!container) {
+                return;
+            }
+
+            container.querySelectorAll('code').forEach(code => {
+                const isMultiline = code.innerHTML.includes('<br>') || code.textContent.includes('\n');
+                code.classList.toggle('multiline-code', isMultiline);
+            });
+        }
+
+        function shuffleQuestions(questionList) {
+            const shuffled = [...questionList];
+
+            for (let index = shuffled.length - 1; index > 0; index--) {
+                const randomIndex = Math.floor(Math.random() * (index + 1));
+                [shuffled[index], shuffled[randomIndex]] = [shuffled[randomIndex], shuffled[index]];
+            }
+
+            return shuffled;
+        }
+
+        function hasNonEmptyAnswer(answer) {
+            return String(answer ?? '').trim() !== '';
+        }
+
+        function handleAdventureFillKeydown(event) {
+            if (event.key !== 'Enter' || event.isComposing || !hasNonEmptyAnswer(event.target.value)) {
+                return;
+            }
+
+            event.preventDefault();
+            submitAnswer();
+        }
+
+        function handlePracticeFillKeydown(event) {
+            if (event.key !== 'Enter' || event.isComposing || !hasNonEmptyAnswer(event.target.value)) {
+                return;
+            }
+
+            event.preventDefault();
+            submitPracticeAnswer();
+        }
+
         // 游戏状态
-        let gameState = {
-            currentUnit: 0,
-            currentLevel: 0,
-            currentQuestion: 0,
-            lives: 3,
-            score: 0,
-            combo: 0,
-            maxCombo: 0,
-            levelScore: 0,
-            levelCorrect: 0,
-            levelTime: 0,
-            questionStartTime: 0,
-            selectedAnswer: null,
-            isPracticeMode: false,
-            practiceQuestionIndex: 0,
-            unitLevelUnlocked: [[true, false, false, false, false, false], [true, false, false, false, false, false]],
-            unitLevelStars: [[0, 0, 0, 0, 0, 0], [0, 0, 0, 0, 0, 0]],
-            achievements: [],
-            totalCorrect: 0,
-            totalQuestions: 0,
-            fastAnswer: false,
-            fastStreak: 0,
-            perfectLevel: false,
-            oneLifeWin: false,
-            practiceCount: 0,
-            extremePasses: 0,
-            extremeDualPasses: 0,
-            pendingMode: 'adventure',
-            levelLivesAtStart: 3,
-            isPaused: false,
-            wrongQuestions: [],
-            wrongAnalysisUnit: 0,
-            isExtremeMode: false,
-            extremeScope: null,
-            extremeSegments: [],
-            extremeSegmentIndex: 0
-        };
+        let gameState = createDefaultGameState();
 
         let devMenuClickCount = 0;
         let devMenuClickTimer = null;
         let timerInterval = null;
         let currentLevelQuestions = [];
         let devSelectedUnit = 0;
-
-        const DEV_ACCESS_HASH = 'e18e010158ed9479ce5b953795a789a79ba6599b1b6e70528ed7b262f8681aa0';
+        let achievementPopupQueue = [];
+        let achievementPopupActive = false;
 
         // 渲染单元选择卡片
         function renderUnits() {
@@ -102,18 +160,22 @@
         // 创建粒子效果
         function createParticles() {
             const container = document.getElementById('particles');
-            for (let i = 0; i < 20; i++) {
+            container.innerHTML = '';
+            for (let i = 0; i < 28; i++) {
                 const particle = document.createElement('div');
+                const size = 6 + Math.random() * 10;
+                const duration = 10 + Math.random() * 10;
+                const delay = Math.random() * 12;
                 particle.className = 'particle';
                 particle.style.left = Math.random() * 100 + '%';
-                particle.style.animationDelay = Math.random() * 15 + 's';
-                particle.style.animationDuration = (10 + Math.random() * 10) + 's';
+                particle.style.setProperty('--particle-size', `${size}px`);
+                particle.style.setProperty('--particle-opacity', (0.2 + Math.random() * 0.5).toFixed(2));
+                particle.style.setProperty('--particle-shift-start', `${(-20 + Math.random() * 40).toFixed(1)}px`);
+                particle.style.setProperty('--particle-shift-end', `${(-80 + Math.random() * 160).toFixed(1)}px`);
+                particle.style.setProperty('--particle-delay', `${delay.toFixed(2)}s`);
+                particle.style.setProperty('--particle-duration', `${duration.toFixed(2)}s`);
                 container.appendChild(particle);
             }
-        }
-
-        function createDefaultUnitProgress(defaultValue) {
-            return units.map((_, unitIndex) => Array(getLevelsForUnit(unitIndex).length).fill(defaultValue));
         }
 
         function normalizeUnitProgress(savedProgress, fallbackValue) {
@@ -152,6 +214,38 @@
             );
         }
 
+        function getCompletedLevelCount() {
+            return gameState.unitLevelStars.reduce(
+                (sum, unitStars) => sum + unitStars.filter(stars => stars > 0).length,
+                0
+            );
+        }
+
+        function getTotalLevelCount() {
+            return units.reduce((sum, _, unitIndex) => sum + getLevelsForUnit(unitIndex).length, 0);
+        }
+
+        function getUnlockedLevelCount() {
+            return gameState.unitLevelUnlocked.reduce(
+                (sum, unitUnlocked) => sum + unitUnlocked.filter(Boolean).length,
+                0
+            );
+        }
+
+        function getBestUnitStarCount() {
+            return Math.max(
+                0,
+                ...gameState.unitLevelStars.map(unitStars => unitStars.reduce((sum, stars) => sum + stars, 0))
+            );
+        }
+
+        function isCurrentUnitCleared() {
+            const activeLevels = getLevelsForUnit(gameState.currentUnit);
+            const unitStars = gameState.unitLevelStars[gameState.currentUnit] || [];
+
+            return activeLevels.length > 0 && activeLevels.every((_, levelIndex) => (unitStars[levelIndex] || 0) > 0);
+        }
+
         function getCompletedUnitCount() {
             return units.filter((_, unitIndex) => {
                 const unitStars = gameState.unitLevelStars[unitIndex] || [];
@@ -160,6 +254,9 @@
         }
 
         function buildAchievementStats(overrides = {}) {
+            const totalQuestions = gameState.totalQuestions;
+            const totalCorrect = gameState.totalCorrect;
+
             return Object.assign({
                 fastAnswer: gameState.fastAnswer,
                 maxCombo: gameState.maxCombo,
@@ -169,11 +266,21 @@
                 practiceCount: gameState.practiceCount,
                 fastStreak: gameState.fastStreak,
                 perfectStreak: gameState.levelCorrect === currentLevelQuestions.length && currentLevelQuestions.length > 0,
-                totalCorrect: gameState.totalCorrect,
-                totalQuestions: gameState.totalQuestions,
+                totalCorrect,
+                totalQuestions,
                 totalStars: getTotalStars(),
+                completedLevels: getCompletedLevelCount(),
+                unlockedLevels: getUnlockedLevelCount(),
+                totalLevels: getTotalLevelCount(),
                 completedUnits: getCompletedUnitCount(),
                 totalUnits: units.length,
+                currentUnitCleared: isCurrentUnitCleared(),
+                bestUnitStars: getBestUnitStarCount(),
+                wrongQuestionCount: gameState.wrongQuestions.length,
+                accuracy: totalQuestions > 0 ? totalCorrect / totalQuestions : 0,
+                allUnitsCleared: getCompletedUnitCount() >= units.length,
+                unlockedAchievements: gameState.achievements.length,
+                totalAchievements: achievementList.length,
                 score: gameState.score,
                 extremePasses: gameState.extremePasses,
                 extremeDualPasses: gameState.extremeDualPasses
@@ -207,44 +314,270 @@
             return null;
         }
 
-        function enrichWrongQuestionRecord(record) {
-            const meta = getQuestionMetaById(record.id);
-            if (!meta) {
-                return Object.assign({}, record, {
-                    unitIndex: Number(record.unitIndex || 0),
-                    levelIndex: Number(record.levelIndex || 0),
-                    unitName: record.unitName || units[0].name,
-                    levelName: record.levelName || record.category || '未知关卡',
-                    sourceLabel: `[${getUnitDisplayName(Number(record.unitIndex || 0))} - ${record.levelName || record.category || '未知关卡'}]`
-                });
+        function normalizeWrongQuestionRecord(record) {
+            if (!record || !Number.isFinite(Number(record.id))) {
+                return null;
             }
 
-            return Object.assign({}, record, {
-                unitIndex: meta.unitIndex,
-                levelIndex: meta.levelIndex,
-                unitName: meta.unitName,
-                levelName: meta.levelName,
-                sourceLabel: `[${meta.unitDisplayName} - ${meta.levelName}]`
-            });
+            const questionId = Number(record.id);
+            const meta = getQuestionMetaById(questionId);
+            const parsedUnitIndex = Number(record.unitIndex);
+            const parsedLevelIndex = Number(record.levelIndex);
+            const unitIndex = Number.isInteger(parsedUnitIndex) && units[parsedUnitIndex]
+                ? parsedUnitIndex
+                : meta ? meta.unitIndex : 0;
+            const levelIndex = Number.isInteger(parsedLevelIndex) && parsedLevelIndex >= 0
+                ? parsedLevelIndex
+                : meta ? meta.levelIndex : 0;
+
+            return {
+                id: questionId,
+                userAnswer: record.userAnswer === undefined || record.userAnswer === null
+                    ? ''
+                    : String(record.userAnswer),
+                timestamp: typeof record.timestamp === 'string' && record.timestamp.trim()
+                    ? record.timestamp
+                    : new Date().toLocaleString(),
+                unitIndex,
+                levelIndex
+            };
+        }
+
+        function buildWrongQuestionViewModel(record) {
+            const meta = getQuestionMetaById(record.id);
+            const unitIndex = meta ? meta.unitIndex : record.unitIndex;
+            const levelIndex = meta ? meta.levelIndex : record.levelIndex;
+            const fallbackLevel = getLevelsForUnit(unitIndex)[levelIndex];
+
+            return {
+                question: meta ? meta.question : null,
+                unitIndex,
+                levelIndex,
+                sourceLabel: meta
+                    ? `[${meta.unitDisplayName} - ${meta.levelName}]`
+                    : `[${getUnitDisplayName(unitIndex)} - ${fallbackLevel ? fallbackLevel.name : '未知关卡'}]`
+            };
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '').replace(/[&<>"']/g, char => ({
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#39;'
+            }[char]));
+        }
+
+        function renderKnowledgeDetails(container, knowledge) {
+            if (!container || !knowledge) {
+                return;
+            }
+
+            container.innerHTML = `
+                <h4>📚 知识点解析</h4>
+                <p><strong>运算符含义：</strong>${knowledge.meaning}</p>
+                <p><strong>运算规则：</strong>${knowledge.rule}</p>
+                <p><strong>常见易错点：</strong>${knowledge.error}</p>
+                <p><strong>相关示例：</strong>${knowledge.example}</p>
+            `;
+            formatMultilineCodeBlocks(container);
+        }
+
+        function getAchievementRarityMeta(rarity = 'common') {
+            return achievementRarityMeta[rarity] || achievementRarityMeta.common;
+        }
+
+        function getAchievementCategoryMeta(category = '启程') {
+            return achievementCategoryMeta[category] || { icon: '🏆', accent: '#667eea' };
+        }
+
+        function normalizeAchievementProgress(progress, fallbackLabel = '待解锁') {
+            const current = Math.max(0, Number(progress?.current ?? 0) || 0);
+            const target = Math.max(1, Number(progress?.target ?? 1) || 1);
+            const ratioSource = progress?.ratio !== undefined ? Number(progress.ratio) : current / target;
+            const ratio = Math.max(0, Math.min(1, Number.isFinite(ratioSource) ? ratioSource : current / target));
+            const complete = progress?.complete !== undefined ? Boolean(progress.complete) : current >= target;
+
+            return {
+                current,
+                target,
+                ratio,
+                complete,
+                label: progress?.label || (complete ? '已达成' : fallbackLabel)
+            };
+        }
+
+        function getAchievementProgress(achievement, stats = buildAchievementStats()) {
+            if (typeof achievement.getProgress === 'function') {
+                return normalizeAchievementProgress(achievement.getProgress(stats), achievement.hint || '待解锁');
+            }
+
+            const complete = typeof achievement.condition === 'function' ? achievement.condition(stats) : false;
+            return normalizeAchievementProgress({ complete }, achievement.hint || '待解锁');
+        }
+
+        function isAchievementUnlocked(achievementId) {
+            return gameState.achievements.includes(achievementId);
+        }
+
+        function getAchievementCardMarkup(achievement, stats, compact = false) {
+            const unlocked = isAchievementUnlocked(achievement.id);
+            const progress = getAchievementProgress(achievement, stats);
+            const rarityMeta = getAchievementRarityMeta(achievement.rarity);
+            const categoryMeta = getAchievementCategoryMeta(achievement.category);
+            const progressWidth = Math.round(progress.ratio * 100);
+
+            if (compact) {
+                return `
+                    <div class="achievement-item achievement-item--compact rarity-${achievement.rarity || 'common'}" style="--achievement-accent: ${rarityMeta.accent}; --achievement-category-accent: ${categoryMeta.accent};">
+                        <span class="achievement-icon">${achievement.icon}</span>
+                        <div class="achievement-info">
+                            <div class="achievement-inline-meta">
+                                <span class="achievement-inline-pill">${categoryMeta.icon} ${achievement.category}</span>
+                                <span class="achievement-inline-pill achievement-inline-pill--rarity">${rarityMeta.label}</span>
+                            </div>
+                            <h5>${achievement.name}</h5>
+                            <p>${achievement.desc}</p>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <article class="achievement-card ${unlocked ? 'is-unlocked' : 'is-locked'} rarity-${achievement.rarity || 'common'}" style="--achievement-accent: ${rarityMeta.accent}; --achievement-category-accent: ${categoryMeta.accent}; --achievement-progress: ${progressWidth}%;">
+                    <div class="achievement-card-head">
+                        <div class="achievement-card-icon">${unlocked ? achievement.icon : '🔒'}</div>
+                        <div class="achievement-card-badges">
+                            <span class="achievement-badge">${categoryMeta.icon} ${achievement.category}</span>
+                            <span class="achievement-badge achievement-badge--rarity">${rarityMeta.label}</span>
+                        </div>
+                    </div>
+                    <h3 class="achievement-card-title">${achievement.name}</h3>
+                    <p class="achievement-card-desc">${achievement.desc}</p>
+                    <div class="achievement-progress-block">
+                        <div class="achievement-progress-track"><span style="width: ${progressWidth}%;"></span></div>
+                        <div class="achievement-progress-meta">
+                            <span>${unlocked ? '已解锁' : progress.label}</span>
+                            <span>${Math.round(progress.ratio * 100)}%</span>
+                        </div>
+                    </div>
+                    <p class="achievement-card-hint">${unlocked ? '已收入勋章墙。' : (achievement.hint || '继续挑战即可解锁。')}</p>
+                </article>
+            `;
+        }
+
+        function renderUnlockedAchievements(container, newAchievements, emptyMessage = '') {
+            if (!container) {
+                return;
+            }
+
+            if (newAchievements.length > 0) {
+                const stats = buildAchievementStats();
+                container.innerHTML = '<h3 style="color: #ffd700; margin-bottom: 10px;">🏆 新成就解锁！</h3>' +
+                    `<div class="achievement-inline-list">${newAchievements.map(achievement => getAchievementCardMarkup(achievement, stats, true)).join('')}</div>`;
+                return;
+            }
+
+            container.innerHTML = emptyMessage
+                ? `<div style="color: #fff; opacity: 0.9;">${emptyMessage}</div>`
+                : '';
+        }
+
+        function getAttemptedQuestionCount() {
+            return currentLevelQuestions.length === 0
+                ? 0
+                : Math.min(gameState.currentQuestion + 1, currentLevelQuestions.length);
         }
 
         function createWrongQuestionRecord(question, userAnswer) {
-            const level = getLevelsForUnit(gameState.currentUnit)[gameState.currentLevel];
             return {
                 id: question.id,
-                category: question.category,
-                type: question.type,
-                content: question.content,
-                answer: question.answer,
-                userAnswer: userAnswer,
+                userAnswer: userAnswer === undefined || userAnswer === null ? '' : String(userAnswer),
                 timestamp: new Date().toLocaleString(),
-                knowledge: question.knowledge,
                 unitIndex: gameState.currentUnit,
-                levelIndex: gameState.currentLevel,
-                unitName: units[gameState.currentUnit].name,
-                levelName: level ? level.name : question.category,
-                sourceLabel: `[${getUnitDisplayName(gameState.currentUnit)} - ${level ? level.name : question.category}]`
+                levelIndex: gameState.currentLevel
             };
+        }
+
+        function buildPersistedGameState() {
+            return {
+                storageVersion: STORAGE_VERSION,
+                unitOrderVersion: 2,
+                unitLevelUnlocked: gameState.unitLevelUnlocked,
+                unitLevelStars: gameState.unitLevelStars,
+                achievements: gameState.achievements,
+                wrongQuestions: gameState.wrongQuestions,
+                totalCorrect: gameState.totalCorrect,
+                totalQuestions: gameState.totalQuestions,
+                score: gameState.score,
+                practiceCount: gameState.practiceCount,
+                extremePasses: gameState.extremePasses,
+                extremeDualPasses: gameState.extremeDualPasses
+            };
+        }
+
+        function applySavedGameState(data) {
+            if (!data || typeof data !== 'object' || Array.isArray(data)) {
+                throw new Error('存档根节点必须是对象。');
+            }
+
+            const nextState = createDefaultGameState();
+            let migrated = false;
+            const warnings = [];
+            const legacyLevels = getLevelsForUnit(0);
+
+            if (Array.isArray(data.levelUnlocked) && !Array.isArray(data.unitLevelUnlocked)) {
+                data.unitLevelUnlocked = createDefaultUnitProgress(false);
+                data.unitLevelUnlocked[0] = legacyLevels.map((_, levelIndex) => Boolean(data.levelUnlocked[levelIndex]));
+                migrated = true;
+            }
+
+            if (Array.isArray(data.levelStars) && !Array.isArray(data.unitLevelStars)) {
+                data.unitLevelStars = createDefaultUnitProgress(0);
+                data.unitLevelStars[0] = legacyLevels.map((_, levelIndex) => Number(data.levelStars[levelIndex] || 0));
+                migrated = true;
+            }
+
+            nextState.unitLevelUnlocked = normalizeUnitProgress(data.unitLevelUnlocked, false).map(unitProgress =>
+                unitProgress.map((isUnlocked, levelIndex) => levelIndex === 0 ? true : Boolean(isUnlocked))
+            );
+            nextState.unitLevelStars = normalizeUnitProgress(data.unitLevelStars, 0).map(unitProgress =>
+                unitProgress.map(stars => Math.max(0, Number(stars) || 0))
+            );
+
+            if ((data.unitOrderVersion || 1) < 2) {
+                nextState.unitLevelUnlocked = swapUnitOrder(nextState.unitLevelUnlocked);
+                nextState.unitLevelStars = swapUnitOrder(nextState.unitLevelStars);
+                migrated = true;
+            }
+
+            nextState.achievements = Array.isArray(data.achievements)
+                ? data.achievements.filter(id => achievementList.some(achievement => achievement.id === id))
+                : [];
+
+            const wrongQuestions = Array.isArray(data.wrongQuestions) ? data.wrongQuestions : [];
+            nextState.wrongQuestions = wrongQuestions
+                .map(normalizeWrongQuestionRecord)
+                .filter(Boolean);
+            if (nextState.wrongQuestions.length !== wrongQuestions.length) {
+                warnings.push('部分错题记录无法识别，已自动忽略。');
+                migrated = true;
+            }
+
+            nextState.totalCorrect = Math.max(0, Number(data.totalCorrect || 0));
+            nextState.totalQuestions = Math.max(0, Number(data.totalQuestions || 0));
+            nextState.score = Math.max(0, Number(data.score || 0));
+            nextState.practiceCount = Math.max(0, Number(data.practiceCount || 0));
+            nextState.extremePasses = Math.max(0, Number(data.extremePasses || 0));
+            nextState.extremeDualPasses = Math.max(0, Number(data.extremeDualPasses || 0));
+
+            if ((data.storageVersion || 0) < STORAGE_VERSION || data.levelUnlocked !== undefined || data.levelStars !== undefined) {
+                migrated = true;
+            }
+
+            gameState = nextState;
+            return { migrated, warnings };
         }
 
         function resetExtremeMode() {
@@ -277,7 +610,8 @@
             const newAchievements = [];
 
             achievementList.forEach(achievement => {
-                if (!gameState.achievements.includes(achievement.id) && achievement.condition(stats)) {
+                const progress = getAchievementProgress(achievement, stats);
+                if (!gameState.achievements.includes(achievement.id) && progress.complete) {
                     gameState.achievements.push(achievement.id);
                     newAchievements.push(achievement);
                     showAchievementPopup(achievement);
@@ -289,78 +623,58 @@
 
         // 加载游戏状态
         function loadGameState() {
-            const saved = localStorage.getItem('pythonOperatorGame');
-            if (saved) {
+            let saved = null;
+
+            try {
+                saved = localStorage.getItem(STORAGE_KEY);
+            } catch (error) {
+                console.warn('读取存档失败，已回退到默认进度。', error);
+                gameState = createDefaultGameState();
+                storageStatusMessage = '浏览器存储不可用，已回退到默认进度。';
+                return;
+            }
+
+            if (!saved) {
+                gameState = createDefaultGameState();
+                storageStatusMessage = '未发现本地存档，已使用默认进度。';
+                return;
+            }
+
+            try {
                 const data = JSON.parse(saved);
-                let migrated = false;
-                const legacyLevels = getLevelsForUnit(0);
-
-                if (Array.isArray(data.levelUnlocked) && !Array.isArray(data.unitLevelUnlocked)) {
-                    data.unitLevelUnlocked = createDefaultUnitProgress(false);
-                    data.unitLevelUnlocked[0] = legacyLevels.map((_, levelIndex) => Boolean(data.levelUnlocked[levelIndex]));
-                    migrated = true;
-                }
-
-                if (Array.isArray(data.levelStars) && !Array.isArray(data.unitLevelStars)) {
-                    data.unitLevelStars = createDefaultUnitProgress(0);
-                    data.unitLevelStars[0] = legacyLevels.map((_, levelIndex) => Number(data.levelStars[levelIndex] || 0));
-                    migrated = true;
-                }
-
-                if (data.levelUnlocked !== undefined) {
-                    delete data.levelUnlocked;
-                    migrated = true;
-                }
-
-                if (data.levelStars !== undefined) {
-                    delete data.levelStars;
-                    migrated = true;
-                }
-
-                gameState.unitLevelUnlocked = normalizeUnitProgress(data.unitLevelUnlocked, false);
-                gameState.unitLevelUnlocked = gameState.unitLevelUnlocked.map((unitProgress, unitIndex) =>
-                    unitProgress.map((isUnlocked, levelIndex) => levelIndex === 0 ? true : Boolean(isUnlocked))
-                );
-                gameState.unitLevelStars = normalizeUnitProgress(data.unitLevelStars, 0).map(unitProgress =>
-                    unitProgress.map(stars => Math.max(0, Number(stars) || 0))
-                );
-                if ((data.unitOrderVersion || 1) < 2) {
-                    gameState.unitLevelUnlocked = swapUnitOrder(gameState.unitLevelUnlocked);
-                    gameState.unitLevelStars = swapUnitOrder(gameState.unitLevelStars);
-                    migrated = true;
-                }
-                gameState.achievements = data.achievements || [];
-                gameState.wrongQuestions = Array.isArray(data.wrongQuestions)
-                    ? data.wrongQuestions.map(enrichWrongQuestionRecord)
-                    : [];
-                gameState.totalCorrect = Number(data.totalCorrect || 0);
-                gameState.totalQuestions = Number(data.totalQuestions || 0);
-                gameState.score = Number(data.score || 0);
-                gameState.practiceCount = Number(data.practiceCount || 0);
-                gameState.extremePasses = Number(data.extremePasses || 0);
-                gameState.extremeDualPasses = Number(data.extremeDualPasses || 0);
+                const { migrated, warnings } = applySavedGameState(data);
+                storageStatusMessage = warnings.length > 0
+                    ? warnings.join('；')
+                    : migrated
+                        ? '旧存档已自动迁移到最新版本。'
+                        : '本地存档已读取。';
 
                 if (migrated) {
                     saveGameState();
+                }
+            } catch (error) {
+                console.warn('存档损坏，已自动重置。', error);
+                gameState = createDefaultGameState();
+                storageStatusMessage = '检测到损坏存档，已自动重置为默认进度。';
+
+                try {
+                    localStorage.removeItem(STORAGE_KEY);
+                } catch (removeError) {
+                    console.warn('清理损坏存档失败。', removeError);
                 }
             }
         }
 
         // 保存游戏状态
         function saveGameState() {
-            localStorage.setItem('pythonOperatorGame', JSON.stringify({
-                unitOrderVersion: 2,
-                unitLevelUnlocked: gameState.unitLevelUnlocked,
-                unitLevelStars: gameState.unitLevelStars,
-                achievements: gameState.achievements,
-                wrongQuestions: gameState.wrongQuestions,
-                totalCorrect: gameState.totalCorrect,
-                totalQuestions: gameState.totalQuestions,
-                score: gameState.score,
-                practiceCount: gameState.practiceCount,
-                extremePasses: gameState.extremePasses,
-                extremeDualPasses: gameState.extremeDualPasses
-            }));
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedGameState()));
+                return true;
+            } catch (error) {
+                console.warn('保存存档失败。', error);
+                storageStatusMessage = '保存失败：浏览器存储不可用。';
+                return false;
+            }
         }
 
         // 显示开始界面
@@ -375,8 +689,13 @@
 
         // 切换界面
         function switchScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
+            document.querySelectorAll('.screen').forEach(screen => screen.classList.remove('active', 'screen-enter'));
+
+            const nextScreen = document.getElementById(screenId);
+            nextScreen.classList.add('active');
+            void nextScreen.offsetWidth;
+            nextScreen.classList.add('screen-enter');
+            window.scrollTo(0, 0);
         }
 
         // 开始冒险
@@ -417,7 +736,7 @@
             gameState.practiceQuestionIndex = 0;
 
             const unitQuestions = unitQuestionsMap[gameState.currentUnit];
-            currentLevelQuestions = [...unitQuestions].sort(() => Math.random() - 0.5);
+            currentLevelQuestions = shuffleQuestions(unitQuestions);
 
             document.getElementById('practiceTitle').textContent = `${units[gameState.currentUnit].name} · 随机练习`;
             switchScreen('practiceScreen');
@@ -498,11 +817,13 @@
         // 渲染题目
         function renderQuestion() {
             const q = currentLevelQuestions[gameState.currentQuestion];
+            const questionContent = document.getElementById('questionContent');
 
             document.getElementById('questionType').textContent = q.type;
             document.getElementById('questionProgress').textContent =
                 `${gameState.currentQuestion + 1} / ${currentLevelQuestions.length}`;
-            document.getElementById('questionContent').innerHTML = q.content;
+            questionContent.innerHTML = q.content;
+            formatMultilineCodeBlocks(questionContent);
 
             const optionsContainer = document.getElementById('optionsContainer');
             gameState.selectedAnswer = null;
@@ -547,7 +868,7 @@
                 optionsContainer.innerHTML = `
                     <div class="fill-blank">
                         <input type="text" class="fill-input" id="fillInput" 
-                               placeholder="请输入答案" oninput="checkFillAnswer(this.value)">
+                               placeholder="请输入答案" oninput="checkFillAnswer(this.value)" onkeydown="handleAdventureFillKeydown(event)">
                     </div>
                 `;
             }
@@ -588,7 +909,7 @@
 
         // 检查填空答案
         function checkFillAnswer(value) {
-            if (value.trim()) {
+            if (hasNonEmptyAnswer(value)) {
                 gameState.selectedAnswer = value.trim();
                 document.getElementById('submitBtn').disabled = false;
             } else {
@@ -642,7 +963,6 @@
                 gameState.levelScore += points;
                 gameState.levelCorrect++;
                 gameState.totalCorrect++;
-                gameState.score += points;
 
                 showCorrectEffect();
                 showFloatingCoins();
@@ -715,8 +1035,8 @@
         // 标准化答案
         function normalizeAnswer(answer) {
             const str = String(answer).trim().toLowerCase();
-            if (str === 'true' || str === 't') return 'true';
-            if (str === 'false' || str === 'f') return 'false';
+            if (str === 'true' || str === '正确') return 'true';
+            if (str === 'false' || str === '错误') return 'false';
             return str;
         }
 
@@ -740,14 +1060,7 @@
             bonusDiv.style.display = bonus ? 'block' : 'none';
 
             const q = currentLevelQuestions[gameState.currentQuestion];
-            const k = q.knowledge;
-            knowledgeBox.innerHTML = `
-                <h4>📚 知识点解析</h4>
-                <p><strong>运算符含义：</strong>${k.meaning}</p>
-                <p><strong>运算规则：</strong>${k.rule}</p>
-                <p><strong>常见易错点：</strong>${k.error}</p>
-                <p><strong>相关示例：</strong>${k.example}</p>
-            `;
+            renderKnowledgeDetails(knowledgeBox, q.knowledge);
 
             overlay.classList.add('show');
         }
@@ -876,7 +1189,11 @@
 
         // 更新分数显示
         function updateScoreDisplay() {
-            document.getElementById('scoreDisplay').textContent = gameState.score;
+            const gameScreen = document.getElementById('gameScreen');
+            const showPendingLevelScore = Boolean(gameScreen && gameScreen.classList.contains('active') && !gameState.isPracticeMode);
+            const scoreToDisplay = gameState.score + (showPendingLevelScore ? gameState.levelScore : 0);
+
+            document.getElementById('scoreDisplay').textContent = scoreToDisplay;
         }
 
         // 更新连击显示
@@ -958,6 +1275,8 @@
                 gameState.unitLevelUnlocked[gameState.currentUnit][gameState.currentLevel + 1] = true;
             }
 
+            gameState.score += gameState.levelScore;
+
             // 检查成就
             const newAchievements = checkAchievements(stars);
 
@@ -974,20 +1293,7 @@
 
             // 成就列表
             const list = document.getElementById('achievementsList');
-            if (newAchievements.length > 0) {
-                list.innerHTML = '<h3 style="color: #ffd700; margin-bottom: 10px;">🏆 新成就解锁！</h3>' +
-                    newAchievements.map(a => `
-                        <div class="achievement-item">
-                            <span class="achievement-icon">${a.icon}</span>
-                            <div class="achievement-info">
-                                <h5>${a.name}</h5>
-                                <p>${a.desc}</p>
-                            </div>
-                        </div>
-                    `).join('');
-            } else {
-                list.innerHTML = '';
-            }
+            renderUnlockedAchievements(list, newAchievements);
 
             // 下一关按钮
             const nextBtn = document.getElementById('nextLevelBtn');
@@ -1007,6 +1313,7 @@
             }
 
             switchScreen('levelCompleteScreen');
+            updateScoreDisplay();
         }
 
         // 检查成就
@@ -1027,6 +1334,8 @@
             const correctRate = `${gameState.levelCorrect}/${currentLevelQuestions.length}`;
             const hasNextSegment = gameState.extremeSegmentIndex < gameState.extremeSegments.length - 1;
 
+            gameState.score += gameState.levelScore;
+
             document.getElementById('completeTitle').textContent = hasNextSegment ? '⚔️ 本段通过！' : '👑 极限测试通过！';
             document.getElementById('starsEarned').textContent = hasNextSegment ? '🔥 无伤推进' : '🏆 零失误通关';
             document.getElementById('statScore').textContent = gameState.levelScore;
@@ -1040,26 +1349,16 @@
                     gameState.extremeDualPasses++;
                 }
                 newAchievements = unlockAchievements(buildAchievementStats());
-                saveGameState();
             }
 
+            saveGameState();
+
             const list = document.getElementById('achievementsList');
-            if (newAchievements.length > 0) {
-                list.innerHTML = '<h3 style="color: #ffd700; margin-bottom: 10px;">🏆 新成就解锁！</h3>' +
-                    newAchievements.map(a => `
-                        <div class="achievement-item">
-                            <span class="achievement-icon">${a.icon}</span>
-                            <div class="achievement-info">
-                                <h5>${a.name}</h5>
-                                <p>${a.desc}</p>
-                            </div>
-                        </div>
-                    `).join('');
-            } else {
-                list.innerHTML = hasNextSegment
-                    ? '<div style="color: #fff; opacity: 0.9;">继续保持，全程不能出错。</div>'
-                    : '<div style="color: #fff; opacity: 0.9;">本次极限测试已计入你的荣誉记录。</div>';
-            }
+            renderUnlockedAchievements(
+                list,
+                newAchievements,
+                hasNextSegment ? '继续保持，全程不能出错。' : '本次极限测试已计入你的荣誉记录。'
+            );
 
             const nextBtn = document.getElementById('nextLevelBtn');
             if (hasNextSegment) {
@@ -1077,19 +1376,57 @@
             }
 
             switchScreen('levelCompleteScreen');
+            updateScoreDisplay();
         }
 
         // 显示成就弹窗
         function showAchievementPopup(achievement) {
+            achievementPopupQueue.push(achievement);
+            if (achievementPopupActive) {
+                return;
+            }
+
+            achievementPopupActive = true;
+            displayNextAchievementPopup();
+        }
+
+        function displayNextAchievementPopup() {
             const popup = document.getElementById('achievementPopup');
+            const popupMeta = document.getElementById('popupMeta');
+            const achievement = achievementPopupQueue.shift();
+
+            if (!popup || !achievement) {
+                achievementPopupActive = false;
+                return;
+            }
+
+            const rarityMeta = getAchievementRarityMeta(achievement.rarity);
+            const categoryMeta = getAchievementCategoryMeta(achievement.category);
+
+            popup.dataset.rarity = achievement.rarity || 'common';
+            popup.style.setProperty('--achievement-popup-accent', rarityMeta.accent);
             document.getElementById('popupIcon').textContent = achievement.icon;
             document.getElementById('popupTitle').textContent = achievement.name;
+            if (popupMeta) {
+                popupMeta.textContent = `${categoryMeta.icon} ${achievement.category} · ${rarityMeta.label}`;
+            }
             document.getElementById('popupDesc').textContent = achievement.desc;
 
             popup.style.display = 'block';
+            popup.classList.remove('hide');
+            void popup.offsetWidth;
+            popup.classList.add('show');
+
             setTimeout(() => {
-                popup.style.display = 'none';
-            }, 2500);
+                popup.classList.remove('show');
+                popup.classList.add('hide');
+
+                setTimeout(() => {
+                    popup.style.display = 'none';
+                    popup.classList.remove('hide');
+                    displayNextAchievementPopup();
+                }, 240);
+            }, 2800);
         }
 
         // 下一关
@@ -1129,6 +1466,7 @@
         function gameOver() {
             stopTimer();
             document.getElementById('gameOverScore').textContent = gameState.levelScore;
+            const attemptedCount = getAttemptedQuestionCount();
             if (gameState.isExtremeMode) {
                 document.querySelector('.game-over-title').textContent = '💥 考核失败';
                 document.getElementById('gameOverMessage').textContent = '极限测试中答错 1 题即终止，本次考核已结束。';
@@ -1136,7 +1474,7 @@
                 document.getElementById('gameOverLevel').textContent =
                     `${gameState.extremeSegmentIndex + 1}/${gameState.extremeSegments.length}`;
                 document.getElementById('gameOverCorrect').textContent =
-                    `${gameState.levelCorrect}/${currentLevelQuestions.length}`;
+                    `${gameState.levelCorrect}/${attemptedCount}`;
             } else {
                 document.querySelector('.game-over-title').textContent = '💔 挑战失败';
                 document.getElementById('gameOverMessage').textContent = '生命值耗尽，请重新挑战！';
@@ -1144,10 +1482,11 @@
                 document.getElementById('gameOverLevel').textContent =
                     `${gameState.currentLevel + 1}/${getLevelsForUnit().length}`;
                 document.getElementById('gameOverCorrect').textContent =
-                    `${gameState.totalCorrect}/${gameState.totalQuestions}`;
+                    `${gameState.levelCorrect}/${attemptedCount}`;
             }
 
             switchScreen('gameOverScreen');
+            updateScoreDisplay();
         }
 
         // 重试关卡
@@ -1170,11 +1509,13 @@
         // 渲染修炼场题目
         function renderPracticeQuestion() {
             const q = currentLevelQuestions[gameState.practiceQuestionIndex];
+            const practiceQuestionContent = document.getElementById('practiceQuestionContent');
 
             document.getElementById('practiceQuestionType').textContent = q.type;
             document.getElementById('practiceProgress').textContent =
                 `${gameState.practiceQuestionIndex + 1} / ${currentLevelQuestions.length}`;
-            document.getElementById('practiceQuestionContent').innerHTML = q.content;
+            practiceQuestionContent.innerHTML = q.content;
+            formatMultilineCodeBlocks(practiceQuestionContent);
 
             const optionsContainer = document.getElementById('practiceOptionsContainer');
             gameState.selectedAnswer = null;
@@ -1191,6 +1532,7 @@
 
             document.getElementById('practiceSubmitBtn').style.display = 'inline-block';
             document.getElementById('practiceSubmitBtn').textContent = '查看答案';
+            document.getElementById('practiceSubmitBtn').disabled = q.type === '填空题';
             document.getElementById('practiceNextBtn').style.display = 'none';
 
             if (q.type === '选择题') {
@@ -1221,12 +1563,13 @@
                 optionsContainer.innerHTML = `
                     <div class="fill-blank">
                         <input type="text" class="fill-input" id="practiceFillInput" 
-                               placeholder="请输入答案" oninput="selectPracticeAnswer(this.value, this)">
+                               placeholder="请输入答案" oninput="selectPracticeAnswer(this.value, this)" onkeydown="handlePracticeFillKeydown(event)">
                     </div>
                 `;
             }
 
             document.getElementById('practiceNextBtn').style.display = 'none';
+            updatePracticeSubmitState();
         }
 
         // 选择修炼场答案
@@ -1235,7 +1578,20 @@
                 el.classList.remove('selected');
             });
             if (element) element.classList.add('selected');
-            gameState.selectedAnswer = typeof answer === 'string' ? answer : answer.trim();
+            const normalizedAnswer = String(answer ?? '').trim();
+            gameState.selectedAnswer = normalizedAnswer || null;
+            updatePracticeSubmitState();
+        }
+
+        function updatePracticeSubmitState() {
+            const submitBtn = document.getElementById('practiceSubmitBtn');
+            const currentQuestion = currentLevelQuestions[gameState.practiceQuestionIndex];
+
+            if (!submitBtn || !currentQuestion) {
+                return;
+            }
+
+            submitBtn.disabled = currentQuestion.type === '填空题' && !hasNonEmptyAnswer(gameState.selectedAnswer);
         }
 
         // 修炼场-选择题/判断题点击即提交
@@ -1258,6 +1614,14 @@
         // 提交修炼场答案
         function submitPracticeAnswer() {
             const q = currentLevelQuestions[gameState.practiceQuestionIndex];
+            if (q.type === '填空题' && !hasNonEmptyAnswer(gameState.selectedAnswer)) {
+                const input = document.getElementById('practiceFillInput');
+                if (input) {
+                    input.focus();
+                }
+                return;
+            }
+
             const userAnswer = gameState.selectedAnswer || '';
             const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(q.answer);
 
@@ -1299,17 +1663,10 @@
             highlightPracticeAnswer(q.answer, isCorrect);
 
             // 显示知识点
-            const k = q.knowledge;
             const knowledgeBox = document.createElement('div');
             knowledgeBox.className = 'knowledge-box';
             knowledgeBox.style.marginTop = '20px';
-            knowledgeBox.innerHTML = `
-                <h4>📚 知识点解析</h4>
-                <p><strong>运算符含义：</strong>${k.meaning}</p>
-                <p><strong>运算规则：</strong>${k.rule}</p>
-                <p><strong>常见易错点：</strong>${k.error}</p>
-                <p><strong>相关示例：</strong>${k.example}</p>
-            `;
+            renderKnowledgeDetails(knowledgeBox, q.knowledge);
             document.getElementById('practiceOptionsContainer').appendChild(knowledgeBox);
 
             // 隐藏填空题的提交按钮（如果存在）
@@ -1374,8 +1731,9 @@
         // 下一题
         function nextPracticeQuestion() {
             gameState.practiceQuestionIndex++;
-            const unitQuestions = unitQuestionsMap[gameState.currentUnit];
-            if (gameState.practiceQuestionIndex >= unitQuestions.length) {
+            if (gameState.practiceQuestionIndex >= currentLevelQuestions.length) {
+                const unitQuestions = unitQuestionsMap[gameState.currentUnit];
+                currentLevelQuestions = shuffleQuestions(unitQuestions);
                 gameState.practiceQuestionIndex = 0;
             }
             renderPracticeQuestion();
@@ -1384,18 +1742,34 @@
         // 渲染成就列表
         function renderAchievements() {
             const container = document.getElementById('achievementsContainer');
-            container.innerHTML = achievementList.map(a => {
-                const unlocked = gameState.achievements.includes(a.id);
-                return `
-                    <div class="achievement-item" style="opacity: ${unlocked ? 1 : 0.5}; background: ${unlocked ? 'linear-gradient(135deg, #ffd70020, #ffaa0020)' : '#f5f5f5'};">
-                        <span class="achievement-icon">${unlocked ? a.icon : '🔒'}</span>
-                        <div class="achievement-info">
-                            <h5 style="color: ${unlocked ? '#ffd700' : '#999'};">${a.name}</h5>
-                            <p>${a.desc}</p>
-                        </div>
+            const stats = buildAchievementStats();
+            const unlockedCount = gameState.achievements.length;
+            const legendaryCount = achievementList.filter(achievement => achievement.rarity === 'legendary' && isAchievementUnlocked(achievement.id)).length;
+            const rarePlusCount = achievementList.filter(achievement => ['rare', 'epic', 'legendary'].includes(achievement.rarity) && isAchievementUnlocked(achievement.id)).length;
+
+            container.innerHTML = `
+                <section class="achievement-overview">
+                    <div class="achievement-summary-card">
+                        <div class="achievement-summary-label">已解锁</div>
+                        <div class="achievement-summary-value">${unlockedCount}/${achievementList.length}</div>
                     </div>
-                `;
-            }).join('');
+                    <div class="achievement-summary-card">
+                        <div class="achievement-summary-label">稀有以上</div>
+                        <div class="achievement-summary-value">${rarePlusCount}</div>
+                    </div>
+                    <div class="achievement-summary-card">
+                        <div class="achievement-summary-label">传说勋章</div>
+                        <div class="achievement-summary-value">${legendaryCount}</div>
+                    </div>
+                    <div class="achievement-summary-card">
+                        <div class="achievement-summary-label">当前进度</div>
+                        <div class="achievement-summary-value">⭐ ${stats.totalStars} · 🔥 ${stats.maxCombo}</div>
+                    </div>
+                </section>
+                <section class="achievement-grid">
+                    ${achievementList.map(achievement => getAchievementCardMarkup(achievement, stats)).join('')}
+                </section>
+            `;
         }
 
         // 显示成就界面
@@ -1462,7 +1836,7 @@
 
         // 重置记录
         function resetRecords() {
-            if (confirm('确定要重置所有做题记录吗？此操作无法撤销！')) {
+            if (confirm('确定要重置全部做题记录吗？这会清空积分、进度、成就和错题记录，且无法撤销。')) {
                 gameState.totalCorrect = 0;
                 gameState.totalQuestions = 0;
                 gameState.practiceCount = 0;
@@ -1473,7 +1847,9 @@
                     unitProgress.map((_, levelIndex) => levelIndex === 0)
                 );
                 gameState.achievements = [];
+                gameState.wrongQuestions = [];
                 gameState.score = 0;
+                storageStatusMessage = '已通过记录页清空全部学习记录。';
                 saveGameState();
                 showRecords();
             }
@@ -1522,14 +1898,13 @@
                 }
 
                 container.innerHTML = filteredWrongs.map((w, idx) => {
-                    const meta = getQuestionMetaById(w.id);
-                    const q = meta ? meta.question : null;
-                    const sourceLabel = meta
-                        ? `[${meta.unitDisplayName} - ${meta.levelName}]`
-                        : `[${getUnitDisplayName(Number(w.unitIndex || 0))} - ${w.levelName || w.category || '未知关卡'}]`;
+                    const viewModel = buildWrongQuestionViewModel(w);
+                    const q = viewModel.question;
+                    const sourceLabel = viewModel.sourceLabel;
+                    const userAnswer = escapeHtml(w.userAnswer || '未答');
                     let optionsHtml = '';
                     
-                    if (w.type === '选择题' && q && q.options) {
+                    if (q && q.type === '选择题' && q.options) {
                         optionsHtml = `
                             <div style="margin: 15px 0;">
                                 <div style="font-weight: bold; color: #333; margin-bottom: 10px;">📋 选项：</div>
@@ -1537,7 +1912,7 @@
                                     let optStyle = 'background: #fff; border: 2px solid #ddd;';
                                     let highlight = '';
                                     
-                                    if (opt.letter === w.answer) {
+                                    if (opt.letter === q.answer) {
                                         optStyle = 'background: linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,230,118,0.1)); border: 2px solid #00c853;';
                                         highlight = ' ✓ 正确';
                                     }
@@ -1551,16 +1926,20 @@
                                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                                 <span style="font-weight: bold; color: #667eea;">${opt.letter}.</span>
                                                 <span style="flex: 1; margin: 0 10px; color: #333;">${opt.text}</span>
-                                                <span style="font-size: 0.85em; font-weight: bold; ${ opt.letter === w.answer ? 'color: #00c853;' : opt.letter === w.userAnswer ? 'color: #ff1744;' : 'color: #999;' }">${highlight}</span>
+                                                <span style="font-size: 0.85em; font-weight: bold; ${ opt.letter === q.answer ? 'color: #00c853;' : opt.letter === w.userAnswer ? 'color: #ff1744;' : 'color: #999;' }">${highlight}</span>
                                             </div>
                                         </div>
                                     `;
                                 }).join('')}
                             </div>
                         `;
-                    } else if (w.type === '判断题') {
-                        const correctText = w.answer.toLowerCase() === 'true' ? '✓ 正确' : '✗ 错误';
-                        const userText = w.userAnswer.toLowerCase() === 'true' ? '✓ 正确' : '✗ 错误';
+                    } else if (q && q.type === '判断题') {
+                        const correctText = normalizeAnswer(q.answer) === 'true' ? '✓ 正确' : '✗ 错误';
+                        const userText = normalizeAnswer(w.userAnswer) === 'true'
+                            ? '✓ 正确'
+                            : normalizeAnswer(w.userAnswer) === 'false'
+                                ? '✗ 错误'
+                                : userAnswer;
                         optionsHtml = `
                             <div style="margin: 15px 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                                 <div style="background: linear-gradient(135deg, rgba(0,200,83,0.15), rgba(0,230,118,0.1)); border: 2px solid #00c853; padding: 15px; border-radius: 8px; text-align: center;">
@@ -1573,17 +1952,23 @@
                                 </div>
                             </div>
                         `;
-                    } else if (w.type === '填空题') {
+                    } else if (q && q.type === '填空题') {
                         optionsHtml = `
                             <div style="margin: 15px 0;">
                                 <div style="background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
                                     <div style="color: #667eea; font-size: 0.9em; margin-bottom: 8px;"><strong>✓ 正确答案：</strong></div>
-                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #00c853; font-weight: bold; font-family: monospace;">${w.answer}</div>
+                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #00c853; font-weight: bold; font-family: monospace;">${escapeHtml(q.answer)}</div>
                                 </div>
                                 <div style="background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,82,82,0.1)); padding: 15px; border-radius: 8px;">
                                     <div style="color: #ff6b6b; font-size: 0.9em; margin-bottom: 8px;"><strong>✗ 你的答案：</strong></div>
-                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #ff1744; font-weight: bold; font-family: monospace;">${w.userAnswer || '未答'}</div>
+                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #ff1744; font-weight: bold; font-family: monospace;">${userAnswer}</div>
                                 </div>
+                            </div>
+                        `;
+                    } else {
+                        optionsHtml = `
+                            <div style="margin: 15px 0; background: rgba(255,255,255,0.7); border-radius: 8px; padding: 15px; color: #666; line-height: 1.8;">
+                                该题已从当前题库中移除，保留你的作答记录：<strong>${userAnswer}</strong>
                             </div>
                         `;
                     }
@@ -1591,23 +1976,26 @@
                     return `
                         <div style="background: rgba(255, 107, 107, 0.1); border-left: 4px solid #ff6b6b; border-radius: 10px; padding: 20px; margin-bottom: 20px;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                                <span style="color: #ff6b6b; font-weight: bold; font-size: 1.1em;">${idx + 1}. ${sourceLabel} ${w.type}</span>
-                                <span style="color: #999; font-size: 0.85em;">${w.timestamp}</span>
+                                <span style="color: #ff6b6b; font-weight: bold; font-size: 1.1em;">${idx + 1}. ${sourceLabel} ${q ? q.type : '已失效记录'}</span>
+                                <span style="color: #999; font-size: 0.85em;">${escapeHtml(w.timestamp)}</span>
                             </div>
-                            <div style="color: #333; margin-bottom: 15px; font-size: 1.05em; line-height: 1.6;">${w.content}</div>
+                            <div style="color: #333; margin-bottom: 15px; font-size: 1.05em; line-height: 1.6;">${q ? q.content : '<em>该题题干已不可用。</em>'}</div>
                             ${optionsHtml}
-                            <div style="background: linear-gradient(135deg, #667eea20, #764ba220); border-left: 4px solid #667eea; border-radius: 5px; padding: 15px; margin-top: 15px;">
-                                <div style="color: #667eea; font-weight: bold; margin-bottom: 8px;">📚 知识解析：</div>
-                                <div style="color: #555; font-size: 0.95em; line-height: 1.8;">
-                                    <div style="margin-bottom: 8px;"><strong>• 含义：</strong>${w.knowledge.meaning}</div>
-                                    <div style="margin-bottom: 8px;"><strong>• 规则：</strong>${w.knowledge.rule}</div>
-                                    <div style="margin-bottom: 8px;"><strong>• 常见错误：</strong>${w.knowledge.error}</div>
-                                    <div><strong>• 示例：</strong>${w.knowledge.example}</div>
+                            ${q ? `
+                                <div style="background: linear-gradient(135deg, #667eea20, #764ba220); border-left: 4px solid #667eea; border-radius: 5px; padding: 15px; margin-top: 15px;">
+                                    <div style="color: #667eea; font-weight: bold; margin-bottom: 8px;">📚 知识解析：</div>
+                                    <div style="color: #555; font-size: 0.95em; line-height: 1.8;">
+                                        <div style="margin-bottom: 8px;"><strong>• 含义：</strong>${q.knowledge.meaning}</div>
+                                        <div style="margin-bottom: 8px;"><strong>• 规则：</strong>${q.knowledge.rule}</div>
+                                        <div style="margin-bottom: 8px;"><strong>• 常见错误：</strong>${q.knowledge.error}</div>
+                                        <div><strong>• 示例：</strong>${q.knowledge.example}</div>
+                                    </div>
                                 </div>
-                            </div>
+                            ` : ''}
                         </div>
                     `;
                 }).join('');
+                formatMultilineCodeBlocks(container);
             }
             switchScreen('wrongAnalysisScreen');
         }
@@ -1666,6 +2054,9 @@
             const summary = document.getElementById('devQuickSummary');
             if (!summary) return;
 
+            const snapshotText = getStorageSnapshotText();
+            const snapshotSize = new Blob([snapshotText]).size;
+
             const cards = [
                 { label: '总积分', value: gameState.score },
                 { label: '总做题数', value: gameState.totalQuestions },
@@ -1674,7 +2065,9 @@
                 { label: '总星数', value: getTotalStars() },
                 { label: '修炼题数', value: gameState.practiceCount },
                 { label: '极限通关', value: gameState.extremePasses },
-                { label: '综合大考', value: gameState.extremeDualPasses }
+                { label: '综合大考', value: gameState.extremeDualPasses },
+                { label: '存档版本', value: `v${STORAGE_VERSION}` },
+                { label: '快照体积', value: `${snapshotSize} B` }
             ];
 
             summary.innerHTML = cards.map(card => `
@@ -1719,6 +2112,111 @@
             `;
         }
 
+        function getStorageSnapshotText() {
+            return JSON.stringify(buildPersistedGameState(), null, 2);
+        }
+
+        function renderDevStorageTools() {
+            const snapshot = document.getElementById('devStorageSnapshot');
+            const meta = document.getElementById('devStorageMeta');
+            const status = document.getElementById('devStorageStatus');
+            if (!snapshot || !meta || !status) return;
+
+            let rawStored = '';
+            try {
+                rawStored = localStorage.getItem(STORAGE_KEY) || '';
+            } catch (error) {
+                console.warn('读取开发者快照失败。', error);
+            }
+
+            const snapshotText = getStorageSnapshotText();
+
+            snapshot.value = snapshotText;
+            meta.innerHTML = `
+                <div class="dev-summary-card">
+                    <div class="dev-summary-label">存档 Key</div>
+                    <div class="dev-summary-value">${STORAGE_KEY}</div>
+                </div>
+                <div class="dev-summary-card">
+                    <div class="dev-summary-label">当前版本</div>
+                    <div class="dev-summary-value">v${STORAGE_VERSION}</div>
+                </div>
+                <div class="dev-summary-card">
+                    <div class="dev-summary-label">已存储字节数</div>
+                    <div class="dev-summary-value">${new Blob([rawStored || snapshotText]).size}</div>
+                </div>
+            `;
+            status.textContent = storageStatusMessage;
+        }
+
+        async function copyDevSaveSnapshot() {
+            const snapshot = document.getElementById('devStorageSnapshot');
+            if (!snapshot) return;
+
+            const snapshotText = snapshot.value.trim() || getStorageSnapshotText();
+
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(snapshotText);
+                } else {
+                    snapshot.focus();
+                    snapshot.select();
+                    document.execCommand('copy');
+                }
+                updateAdminStatus('已复制当前存档快照。');
+            } catch (error) {
+                updateAdminStatus('复制失败，请手动复制文本框内容。');
+            }
+        }
+
+        function importDevSaveSnapshot() {
+            const snapshot = document.getElementById('devStorageSnapshot');
+            if (!snapshot) return;
+
+            const raw = snapshot.value.trim();
+            if (!raw) {
+                updateAdminStatus('请先粘贴要导入的存档 JSON。');
+                return;
+            }
+
+            try {
+                const parsed = JSON.parse(raw);
+                const { migrated, warnings } = applySavedGameState(parsed);
+                saveGameState();
+                storageStatusMessage = warnings.length > 0
+                    ? warnings.join('；')
+                    : migrated
+                        ? '导入成功，旧存档字段已自动迁移。'
+                        : '已从开发者控制台导入存档。';
+                renderUnits();
+                renderAchievements();
+                renderLevelMap();
+                refreshDeveloperConsole('存档导入成功。');
+            } catch (error) {
+                updateAdminStatus(`导入失败：${error.message}`);
+            }
+        }
+
+        function clearStoredSave() {
+            if (!confirm('确定要清空当前浏览器里的存档吗？这会恢复到默认进度。')) {
+                return;
+            }
+
+            gameState = createDefaultGameState();
+            storageStatusMessage = '已通过开发者控制台清空浏览器存档。';
+
+            try {
+                localStorage.removeItem(STORAGE_KEY);
+            } catch (error) {
+                console.warn('清空本地存档失败。', error);
+            }
+
+            renderUnits();
+            renderAchievements();
+            renderLevelMap();
+            refreshDeveloperConsole('已清空浏览器存档并恢复默认状态。');
+        }
+
         function refreshDeveloperConsole(statusMessage) {
             if (!units[devSelectedUnit]) {
                 devSelectedUnit = units[gameState.currentUnit] ? gameState.currentUnit : 0;
@@ -1727,6 +2225,7 @@
             renderDevSummary();
             renderDevUnitTabs();
             renderDevUnitSummary();
+            renderDevStorageTools();
 
             if (statusMessage) {
                 updateAdminStatus(statusMessage);
@@ -1752,6 +2251,13 @@
         }
 
         function showDevMenu() {
+            if (devAccessGranted) {
+                devSelectedUnit = units[gameState.currentUnit] ? gameState.currentUnit : 0;
+                switchScreen('adminScreen');
+                refreshDeveloperConsole('已复用当前会话的开发者权限。');
+                return;
+            }
+
             const devScreen = document.getElementById('devMenuScreen');
             devScreen.style.display = 'flex';
             devScreen.style.top = '0';
@@ -1777,21 +2283,32 @@
                 return;
             }
 
-            const msgUint8 = new TextEncoder().encode(input);
-            const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
+            if (!window.crypto || !window.crypto.subtle) {
+                updateDevPassHint('当前环境不支持口令校验。', true);
+                return;
+            }
 
-            const hashArray = Array.from(new Uint8Array(hashBuffer));
-            const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+            try {
+                const msgUint8 = new TextEncoder().encode(input);
+                const hashBuffer = await crypto.subtle.digest('SHA-256', msgUint8);
 
-            if (inputHash === DEV_ACCESS_HASH) {
-                closeDevMenu();
-                devSelectedUnit = units[gameState.currentUnit] ? gameState.currentUnit : 0;
-                switchScreen('adminScreen');
-                refreshDeveloperConsole('验证成功，开发者控制台已就绪。');
-            } else {
-                inputElement.value = '';
-                updateDevPassHint('口令错误，请重新输入。', true);
-                inputElement.focus();
+                const hashArray = Array.from(new Uint8Array(hashBuffer));
+                const inputHash = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+
+                if (inputHash === DEV_ACCESS_HASH) {
+                    devAccessGranted = true;
+                    closeDevMenu();
+                    devSelectedUnit = units[gameState.currentUnit] ? gameState.currentUnit : 0;
+                    switchScreen('adminScreen');
+                    refreshDeveloperConsole('验证成功，开发者控制台已就绪。');
+                } else {
+                    inputElement.value = '';
+                    updateDevPassHint('口令错误，请重新输入。', true);
+                    inputElement.focus();
+                }
+            } catch (error) {
+                console.warn('开发者口令校验失败。', error);
+                updateDevPassHint('口令校验失败，请在受支持的浏览器环境中重试。', true);
             }
         }
 
