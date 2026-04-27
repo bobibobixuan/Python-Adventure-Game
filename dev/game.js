@@ -44,14 +44,16 @@
                 extremePasses: 0,
                 extremeDualPasses: 0,
                 pendingMode: 'adventure',
-                levelLivesAtStart: 3,
                 isPaused: false,
                 wrongQuestions: [],
                 wrongAnalysisUnit: 0,
                 isExtremeMode: false,
                 extremeScope: null,
                 extremeSegments: [],
-                extremeSegmentIndex: 0
+                extremeSegmentIndex: 0,
+                extremeRunCorrect: 0,
+                extremeRunAttempted: 0,
+                isAnswerLocked: false
             };
         }
 
@@ -97,6 +99,61 @@
 
             event.preventDefault();
             submitPracticeAnswer();
+        }
+
+        function focusInputSoon(inputId) {
+            window.setTimeout(() => {
+                const input = document.getElementById(inputId);
+                if (!input) {
+                    return;
+                }
+
+                input.focus();
+                if (typeof input.select === 'function') {
+                    input.select();
+                }
+            }, 50);
+        }
+
+        function handleChoiceCardKeypress(event, answer, element) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            clickChoiceSubmit(answer, element);
+        }
+
+        function handleJudgeCardKeypress(event, answer, element) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            clickJudgeSubmit(answer, element);
+        }
+
+        function handlePracticeChoiceCardKeypress(event, answer, element) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            practiceClickSubmit('choice', answer, element);
+        }
+
+        function handlePracticeJudgeCardKeypress(event, answer, element) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            practiceClickSubmit('judge', answer, element);
+        }
+
+        function getDefaultWrongAnalysisUnit() {
+            const firstWrong = gameState.wrongQuestions.find(item => units[item.unitIndex]);
+            return firstWrong ? firstWrong.unitIndex : 0;
         }
 
         // 游戏状态
@@ -369,18 +426,116 @@
             }[char]));
         }
 
-        function renderKnowledgeDetails(container, knowledge) {
-            if (!container || !knowledge) {
+        function getQuestionAnswerMarkup(question) {
+            if (!question) {
+                return '未知';
+            }
+
+            if (question.type === '选择题') {
+                const option = Array.isArray(question.options)
+                    ? question.options.find(candidate => candidate.letter === question.answer)
+                    : null;
+
+                return option
+                    ? `<strong>${escapeHtml(question.answer)}.</strong> ${option.text}`
+                    : escapeHtml(question.answer);
+            }
+
+            if (question.type === '判断题') {
+                return normalizeAnswer(question.answer) === 'true' ? '正确' : '错误';
+            }
+
+            return `<code>${escapeHtml(question.answer)}</code>`;
+        }
+
+        function getBeginnerThinkingSteps(question) {
+            const questionText = String(question?.content || '');
+
+            if (question?.type === '填空题' && (questionText.includes('执行代码') || questionText.includes('print('))) {
+                return [
+                    '先看变量一开始的值，不要急着看最后一行。',
+                    '再判断 if 条件是真是假，只执行真正会走到的分支。',
+                    '最后按顺序模拟每一行代码，算出最终输出。'
+                ];
+            }
+
+            if (question?.type === '选择题') {
+                return [
+                    '先看题目在问写法、规则还是运行结果。',
+                    '把明显不合法或明显违背规则的选项先排掉。',
+                    '最后只在剩下的选项里比较，选最符合 Python 规则的一项。'
+                ];
+            }
+
+            if (question?.type === '判断题') {
+                return [
+                    '先把题目改写成一句“Python 里能不能这样做”。',
+                    '再直接拿语法规则去判断真或假，不要靠感觉。',
+                    '看到“必须、一定、只能”这种绝对说法时，要格外小心。'
+                ];
+            }
+
+            return [
+                '先看题目到底在考哪个规则。',
+                '再判断当前写法或条件是否符合这个规则。',
+                '最后回头检查有没有漏掉缩进、符号或边界情况。'
+            ];
+        }
+
+        function buildKnowledgeDetailsMarkup(question, knowledge = question?.knowledge) {
+            if (!knowledge) {
+                return '';
+            }
+
+            const steps = getBeginnerThinkingSteps(question);
+
+            return `
+                <div class="knowledge-heading">
+                    <div>
+                        <h4>📚 小白版答案解析</h4>
+                        <div class="knowledge-meta">
+                            <span class="knowledge-chip">${escapeHtml(question?.category || '基础知识')}</span>
+                            <span class="knowledge-chip">${escapeHtml(question?.type || '题目解析')}</span>
+                        </div>
+                    </div>
+                    <div class="knowledge-answer-card">
+                        <div class="knowledge-answer-label">这题答案</div>
+                        <div class="knowledge-answer-value">${getQuestionAnswerMarkup(question)}</div>
+                    </div>
+                </div>
+                <div class="knowledge-grid">
+                    <section class="knowledge-section knowledge-section--highlight">
+                        <h5>这题其实在考什么</h5>
+                        <p>${knowledge.meaning}</p>
+                    </section>
+                    <section class="knowledge-section">
+                        <h5>为什么答案是这个</h5>
+                        <p>${knowledge.rule}</p>
+                    </section>
+                    <section class="knowledge-section">
+                        <h5>新手可以怎么想</h5>
+                        <ol class="knowledge-steps">
+                            ${steps.map(step => `<li>${step}</li>`).join('')}
+                        </ol>
+                    </section>
+                    <section class="knowledge-section">
+                        <h5>最容易踩的坑</h5>
+                        <p>${knowledge.error}</p>
+                    </section>
+                </div>
+                <div class="knowledge-example-panel">
+                    <h5>照着这个小例子记</h5>
+                    <div class="knowledge-example-content">${knowledge.example}</div>
+                </div>
+            `;
+        }
+
+        function renderKnowledgeDetails(container, question) {
+            if (!container || !question?.knowledge) {
                 return;
             }
 
-            container.innerHTML = `
-                <h4>📚 知识点解析</h4>
-                <p><strong>运算符含义：</strong>${knowledge.meaning}</p>
-                <p><strong>运算规则：</strong>${knowledge.rule}</p>
-                <p><strong>常见易错点：</strong>${knowledge.error}</p>
-                <p><strong>相关示例：</strong>${knowledge.example}</p>
-            `;
+            container.innerHTML = buildKnowledgeDetailsMarkup(question);
             formatMultilineCodeBlocks(container);
         }
 
@@ -585,6 +740,8 @@
             gameState.extremeScope = null;
             gameState.extremeSegments = [];
             gameState.extremeSegmentIndex = 0;
+            gameState.extremeRunCorrect = 0;
+            gameState.extremeRunAttempted = 0;
         }
 
         function getExtremeSegments(scope) {
@@ -720,6 +877,8 @@
             gameState.extremeScope = scope;
             gameState.extremeSegments = getExtremeSegments(scope);
             gameState.extremeSegmentIndex = 0;
+            gameState.extremeRunCorrect = 0;
+            gameState.extremeRunAttempted = 0;
 
             if (gameState.extremeSegments.length === 0) {
                 showStartScreen();
@@ -781,8 +940,8 @@
             gameState.maxCombo = 0;
             gameState.fastStreak = 0;
             gameState.perfectLevel = true;
-            gameState.levelLivesAtStart = gameState.lives;
             gameState.fastAnswer = false;
+            gameState.isAnswerLocked = false;
 
             // 获取该单元该关卡的题目
             const unitQuestions = unitQuestionsMap[gameState.currentUnit];
@@ -818,6 +977,7 @@
         function renderQuestion() {
             const q = currentLevelQuestions[gameState.currentQuestion];
             const questionContent = document.getElementById('questionContent');
+            gameState.isAnswerLocked = false;
 
             document.getElementById('questionType').textContent = q.type;
             document.getElementById('questionProgress').textContent =
@@ -844,7 +1004,7 @@
                 optionsContainer.innerHTML = `
                     <div class="options-grid">
                         ${q.options.map(opt => `
-                            <div class="option-card" onclick="clickChoiceSubmit('${opt.letter}', this)">
+                            <div class="option-card" role="button" tabindex="0" onclick="clickChoiceSubmit('${opt.letter}', this)" onkeypress="handleChoiceCardKeypress(event, '${opt.letter}', this)">
                                 <span class="option-letter">${opt.letter}</span>
                                 <span>${opt.text}</span>
                             </div>
@@ -854,11 +1014,11 @@
             } else if (q.type === '判断题') {
                 optionsContainer.innerHTML = `
                     <div class="judge-options">
-                        <div class="judge-card true-btn" onclick="clickJudgeSubmit('true', this)">
+                        <div class="judge-card true-btn" role="button" tabindex="0" onclick="clickJudgeSubmit('true', this)" onkeypress="handleJudgeCardKeypress(event, 'true', this)">
                             <div class="icon">✓</div>
                             <div>正确</div>
                         </div>
-                        <div class="judge-card false-btn" onclick="clickJudgeSubmit('false', this)">
+                        <div class="judge-card false-btn" role="button" tabindex="0" onclick="clickJudgeSubmit('false', this)" onkeypress="handleJudgeCardKeypress(event, 'false', this)">
                             <div class="icon">✗</div>
                             <div>错误</div>
                         </div>
@@ -871,6 +1031,8 @@
                                placeholder="请输入答案" oninput="checkFillAnswer(this.value)" onkeydown="handleAdventureFillKeydown(event)">
                     </div>
                 `;
+
+                focusInputSoon('fillInput');
             }
 
             gameState.questionStartTime = Date.now();
@@ -893,6 +1055,9 @@
             document.querySelectorAll('.option-card').forEach(el => {
                 el.style.pointerEvents = 'none';
             });
+            if (element) {
+                element.classList.add('selected');
+            }
             gameState.selectedAnswer = answer;
             submitAnswer();
         }
@@ -903,6 +1068,9 @@
             document.querySelectorAll('.judge-card').forEach(el => {
                 el.style.pointerEvents = 'none';
             });
+            if (element) {
+                element.classList.add('selected');
+            }
             gameState.selectedAnswer = answer;
             submitAnswer();
         }
@@ -919,7 +1087,16 @@
         }
         // 提交答案
         function submitAnswer() {
+            if (gameState.isAnswerLocked) {
+                return;
+            }
+
             const q = currentLevelQuestions[gameState.currentQuestion];
+            if (!q) {
+                return;
+            }
+
+            gameState.isAnswerLocked = true;
             const userAnswer = gameState.selectedAnswer;
             const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(q.answer);
 
@@ -976,7 +1153,10 @@
 
                 // 记录错误题
                 const wrongRecord = createWrongQuestionRecord(q, userAnswer);
-                if (!gameState.wrongQuestions.find(w => w.id === q.id)) {
+                const existingIndex = gameState.wrongQuestions.findIndex(w => w.id === q.id);
+                if (existingIndex !== -1) {
+                    gameState.wrongQuestions[existingIndex] = wrongRecord;
+                } else {
                     gameState.wrongQuestions.push(wrongRecord);
                 }
 
@@ -986,8 +1166,23 @@
             // 更新顶部UI
             updateScoreDisplay();
             updateComboDisplay();
-            updateLivesDisplay();
+            if (isCorrect) {
+                updateLivesDisplay();
+            } else {
+                window.setTimeout(() => {
+                    updateLivesDisplay();
+                }, 520);
+            }
             gameState.totalQuestions++;
+
+            if (gameState.isExtremeMode) {
+                gameState.extremeRunAttempted++;
+                if (isCorrect) {
+                    gameState.extremeRunCorrect++;
+                }
+            }
+
+            unlockAchievements(buildAchievementStats());
 
             // 2. 立即在卡片上显示动画和对错反馈文字
             const questionCard = document.querySelector('.question-card');
@@ -1019,13 +1214,6 @@
 
             saveGameState();
 
-            if (gameState.isExtremeMode && !isCorrect) {
-                setTimeout(() => {
-                    gameOver();
-                }, 500);
-                return;
-            }
-
             // 3. 延迟 800 毫秒，让卡片飞一会儿，再弹出详细解析遮罩
             setTimeout(() => {
                 showResult(isCorrect, points, bonus);
@@ -1040,6 +1228,73 @@
             return str;
         }
 
+        function clearQuestionFeedback(cardSelector = '.question-card') {
+            const questionCard = document.querySelector(cardSelector);
+            if (!questionCard) {
+                return;
+            }
+
+            if (questionCard._feedbackTimerId) {
+                clearTimeout(questionCard._feedbackTimerId);
+                questionCard._feedbackTimerId = null;
+            }
+
+            questionCard.classList.remove('answered-correct', 'answered-wrong');
+
+            const feedback = questionCard.querySelector('.answer-feedback');
+            if (feedback) {
+                feedback.remove();
+            }
+
+            const tip = questionCard.querySelector('.correct-answer-tip');
+            if (tip) {
+                tip.remove();
+            }
+
+            const practiceBanner = questionCard.querySelector('.practice-feedback-banner');
+            if (practiceBanner) {
+                practiceBanner.remove();
+            }
+        }
+
+        function showPracticeTransientFeedback(questionCard, isCorrect) {
+            if (!questionCard) {
+                return;
+            }
+
+            if (questionCard._feedbackTimerId) {
+                clearTimeout(questionCard._feedbackTimerId);
+                questionCard._feedbackTimerId = null;
+            }
+
+            const existingFeedback = questionCard.querySelector('.answer-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+
+            const feedback = document.createElement('div');
+            feedback.className = `answer-feedback answer-feedback--practice ${isCorrect ? 'correct' : 'wrong'}`;
+            feedback.textContent = isCorrect ? '✓ 正确！' : '✗ 错误！';
+
+            const cardRect = questionCard.getBoundingClientRect();
+            const questionContent = questionCard.querySelector('#practiceQuestionContent');
+            const optionsContainer = questionCard.querySelector('#practiceOptionsContainer');
+            const contentRect = questionContent ? questionContent.getBoundingClientRect() : null;
+            const optionsRect = optionsContainer ? optionsContainer.getBoundingClientRect() : null;
+
+            if (cardRect && contentRect && optionsRect) {
+                const anchorTop = (contentRect.bottom + optionsRect.bottom) / 2 - cardRect.top;
+                feedback.style.top = `${Math.max(110, anchorTop)}px`;
+            }
+
+            questionCard.appendChild(feedback);
+
+            questionCard._feedbackTimerId = window.setTimeout(() => {
+                feedback.remove();
+                questionCard._feedbackTimerId = null;
+            }, 2300);
+        }
+
         // 显示结果
         function showResult(isCorrect, points, bonus) {
             const overlay = document.getElementById('resultOverlay');
@@ -1048,6 +1303,7 @@
             const scoreDiv = document.getElementById('resultScore');
             const bonusDiv = document.getElementById('resultBonus');
             const knowledgeBox = document.getElementById('knowledgeBox');
+            const continueBtn = overlay.querySelector('.continue-btn');
 
             icon.textContent = isCorrect ? '✓' : '✗';
             icon.style.fontSize = isCorrect ? '80px' : '80px';
@@ -1060,9 +1316,16 @@
             bonusDiv.style.display = bonus ? 'block' : 'none';
 
             const q = currentLevelQuestions[gameState.currentQuestion];
-            renderKnowledgeDetails(knowledgeBox, q.knowledge);
+            renderKnowledgeDetails(knowledgeBox, q);
+            clearQuestionFeedback();
 
             overlay.classList.add('show');
+
+            window.setTimeout(() => {
+                if (continueBtn) {
+                    continueBtn.focus();
+                }
+            }, 50);
         }
 
         function closeResult() {
@@ -1111,6 +1374,7 @@
             // 填空题答案显示
             if (document.getElementById('fillInput')) {
                 const input = document.getElementById('fillInput');
+                input.disabled = true;
                 if (!wasCorrect) {
                     input.style.borderColor = '#ff4757';
                 } else {
@@ -1135,13 +1399,12 @@
             document.body.appendChild(damage);
             setTimeout(() => damage.remove(), 500);
 
-            // 生命值动画
             const lives = document.querySelectorAll('.life:not(.lost)');
             if (lives.length > 0) {
-                lives[lives.length - 1].classList.add('damage');
+                const activeLife = lives[lives.length - 1];
+                activeLife.classList.add('damage');
                 setTimeout(() => {
-                    lives[lives.length - 1].classList.add('lost');
-                    lives[lives.length - 1].classList.remove('damage');
+                    activeLife.classList.remove('damage');
                 }, 500);
             }
         }
@@ -1474,7 +1737,7 @@
                 document.getElementById('gameOverLevel').textContent =
                     `${gameState.extremeSegmentIndex + 1}/${gameState.extremeSegments.length}`;
                 document.getElementById('gameOverCorrect').textContent =
-                    `${gameState.levelCorrect}/${attemptedCount}`;
+                    `${gameState.extremeRunCorrect}/${gameState.extremeRunAttempted}`;
             } else {
                 document.querySelector('.game-over-title').textContent = '💔 挑战失败';
                 document.getElementById('gameOverMessage').textContent = '生命值耗尽，请重新挑战！';
@@ -1521,14 +1784,7 @@
             gameState.selectedAnswer = null;
 
             // 清除旧的答题反馈效果
-            const practiceCard = document.querySelector('#practiceScreen .question-card');
-            if (practiceCard) {
-                practiceCard.classList.remove('answered-correct', 'answered-wrong');
-                const feedback = practiceCard.querySelector('.answer-feedback');
-                if (feedback) feedback.remove();
-                const tip = practiceCard.querySelector('.correct-answer-tip');
-                if (tip) tip.remove();
-            }
+            clearQuestionFeedback('#practiceScreen .question-card');
 
             document.getElementById('practiceSubmitBtn').style.display = 'inline-block';
             document.getElementById('practiceSubmitBtn').textContent = '查看答案';
@@ -1539,7 +1795,7 @@
                 optionsContainer.innerHTML = `
                     <div class="options-grid">
                         ${q.options.map(opt => `
-                            <div class="option-card" onclick="practiceClickSubmit('choice', '${opt.letter}', this)">
+                            <div class="option-card" role="button" tabindex="0" onclick="practiceClickSubmit('choice', '${opt.letter}', this)" onkeypress="handlePracticeChoiceCardKeypress(event, '${opt.letter}', this)">
                                 <span class="option-letter">${opt.letter}</span>
                                 <span>${opt.text}</span>
                             </div>
@@ -1549,11 +1805,11 @@
             } else if (q.type === '判断题') {
                 optionsContainer.innerHTML = `
                     <div class="judge-options">
-                        <div class="judge-card true-btn" onclick="practiceClickSubmit('judge', 'true', this)">
+                        <div class="judge-card true-btn" role="button" tabindex="0" onclick="practiceClickSubmit('judge', 'true', this)" onkeypress="handlePracticeJudgeCardKeypress(event, 'true', this)">
                             <div class="icon">✓</div>
                             <div>正确</div>
                         </div>
-                        <div class="judge-card false-btn" onclick="practiceClickSubmit('judge', 'false', this)">
+                        <div class="judge-card false-btn" role="button" tabindex="0" onclick="practiceClickSubmit('judge', 'false', this)" onkeypress="handlePracticeJudgeCardKeypress(event, 'false', this)">
                             <div class="icon">✗</div>
                             <div>错误</div>
                         </div>
@@ -1566,6 +1822,8 @@
                                placeholder="请输入答案" oninput="selectPracticeAnswer(this.value, this)" onkeydown="handlePracticeFillKeydown(event)">
                     </div>
                 `;
+
+                focusInputSoon('practiceFillInput');
             }
 
             document.getElementById('practiceNextBtn').style.display = 'none';
@@ -1606,6 +1864,9 @@
                     el.style.pointerEvents = 'none';
                 });
             }
+            if (element) {
+                element.classList.add('selected');
+            }
             gameState.selectedAnswer = answer;
             // 直接提交并显示答案
             submitPracticeAnswer();
@@ -1636,27 +1897,7 @@
             if (practiceCard) {
                 practiceCard.classList.remove('answered-correct', 'answered-wrong');
                 practiceCard.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
-
-                // 添加大字反馈
-                const existingFeedback = practiceCard.querySelector('.answer-feedback');
-                if (existingFeedback) existingFeedback.remove();
-
-                const feedback = document.createElement('div');
-                feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'wrong'}`;
-                feedback.textContent = isCorrect ? '✓ 正确！' : '✗ 错误！';
-                practiceCard.appendChild(feedback);
-
-                // 如果答错，添加正确答案提示
-                if (!isCorrect) {
-                    const existingTip = practiceCard.querySelector('.correct-answer-tip');
-                    if (existingTip) existingTip.remove();
-
-                    const tip = document.createElement('div');
-                    tip.className = 'correct-answer-tip';
-                    const correctAnswer = q.answer === 'true' ? '正确' : q.answer === 'false' ? '错误' : q.answer;
-                    tip.innerHTML = `<strong>正确答案：${correctAnswer}</strong>`;
-                    practiceCard.appendChild(tip);
-                }
+                showPracticeTransientFeedback(practiceCard, isCorrect);
             }
 
             // 高亮答案
@@ -1666,7 +1907,7 @@
             const knowledgeBox = document.createElement('div');
             knowledgeBox.className = 'knowledge-box';
             knowledgeBox.style.marginTop = '20px';
-            renderKnowledgeDetails(knowledgeBox, q.knowledge);
+            renderKnowledgeDetails(knowledgeBox, q);
             document.getElementById('practiceOptionsContainer').appendChild(knowledgeBox);
 
             // 隐藏填空题的提交按钮（如果存在）
@@ -1882,8 +2123,12 @@
         }
 
         // 错误分析画面
-        function showWrongAnalysis(unitIndex = 0) {
-            gameState.wrongAnalysisUnit = units[unitIndex] ? unitIndex : 0;
+        function showWrongAnalysis(unitIndex) {
+            const resolvedUnitIndex = typeof unitIndex === 'number'
+                ? unitIndex
+                : getDefaultWrongAnalysisUnit();
+
+            gameState.wrongAnalysisUnit = units[resolvedUnitIndex] ? resolvedUnitIndex : 0;
             renderWrongAnalysisTabs();
             const container = document.getElementById('wrongAnalysisContainer');
             if (gameState.wrongQuestions.length === 0) {
@@ -1957,11 +2202,11 @@
                             <div style="margin: 15px 0;">
                                 <div style="background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
                                     <div style="color: #667eea; font-size: 0.9em; margin-bottom: 8px;"><strong>✓ 正确答案：</strong></div>
-                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #00c853; font-weight: bold; font-family: monospace;">${escapeHtml(q.answer)}</div>
+                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #00c853; font-weight: bold; font-family: monospace; white-space: pre-wrap; word-break: break-word;">${escapeHtml(q.answer)}</div>
                                 </div>
                                 <div style="background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,82,82,0.1)); padding: 15px; border-radius: 8px;">
                                     <div style="color: #ff6b6b; font-size: 0.9em; margin-bottom: 8px;"><strong>✗ 你的答案：</strong></div>
-                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #ff1744; font-weight: bold; font-family: monospace;">${userAnswer}</div>
+                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #ff1744; font-weight: bold; font-family: monospace; white-space: pre-wrap; word-break: break-word;">${userAnswer}</div>
                                 </div>
                             </div>
                         `;
@@ -1981,17 +2226,7 @@
                             </div>
                             <div style="color: #333; margin-bottom: 15px; font-size: 1.05em; line-height: 1.6;">${q ? q.content : '<em>该题题干已不可用。</em>'}</div>
                             ${optionsHtml}
-                            ${q ? `
-                                <div style="background: linear-gradient(135deg, #667eea20, #764ba220); border-left: 4px solid #667eea; border-radius: 5px; padding: 15px; margin-top: 15px;">
-                                    <div style="color: #667eea; font-weight: bold; margin-bottom: 8px;">📚 知识解析：</div>
-                                    <div style="color: #555; font-size: 0.95em; line-height: 1.8;">
-                                        <div style="margin-bottom: 8px;"><strong>• 含义：</strong>${q.knowledge.meaning}</div>
-                                        <div style="margin-bottom: 8px;"><strong>• 规则：</strong>${q.knowledge.rule}</div>
-                                        <div style="margin-bottom: 8px;"><strong>• 常见错误：</strong>${q.knowledge.error}</div>
-                                        <div><strong>• 示例：</strong>${q.knowledge.example}</div>
-                                    </div>
-                                </div>
-                            ` : ''}
+                            ${q ? `<div class="knowledge-box knowledge-box--embedded">${buildKnowledgeDetailsMarkup(q)}</div>` : ''}
                         </div>
                     `;
                 }).join('');

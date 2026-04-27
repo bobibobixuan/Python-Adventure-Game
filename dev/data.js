@@ -20,8 +20,8 @@
             }
         ];
 
-// 第一单元：If语句题目数据
-        const unit1Questions = [
+// 第二单元：If语句题目数据
+    const unit2Questions = [
             // ================= 第1关：基础if语句 (5道) =================
             {
                 id: 101,
@@ -527,8 +527,8 @@
             }
         ];
 
-// 第二单元：运算符题目
-        const unit2Questions = [
+// 第一单元：运算符题目
+    const unit1Questions = [
             {
                 id: 1,
                 category: '算术运算符',
@@ -1031,8 +1031,8 @@
 
 // 单元对应的题目数据
         const unitQuestionsMap = {
-            0: unit2Questions,
-            1: unit1Questions
+            0: unit1Questions,
+            1: unit2Questions
         };
 
 // 单元关卡配置

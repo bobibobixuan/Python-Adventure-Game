@@ -57,21 +57,32 @@
                 <div class="character">🐍</div>
 
                 <div class="mode-buttons">
-                    <button class="mode-btn primary" onclick="startAdventure()">
-                        ⚔️ 冒险模式
-                    </button>
-                    <button class="mode-btn danger" onclick="showExtremeModeSelect()">
-                        👑 极限测试
-                    </button>
-                    <button class="mode-btn secondary" onclick="startPractice()">
-                        📚 修炼场
-                    </button>
-                    <button class="mode-btn secondary" onclick="showRecords()">
-                        📊 做题记录
-                    </button>
-                    <button class="mode-btn secondary" onclick="showAchievements()">
-                        🏆 成就一览
-                    </button>
+                    <div class="menu-featured-grid">
+                        <button class="mode-btn mode-btn--featured primary" onclick="startAdventure()">
+                            <span class="mode-btn-kicker">核心路线</span>
+                            <span class="mode-btn-title">⚔️ 冒险模式</span>
+                            <span class="mode-btn-desc">逐关推进、拿星解锁，适合从头开始系统闯关。</span>
+                        </button>
+                        <button class="mode-btn mode-btn--featured danger" onclick="showExtremeModeSelect()">
+                            <span class="mode-btn-kicker">高压挑战</span>
+                            <span class="mode-btn-title">👑 极限测试</span>
+                            <span class="mode-btn-desc">一命到底，答错即止，适合检验节奏和稳定度。</span>
+                        </button>
+                    </div>
+                    <div class="menu-secondary-grid">
+                        <button class="mode-btn mode-btn--panel secondary" onclick="startPractice()">
+                            <span class="mode-btn-title">📚 修炼场</span>
+                            <span class="mode-btn-desc">随机练习，不扣血不计时，专门拿来补基础。</span>
+                        </button>
+                        <button class="mode-btn mode-btn--panel secondary" onclick="showRecords()">
+                            <span class="mode-btn-title">📊 做题记录</span>
+                            <span class="mode-btn-desc">回看正确率、荣誉记录和分单元进度。</span>
+                        </button>
+                        <button class="mode-btn mode-btn--panel secondary" onclick="showAchievements()">
+                            <span class="mode-btn-title">🏆 成就一览</span>
+                            <span class="mode-btn-desc">查看勋章墙和当前解锁进度。</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>

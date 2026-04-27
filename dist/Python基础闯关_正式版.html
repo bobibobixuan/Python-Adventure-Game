@@ -407,7 +407,7 @@
         /* 开始界面 */
         .start-screen {
             text-align: center;
-            width: min(100%, 860px);
+            width: min(100%, 980px);
             margin: 0 auto;
             padding: clamp(40px, 6vw, 72px) clamp(24px, 5vw, 48px);
             border-radius: 32px;
@@ -467,24 +467,72 @@
         }
 
         .mode-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            max-width: 440px;
+            display: grid;
+            gap: 16px;
+            width: min(100%, 860px);
             margin: 0 auto;
         }
 
+        .menu-featured-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 16px;
+        }
+
+        .menu-secondary-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
         .mode-btn {
-            padding: 20px 40px;
+            padding: 22px 24px;
             border: none;
-            border-radius: 15px;
-            font-size: 1.2em;
+            border-radius: 22px;
+            font-size: 1.05em;
             cursor: pointer;
             transition: all 0.3s ease;
             display: flex;
-            align-items: center;
-            justify-content: center;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: flex-start;
             gap: 10px;
+            min-height: 138px;
+            text-align: left;
+            box-shadow: 0 18px 40px rgba(14, 22, 37, 0.18);
+        }
+
+        .mode-btn--featured {
+            min-height: 172px;
+            padding: 24px 26px;
+        }
+
+        .mode-btn--panel {
+            min-height: 144px;
+        }
+
+        .mode-btn-kicker {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.16);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-size: 0.78em;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .mode-btn-title {
+            font-size: 1.28em;
+            font-weight: 700;
+            line-height: 1.25;
+        }
+
+        .mode-btn-desc {
+            font-size: 0.95em;
+            line-height: 1.7;
+            opacity: 0.9;
         }
         .mode-btn,
         .continue-btn,
@@ -508,27 +556,32 @@
         }
 
         .mode-btn.primary {
-            background: linear-gradient(135deg, #ffd700, #ffaa00);
+            background: linear-gradient(145deg, #ffd95e, #ffb703);
             color: #1a1a2e;
-            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+            box-shadow: 0 18px 42px rgba(255, 190, 11, 0.28);
         }
 
         .mode-btn.secondary {
-            background: rgba(255, 255, 255, 0.1);
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08));
             color: white;
-            border: 2px solid rgba(255, 255, 255, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.22);
         }
 
         .mode-btn.danger {
-            background: linear-gradient(135deg, #ff8a00, #ff3d00);
+            background: linear-gradient(145deg, #ff9a3d, #ff5a36);
             color: white;
-            border: 2px solid rgba(255, 255, 255, 0.25);
-            box-shadow: 0 10px 30px rgba(255, 97, 0, 0.28);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            box-shadow: 0 18px 42px rgba(255, 90, 54, 0.26);
         }
 
         .mode-btn:hover {
             transform: translateY(-5px) scale(1.02);
-            box-shadow: 0 18px 42px rgba(255, 215, 0, 0.4);
+            box-shadow: 0 22px 48px rgba(9, 15, 30, 0.28);
+        }
+
+        .mode-btn.secondary:hover {
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.2), rgba(255, 255, 255, 0.12));
+            border-color: rgba(255, 255, 255, 0.34);
         }
 
         .segmented-tabs {
@@ -1030,8 +1083,14 @@
             color: var(--answer-feedback-color);
             z-index: 10;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-            animation: feedbackPop 0.5s ease;
+            animation: feedbackPop 0.45s ease, feedbackFadeOut 0.45s ease 1.7s forwards;
             pointer-events: none;
+        }
+
+        .answer-feedback--practice {
+            top: 140px;
+            font-size: 3.4em;
+            z-index: 6;
         }
 
         .answer-feedback.wrong {
@@ -1046,6 +1105,38 @@
             border-radius: 10px;
             color: #ff1744;
             font-size: 1.1em;
+        }
+
+        .practice-feedback-banner {
+            margin-top: 16px;
+            padding: 14px 16px;
+            border-radius: 14px;
+            text-align: left;
+            font-size: 0.98em;
+            line-height: 1.7;
+            border: 1px solid transparent;
+        }
+
+        .practice-feedback-banner.is-correct {
+            background: rgba(0, 200, 83, 0.1);
+            border-color: rgba(0, 200, 83, 0.2);
+            color: #0f7a43;
+        }
+
+        .practice-feedback-banner.is-wrong {
+            background: rgba(255, 23, 68, 0.1);
+            border-color: rgba(255, 23, 68, 0.18);
+            color: #c62845;
+        }
+
+        @keyframes feedbackFadeOut {
+            0% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0;
+            }
         }
 
         @keyframes feedbackPop {
@@ -1512,8 +1603,10 @@
             bottom: 0;
             background: rgba(0, 0, 0, 0.8);
             z-index: 1000;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
+            overflow-y: auto;
+            padding: 16px;
         }
 
         .result-overlay.show {
@@ -1523,11 +1616,15 @@
         .result-card {
             background: white;
             border-radius: 25px;
-            padding: 40px;
-            max-width: 500px;
-            width: 90%;
+            padding: 28px;
+            max-width: 760px;
+            width: min(100%, 760px);
+            max-height: calc(100vh - 32px);
+            overflow-y: auto;
+            margin: auto;
             text-align: center;
             animation: popIn 0.4s ease;
+            box-shadow: 0 24px 64px rgba(15, 23, 42, 0.28);
         }
 
         @keyframes popIn {
@@ -1577,18 +1674,23 @@
         }
 
         .knowledge-box {
-            background: linear-gradient(135deg, #667eea20, #764ba220);
-            border-left: 4px solid #667eea;
-            border-radius: 0 15px 15px 0;
-            padding: 20px;
-            margin: 20px 0;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(242, 246, 255, 0.96));
+            border: 1px solid rgba(102, 126, 234, 0.16);
+            border-radius: 20px;
+            padding: 18px;
+            margin: 18px 0;
             text-align: left;
+            box-shadow: 0 16px 34px rgba(31, 41, 55, 0.08);
+        }
+
+        .knowledge-box--embedded {
+            margin-top: 15px;
         }
 
         .knowledge-box h4 {
             color: #667eea;
-            margin-bottom: 10px;
-            font-size: 1.1em;
+            margin-bottom: 0;
+            font-size: 1.18em;
         }
 
         .knowledge-box p {
@@ -1597,12 +1699,147 @@
             margin: 8px 0;
         }
 
+        .knowledge-heading {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .knowledge-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .knowledge-chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(102, 126, 234, 0.1);
+            color: #5662c6;
+            font-size: 0.82em;
+            font-weight: 700;
+        }
+
+        .knowledge-answer-card {
+            min-width: 176px;
+            padding: 12px 14px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.2), rgba(255, 170, 0, 0.14));
+            border: 1px solid rgba(255, 170, 0, 0.18);
+        }
+
+        .knowledge-answer-label {
+            color: #8f6400;
+            font-size: 0.82em;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .knowledge-answer-value {
+            color: #1a1a2e;
+            font-size: 0.98em;
+            font-weight: 700;
+            line-height: 1.55;
+        }
+
+        .knowledge-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .knowledge-section {
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(31, 41, 55, 0.06);
+        }
+
+        .knowledge-section--highlight {
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.12), rgba(118, 75, 162, 0.08));
+            border-color: rgba(102, 126, 234, 0.14);
+        }
+
+        .knowledge-section h5,
+        .knowledge-example-panel h5 {
+            color: #25337d;
+            font-size: 0.94em;
+            margin-bottom: 6px;
+        }
+
+        .knowledge-section p {
+            margin: 0;
+        }
+
+        .knowledge-steps {
+            margin: 0;
+            padding-left: 20px;
+            color: #555;
+            line-height: 1.7;
+        }
+
+        .knowledge-steps li + li {
+            margin-top: 6px;
+        }
+
+        .knowledge-example-panel {
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: linear-gradient(135deg, rgba(0, 217, 255, 0.08), rgba(102, 126, 234, 0.08));
+            border: 1px solid rgba(0, 140, 255, 0.12);
+        }
+
+        .knowledge-example-content {
+            color: #444;
+            line-height: 1.7;
+        }
+
         .knowledge-box code {
             background: #f0f0ff;
             padding: 2px 8px;
             border-radius: 4px;
             font-family: 'Consolas', monospace;
             color: #e91e63;
+        }
+
+        .result-card > .continue-btn {
+            position: sticky;
+            bottom: 0;
+            display: block;
+            width: 100%;
+            margin-top: 16px;
+            box-shadow: 0 -10px 24px rgba(255, 255, 255, 0.95);
+        }
+
+        @media (max-width: 768px) {
+            .result-overlay {
+                padding: 10px;
+            }
+
+            .result-card {
+                padding: 20px;
+                max-height: calc(100vh - 20px);
+            }
+
+            .knowledge-heading {
+                flex-direction: column;
+            }
+
+            .knowledge-answer-card {
+                width: 100%;
+            }
+
+            .knowledge-grid {
+                grid-template-columns: 1fr;
+            }
         }
 
         .continue-btn {
@@ -2104,6 +2341,14 @@
                 font-size: 2em;
             }
 
+            .menu-featured-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .menu-secondary-grid {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
             .container {
                 width: min(100%, calc(100% - 20px));
                 padding-top: 16px;
@@ -2173,6 +2418,19 @@
             .question-card {
                 padding-left: 20px;
                 padding-right: 20px;
+            }
+
+            .menu-secondary-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .mode-btn {
+                align-items: center;
+                text-align: center;
+            }
+
+            .mode-btn-kicker {
+                justify-content: center;
             }
 
             .metrics-grid {
@@ -2474,21 +2732,32 @@
                 <div class="character">🐍</div>
 
                 <div class="mode-buttons">
-                    <button class="mode-btn primary" onclick="startAdventure()">
-                        ⚔️ 冒险模式
-                    </button>
-                    <button class="mode-btn danger" onclick="showExtremeModeSelect()">
-                        👑 极限测试
-                    </button>
-                    <button class="mode-btn secondary" onclick="startPractice()">
-                        📚 修炼场
-                    </button>
-                    <button class="mode-btn secondary" onclick="showRecords()">
-                        📊 做题记录
-                    </button>
-                    <button class="mode-btn secondary" onclick="showAchievements()">
-                        🏆 成就一览
-                    </button>
+                    <div class="menu-featured-grid">
+                        <button class="mode-btn mode-btn--featured primary" onclick="startAdventure()">
+                            <span class="mode-btn-kicker">核心路线</span>
+                            <span class="mode-btn-title">⚔️ 冒险模式</span>
+                            <span class="mode-btn-desc">逐关推进、拿星解锁，适合从头开始系统闯关。</span>
+                        </button>
+                        <button class="mode-btn mode-btn--featured danger" onclick="showExtremeModeSelect()">
+                            <span class="mode-btn-kicker">高压挑战</span>
+                            <span class="mode-btn-title">👑 极限测试</span>
+                            <span class="mode-btn-desc">一命到底，答错即止，适合检验节奏和稳定度。</span>
+                        </button>
+                    </div>
+                    <div class="menu-secondary-grid">
+                        <button class="mode-btn mode-btn--panel secondary" onclick="startPractice()">
+                            <span class="mode-btn-title">📚 修炼场</span>
+                            <span class="mode-btn-desc">随机练习，不扣血不计时，专门拿来补基础。</span>
+                        </button>
+                        <button class="mode-btn mode-btn--panel secondary" onclick="showRecords()">
+                            <span class="mode-btn-title">📊 做题记录</span>
+                            <span class="mode-btn-desc">回看正确率、荣誉记录和分单元进度。</span>
+                        </button>
+                        <button class="mode-btn mode-btn--panel secondary" onclick="showAchievements()">
+                            <span class="mode-btn-title">🏆 成就一览</span>
+                            <span class="mode-btn-desc">查看勋章墙和当前解锁进度。</span>
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2906,8 +3175,8 @@
             }
         ];
 
-// 第一单元：If语句题目数据
-        const unit1Questions = [
+// 第二单元：If语句题目数据
+    const unit2Questions = [
             // ================= 第1关：基础if语句 (5道) =================
             {
                 id: 101,
@@ -3413,8 +3682,8 @@
             }
         ];
 
-// 第二单元：运算符题目
-        const unit2Questions = [
+// 第一单元：运算符题目
+    const unit1Questions = [
             {
                 id: 1,
                 category: '算术运算符',
@@ -3917,8 +4186,8 @@
 
 // 单元对应的题目数据
         const unitQuestionsMap = {
-            0: unit2Questions,
-            1: unit1Questions
+            0: unit1Questions,
+            1: unit2Questions
         };
 
 // 单元关卡配置
@@ -4308,14 +4577,16 @@
                 extremePasses: 0,
                 extremeDualPasses: 0,
                 pendingMode: 'adventure',
-                levelLivesAtStart: 3,
                 isPaused: false,
                 wrongQuestions: [],
                 wrongAnalysisUnit: 0,
                 isExtremeMode: false,
                 extremeScope: null,
                 extremeSegments: [],
-                extremeSegmentIndex: 0
+                extremeSegmentIndex: 0,
+                extremeRunCorrect: 0,
+                extremeRunAttempted: 0,
+                isAnswerLocked: false
             };
         }
 
@@ -4361,6 +4632,61 @@
 
             event.preventDefault();
             submitPracticeAnswer();
+        }
+
+        function focusInputSoon(inputId) {
+            window.setTimeout(() => {
+                const input = document.getElementById(inputId);
+                if (!input) {
+                    return;
+                }
+
+                input.focus();
+                if (typeof input.select === 'function') {
+                    input.select();
+                }
+            }, 50);
+        }
+
+        function handleChoiceCardKeypress(event, answer, element) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            clickChoiceSubmit(answer, element);
+        }
+
+        function handleJudgeCardKeypress(event, answer, element) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            clickJudgeSubmit(answer, element);
+        }
+
+        function handlePracticeChoiceCardKeypress(event, answer, element) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            practiceClickSubmit('choice', answer, element);
+        }
+
+        function handlePracticeJudgeCardKeypress(event, answer, element) {
+            if (event.key !== 'Enter' && event.key !== ' ') {
+                return;
+            }
+
+            event.preventDefault();
+            practiceClickSubmit('judge', answer, element);
+        }
+
+        function getDefaultWrongAnalysisUnit() {
+            const firstWrong = gameState.wrongQuestions.find(item => units[item.unitIndex]);
+            return firstWrong ? firstWrong.unitIndex : 0;
         }
 
         // 游戏状态
@@ -4633,18 +4959,116 @@
             }[char]));
         }
 
-        function renderKnowledgeDetails(container, knowledge) {
-            if (!container || !knowledge) {
+        function getQuestionAnswerMarkup(question) {
+            if (!question) {
+                return '未知';
+            }
+
+            if (question.type === '选择题') {
+                const option = Array.isArray(question.options)
+                    ? question.options.find(candidate => candidate.letter === question.answer)
+                    : null;
+
+                return option
+                    ? `<strong>${escapeHtml(question.answer)}.</strong> ${option.text}`
+                    : escapeHtml(question.answer);
+            }
+
+            if (question.type === '判断题') {
+                return normalizeAnswer(question.answer) === 'true' ? '正确' : '错误';
+            }
+
+            return `<code>${escapeHtml(question.answer)}</code>`;
+        }
+
+        function getBeginnerThinkingSteps(question) {
+            const questionText = String(question?.content || '');
+
+            if (question?.type === '填空题' && (questionText.includes('执行代码') || questionText.includes('print('))) {
+                return [
+                    '先看变量一开始的值，不要急着看最后一行。',
+                    '再判断 if 条件是真是假，只执行真正会走到的分支。',
+                    '最后按顺序模拟每一行代码，算出最终输出。'
+                ];
+            }
+
+            if (question?.type === '选择题') {
+                return [
+                    '先看题目在问写法、规则还是运行结果。',
+                    '把明显不合法或明显违背规则的选项先排掉。',
+                    '最后只在剩下的选项里比较，选最符合 Python 规则的一项。'
+                ];
+            }
+
+            if (question?.type === '判断题') {
+                return [
+                    '先把题目改写成一句“Python 里能不能这样做”。',
+                    '再直接拿语法规则去判断真或假，不要靠感觉。',
+                    '看到“必须、一定、只能”这种绝对说法时，要格外小心。'
+                ];
+            }
+
+            return [
+                '先看题目到底在考哪个规则。',
+                '再判断当前写法或条件是否符合这个规则。',
+                '最后回头检查有没有漏掉缩进、符号或边界情况。'
+            ];
+        }
+
+        function buildKnowledgeDetailsMarkup(question, knowledge = question?.knowledge) {
+            if (!knowledge) {
+                return '';
+            }
+
+            const steps = getBeginnerThinkingSteps(question);
+
+            return `
+                <div class="knowledge-heading">
+                    <div>
+                        <h4>📚 小白版答案解析</h4>
+                        <div class="knowledge-meta">
+                            <span class="knowledge-chip">${escapeHtml(question?.category || '基础知识')}</span>
+                            <span class="knowledge-chip">${escapeHtml(question?.type || '题目解析')}</span>
+                        </div>
+                    </div>
+                    <div class="knowledge-answer-card">
+                        <div class="knowledge-answer-label">这题答案</div>
+                        <div class="knowledge-answer-value">${getQuestionAnswerMarkup(question)}</div>
+                    </div>
+                </div>
+                <div class="knowledge-grid">
+                    <section class="knowledge-section knowledge-section--highlight">
+                        <h5>这题其实在考什么</h5>
+                        <p>${knowledge.meaning}</p>
+                    </section>
+                    <section class="knowledge-section">
+                        <h5>为什么答案是这个</h5>
+                        <p>${knowledge.rule}</p>
+                    </section>
+                    <section class="knowledge-section">
+                        <h5>新手可以怎么想</h5>
+                        <ol class="knowledge-steps">
+                            ${steps.map(step => `<li>${step}</li>`).join('')}
+                        </ol>
+                    </section>
+                    <section class="knowledge-section">
+                        <h5>最容易踩的坑</h5>
+                        <p>${knowledge.error}</p>
+                    </section>
+                </div>
+                <div class="knowledge-example-panel">
+                    <h5>照着这个小例子记</h5>
+                    <div class="knowledge-example-content">${knowledge.example}</div>
+                </div>
+            `;
+        }
+
+        function renderKnowledgeDetails(container, question) {
+            if (!container || !question?.knowledge) {
                 return;
             }
 
-            container.innerHTML = `
-                <h4>📚 知识点解析</h4>
-                <p><strong>运算符含义：</strong>${knowledge.meaning}</p>
-                <p><strong>运算规则：</strong>${knowledge.rule}</p>
-                <p><strong>常见易错点：</strong>${knowledge.error}</p>
-                <p><strong>相关示例：</strong>${knowledge.example}</p>
-            `;
+            container.innerHTML = buildKnowledgeDetailsMarkup(question);
             formatMultilineCodeBlocks(container);
         }
 
@@ -4849,6 +5273,8 @@
             gameState.extremeScope = null;
             gameState.extremeSegments = [];
             gameState.extremeSegmentIndex = 0;
+            gameState.extremeRunCorrect = 0;
+            gameState.extremeRunAttempted = 0;
         }
 
         function getExtremeSegments(scope) {
@@ -4984,6 +5410,8 @@
             gameState.extremeScope = scope;
             gameState.extremeSegments = getExtremeSegments(scope);
             gameState.extremeSegmentIndex = 0;
+            gameState.extremeRunCorrect = 0;
+            gameState.extremeRunAttempted = 0;
 
             if (gameState.extremeSegments.length === 0) {
                 showStartScreen();
@@ -5045,8 +5473,8 @@
             gameState.maxCombo = 0;
             gameState.fastStreak = 0;
             gameState.perfectLevel = true;
-            gameState.levelLivesAtStart = gameState.lives;
             gameState.fastAnswer = false;
+            gameState.isAnswerLocked = false;
 
             // 获取该单元该关卡的题目
             const unitQuestions = unitQuestionsMap[gameState.currentUnit];
@@ -5082,6 +5510,7 @@
         function renderQuestion() {
             const q = currentLevelQuestions[gameState.currentQuestion];
             const questionContent = document.getElementById('questionContent');
+            gameState.isAnswerLocked = false;
 
             document.getElementById('questionType').textContent = q.type;
             document.getElementById('questionProgress').textContent =
@@ -5108,7 +5537,7 @@
                 optionsContainer.innerHTML = `
                     <div class="options-grid">
                         ${q.options.map(opt => `
-                            <div class="option-card" onclick="clickChoiceSubmit('${opt.letter}', this)">
+                            <div class="option-card" role="button" tabindex="0" onclick="clickChoiceSubmit('${opt.letter}', this)" onkeypress="handleChoiceCardKeypress(event, '${opt.letter}', this)">
                                 <span class="option-letter">${opt.letter}</span>
                                 <span>${opt.text}</span>
                             </div>
@@ -5118,11 +5547,11 @@
             } else if (q.type === '判断题') {
                 optionsContainer.innerHTML = `
                     <div class="judge-options">
-                        <div class="judge-card true-btn" onclick="clickJudgeSubmit('true', this)">
+                        <div class="judge-card true-btn" role="button" tabindex="0" onclick="clickJudgeSubmit('true', this)" onkeypress="handleJudgeCardKeypress(event, 'true', this)">
                             <div class="icon">✓</div>
                             <div>正确</div>
                         </div>
-                        <div class="judge-card false-btn" onclick="clickJudgeSubmit('false', this)">
+                        <div class="judge-card false-btn" role="button" tabindex="0" onclick="clickJudgeSubmit('false', this)" onkeypress="handleJudgeCardKeypress(event, 'false', this)">
                             <div class="icon">✗</div>
                             <div>错误</div>
                         </div>
@@ -5135,6 +5564,8 @@
                                placeholder="请输入答案" oninput="checkFillAnswer(this.value)" onkeydown="handleAdventureFillKeydown(event)">
                     </div>
                 `;
+
+                focusInputSoon('fillInput');
             }
 
             gameState.questionStartTime = Date.now();
@@ -5157,6 +5588,9 @@
             document.querySelectorAll('.option-card').forEach(el => {
                 el.style.pointerEvents = 'none';
             });
+            if (element) {
+                element.classList.add('selected');
+            }
             gameState.selectedAnswer = answer;
             submitAnswer();
         }
@@ -5167,6 +5601,9 @@
             document.querySelectorAll('.judge-card').forEach(el => {
                 el.style.pointerEvents = 'none';
             });
+            if (element) {
+                element.classList.add('selected');
+            }
             gameState.selectedAnswer = answer;
             submitAnswer();
         }
@@ -5183,7 +5620,16 @@
         }
         // 提交答案
         function submitAnswer() {
+            if (gameState.isAnswerLocked) {
+                return;
+            }
+
             const q = currentLevelQuestions[gameState.currentQuestion];
+            if (!q) {
+                return;
+            }
+
+            gameState.isAnswerLocked = true;
             const userAnswer = gameState.selectedAnswer;
             const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(q.answer);
 
@@ -5240,7 +5686,10 @@
 
                 // 记录错误题
                 const wrongRecord = createWrongQuestionRecord(q, userAnswer);
-                if (!gameState.wrongQuestions.find(w => w.id === q.id)) {
+                const existingIndex = gameState.wrongQuestions.findIndex(w => w.id === q.id);
+                if (existingIndex !== -1) {
+                    gameState.wrongQuestions[existingIndex] = wrongRecord;
+                } else {
                     gameState.wrongQuestions.push(wrongRecord);
                 }
 
@@ -5250,8 +5699,23 @@
             // 更新顶部UI
             updateScoreDisplay();
             updateComboDisplay();
-            updateLivesDisplay();
+            if (isCorrect) {
+                updateLivesDisplay();
+            } else {
+                window.setTimeout(() => {
+                    updateLivesDisplay();
+                }, 520);
+            }
             gameState.totalQuestions++;
+
+            if (gameState.isExtremeMode) {
+                gameState.extremeRunAttempted++;
+                if (isCorrect) {
+                    gameState.extremeRunCorrect++;
+                }
+            }
+
+            unlockAchievements(buildAchievementStats());
 
             // 2. 立即在卡片上显示动画和对错反馈文字
             const questionCard = document.querySelector('.question-card');
@@ -5283,13 +5747,6 @@
 
             saveGameState();
 
-            if (gameState.isExtremeMode && !isCorrect) {
-                setTimeout(() => {
-                    gameOver();
-                }, 500);
-                return;
-            }
-
             // 3. 延迟 800 毫秒，让卡片飞一会儿，再弹出详细解析遮罩
             setTimeout(() => {
                 showResult(isCorrect, points, bonus);
@@ -5304,6 +5761,73 @@
             return str;
         }
 
+        function clearQuestionFeedback(cardSelector = '.question-card') {
+            const questionCard = document.querySelector(cardSelector);
+            if (!questionCard) {
+                return;
+            }
+
+            if (questionCard._feedbackTimerId) {
+                clearTimeout(questionCard._feedbackTimerId);
+                questionCard._feedbackTimerId = null;
+            }
+
+            questionCard.classList.remove('answered-correct', 'answered-wrong');
+
+            const feedback = questionCard.querySelector('.answer-feedback');
+            if (feedback) {
+                feedback.remove();
+            }
+
+            const tip = questionCard.querySelector('.correct-answer-tip');
+            if (tip) {
+                tip.remove();
+            }
+
+            const practiceBanner = questionCard.querySelector('.practice-feedback-banner');
+            if (practiceBanner) {
+                practiceBanner.remove();
+            }
+        }
+
+        function showPracticeTransientFeedback(questionCard, isCorrect) {
+            if (!questionCard) {
+                return;
+            }
+
+            if (questionCard._feedbackTimerId) {
+                clearTimeout(questionCard._feedbackTimerId);
+                questionCard._feedbackTimerId = null;
+            }
+
+            const existingFeedback = questionCard.querySelector('.answer-feedback');
+            if (existingFeedback) {
+                existingFeedback.remove();
+            }
+
+            const feedback = document.createElement('div');
+            feedback.className = `answer-feedback answer-feedback--practice ${isCorrect ? 'correct' : 'wrong'}`;
+            feedback.textContent = isCorrect ? '✓ 正确！' : '✗ 错误！';
+
+            const cardRect = questionCard.getBoundingClientRect();
+            const questionContent = questionCard.querySelector('#practiceQuestionContent');
+            const optionsContainer = questionCard.querySelector('#practiceOptionsContainer');
+            const contentRect = questionContent ? questionContent.getBoundingClientRect() : null;
+            const optionsRect = optionsContainer ? optionsContainer.getBoundingClientRect() : null;
+
+            if (cardRect && contentRect && optionsRect) {
+                const anchorTop = (contentRect.bottom + optionsRect.bottom) / 2 - cardRect.top;
+                feedback.style.top = `${Math.max(110, anchorTop)}px`;
+            }
+
+            questionCard.appendChild(feedback);
+
+            questionCard._feedbackTimerId = window.setTimeout(() => {
+                feedback.remove();
+                questionCard._feedbackTimerId = null;
+            }, 2300);
+        }
+
         // 显示结果
         function showResult(isCorrect, points, bonus) {
             const overlay = document.getElementById('resultOverlay');
@@ -5312,6 +5836,7 @@
             const scoreDiv = document.getElementById('resultScore');
             const bonusDiv = document.getElementById('resultBonus');
             const knowledgeBox = document.getElementById('knowledgeBox');
+            const continueBtn = overlay.querySelector('.continue-btn');
 
             icon.textContent = isCorrect ? '✓' : '✗';
             icon.style.fontSize = isCorrect ? '80px' : '80px';
@@ -5324,9 +5849,16 @@
             bonusDiv.style.display = bonus ? 'block' : 'none';
 
             const q = currentLevelQuestions[gameState.currentQuestion];
-            renderKnowledgeDetails(knowledgeBox, q.knowledge);
+            renderKnowledgeDetails(knowledgeBox, q);
+            clearQuestionFeedback();
 
             overlay.classList.add('show');
+
+            window.setTimeout(() => {
+                if (continueBtn) {
+                    continueBtn.focus();
+                }
+            }, 50);
         }
 
         function closeResult() {
@@ -5375,6 +5907,7 @@
             // 填空题答案显示
             if (document.getElementById('fillInput')) {
                 const input = document.getElementById('fillInput');
+                input.disabled = true;
                 if (!wasCorrect) {
                     input.style.borderColor = '#ff4757';
                 } else {
@@ -5399,13 +5932,12 @@
             document.body.appendChild(damage);
             setTimeout(() => damage.remove(), 500);
 
-            // 生命值动画
             const lives = document.querySelectorAll('.life:not(.lost)');
             if (lives.length > 0) {
-                lives[lives.length - 1].classList.add('damage');
+                const activeLife = lives[lives.length - 1];
+                activeLife.classList.add('damage');
                 setTimeout(() => {
-                    lives[lives.length - 1].classList.add('lost');
-                    lives[lives.length - 1].classList.remove('damage');
+                    activeLife.classList.remove('damage');
                 }, 500);
             }
         }
@@ -5738,7 +6270,7 @@
                 document.getElementById('gameOverLevel').textContent =
                     `${gameState.extremeSegmentIndex + 1}/${gameState.extremeSegments.length}`;
                 document.getElementById('gameOverCorrect').textContent =
-                    `${gameState.levelCorrect}/${attemptedCount}`;
+                    `${gameState.extremeRunCorrect}/${gameState.extremeRunAttempted}`;
             } else {
                 document.querySelector('.game-over-title').textContent = '💔 挑战失败';
                 document.getElementById('gameOverMessage').textContent = '生命值耗尽，请重新挑战！';
@@ -5785,14 +6317,7 @@
             gameState.selectedAnswer = null;
 
             // 清除旧的答题反馈效果
-            const practiceCard = document.querySelector('#practiceScreen .question-card');
-            if (practiceCard) {
-                practiceCard.classList.remove('answered-correct', 'answered-wrong');
-                const feedback = practiceCard.querySelector('.answer-feedback');
-                if (feedback) feedback.remove();
-                const tip = practiceCard.querySelector('.correct-answer-tip');
-                if (tip) tip.remove();
-            }
+            clearQuestionFeedback('#practiceScreen .question-card');
 
             document.getElementById('practiceSubmitBtn').style.display = 'inline-block';
             document.getElementById('practiceSubmitBtn').textContent = '查看答案';
@@ -5803,7 +6328,7 @@
                 optionsContainer.innerHTML = `
                     <div class="options-grid">
                         ${q.options.map(opt => `
-                            <div class="option-card" onclick="practiceClickSubmit('choice', '${opt.letter}', this)">
+                            <div class="option-card" role="button" tabindex="0" onclick="practiceClickSubmit('choice', '${opt.letter}', this)" onkeypress="handlePracticeChoiceCardKeypress(event, '${opt.letter}', this)">
                                 <span class="option-letter">${opt.letter}</span>
                                 <span>${opt.text}</span>
                             </div>
@@ -5813,11 +6338,11 @@
             } else if (q.type === '判断题') {
                 optionsContainer.innerHTML = `
                     <div class="judge-options">
-                        <div class="judge-card true-btn" onclick="practiceClickSubmit('judge', 'true', this)">
+                        <div class="judge-card true-btn" role="button" tabindex="0" onclick="practiceClickSubmit('judge', 'true', this)" onkeypress="handlePracticeJudgeCardKeypress(event, 'true', this)">
                             <div class="icon">✓</div>
                             <div>正确</div>
                         </div>
-                        <div class="judge-card false-btn" onclick="practiceClickSubmit('judge', 'false', this)">
+                        <div class="judge-card false-btn" role="button" tabindex="0" onclick="practiceClickSubmit('judge', 'false', this)" onkeypress="handlePracticeJudgeCardKeypress(event, 'false', this)">
                             <div class="icon">✗</div>
                             <div>错误</div>
                         </div>
@@ -5830,6 +6355,8 @@
                                placeholder="请输入答案" oninput="selectPracticeAnswer(this.value, this)" onkeydown="handlePracticeFillKeydown(event)">
                     </div>
                 `;
+
+                focusInputSoon('practiceFillInput');
             }
 
             document.getElementById('practiceNextBtn').style.display = 'none';
@@ -5870,6 +6397,9 @@
                     el.style.pointerEvents = 'none';
                 });
             }
+            if (element) {
+                element.classList.add('selected');
+            }
             gameState.selectedAnswer = answer;
             // 直接提交并显示答案
             submitPracticeAnswer();
@@ -5900,27 +6430,7 @@
             if (practiceCard) {
                 practiceCard.classList.remove('answered-correct', 'answered-wrong');
                 practiceCard.classList.add(isCorrect ? 'answered-correct' : 'answered-wrong');
-
-                // 添加大字反馈
-                const existingFeedback = practiceCard.querySelector('.answer-feedback');
-                if (existingFeedback) existingFeedback.remove();
-
-                const feedback = document.createElement('div');
-                feedback.className = `answer-feedback ${isCorrect ? 'correct' : 'wrong'}`;
-                feedback.textContent = isCorrect ? '✓ 正确！' : '✗ 错误！';
-                practiceCard.appendChild(feedback);
-
-                // 如果答错，添加正确答案提示
-                if (!isCorrect) {
-                    const existingTip = practiceCard.querySelector('.correct-answer-tip');
-                    if (existingTip) existingTip.remove();
-
-                    const tip = document.createElement('div');
-                    tip.className = 'correct-answer-tip';
-                    const correctAnswer = q.answer === 'true' ? '正确' : q.answer === 'false' ? '错误' : q.answer;
-                    tip.innerHTML = `<strong>正确答案：${correctAnswer}</strong>`;
-                    practiceCard.appendChild(tip);
-                }
+                showPracticeTransientFeedback(practiceCard, isCorrect);
             }
 
             // 高亮答案
@@ -5930,7 +6440,7 @@
             const knowledgeBox = document.createElement('div');
             knowledgeBox.className = 'knowledge-box';
             knowledgeBox.style.marginTop = '20px';
-            renderKnowledgeDetails(knowledgeBox, q.knowledge);
+            renderKnowledgeDetails(knowledgeBox, q);
             document.getElementById('practiceOptionsContainer').appendChild(knowledgeBox);
 
             // 隐藏填空题的提交按钮（如果存在）
@@ -6146,8 +6656,12 @@
         }
 
         // 错误分析画面
-        function showWrongAnalysis(unitIndex = 0) {
-            gameState.wrongAnalysisUnit = units[unitIndex] ? unitIndex : 0;
+        function showWrongAnalysis(unitIndex) {
+            const resolvedUnitIndex = typeof unitIndex === 'number'
+                ? unitIndex
+                : getDefaultWrongAnalysisUnit();
+
+            gameState.wrongAnalysisUnit = units[resolvedUnitIndex] ? resolvedUnitIndex : 0;
             renderWrongAnalysisTabs();
             const container = document.getElementById('wrongAnalysisContainer');
             if (gameState.wrongQuestions.length === 0) {
@@ -6221,11 +6735,11 @@
                             <div style="margin: 15px 0;">
                                 <div style="background: linear-gradient(135deg, rgba(102,126,234,0.1), rgba(118,75,162,0.1)); padding: 15px; border-radius: 8px; margin-bottom: 10px;">
                                     <div style="color: #667eea; font-size: 0.9em; margin-bottom: 8px;"><strong>✓ 正确答案：</strong></div>
-                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #00c853; font-weight: bold; font-family: monospace;">${escapeHtml(q.answer)}</div>
+                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #00c853; font-weight: bold; font-family: monospace; white-space: pre-wrap; word-break: break-word;">${escapeHtml(q.answer)}</div>
                                 </div>
                                 <div style="background: linear-gradient(135deg, rgba(255,107,107,0.1), rgba(255,82,82,0.1)); padding: 15px; border-radius: 8px;">
                                     <div style="color: #ff6b6b; font-size: 0.9em; margin-bottom: 8px;"><strong>✗ 你的答案：</strong></div>
-                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #ff1744; font-weight: bold; font-family: monospace;">${userAnswer}</div>
+                                    <div style="background: #fff; padding: 10px; border-radius: 5px; color: #ff1744; font-weight: bold; font-family: monospace; white-space: pre-wrap; word-break: break-word;">${userAnswer}</div>
                                 </div>
                             </div>
                         `;
@@ -6245,17 +6759,7 @@
                             </div>
                             <div style="color: #333; margin-bottom: 15px; font-size: 1.05em; line-height: 1.6;">${q ? q.content : '<em>该题题干已不可用。</em>'}</div>
                             ${optionsHtml}
-                            ${q ? `
-                                <div style="background: linear-gradient(135deg, #667eea20, #764ba220); border-left: 4px solid #667eea; border-radius: 5px; padding: 15px; margin-top: 15px;">
-                                    <div style="color: #667eea; font-weight: bold; margin-bottom: 8px;">📚 知识解析：</div>
-                                    <div style="color: #555; font-size: 0.95em; line-height: 1.8;">
-                                        <div style="margin-bottom: 8px;"><strong>• 含义：</strong>${q.knowledge.meaning}</div>
-                                        <div style="margin-bottom: 8px;"><strong>• 规则：</strong>${q.knowledge.rule}</div>
-                                        <div style="margin-bottom: 8px;"><strong>• 常见错误：</strong>${q.knowledge.error}</div>
-                                        <div><strong>• 示例：</strong>${q.knowledge.example}</div>
-                                    </div>
-                                </div>
-                            ` : ''}
+                            ${q ? `<div class="knowledge-box knowledge-box--embedded">${buildKnowledgeDetailsMarkup(q)}</div>` : ''}
                         </div>
                     `;
                 }).join('');
