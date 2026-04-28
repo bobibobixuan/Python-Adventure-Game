@@ -473,6 +473,119 @@
             margin: 0 auto;
         }
 
+        .learning-route-panel {
+            margin-top: 28px;
+            padding: 24px;
+            border-radius: 24px;
+            background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.05));
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            box-shadow: 0 18px 40px rgba(11, 17, 30, 0.18);
+            text-align: left;
+        }
+
+        .learning-route-panel--select {
+            width: min(100%, 1040px);
+            margin: 0 auto 26px;
+        }
+
+        .learning-route-kicker {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(255, 215, 0, 0.18);
+            border: 1px solid rgba(255, 215, 0, 0.24);
+            color: #ffe082;
+            font-size: 0.8em;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .learning-route-title {
+            margin-top: 14px;
+            color: #ffffff;
+            font-size: clamp(1.4rem, 2.6vw, 2rem);
+        }
+
+        .learning-route-copy {
+            margin-top: 10px;
+            color: rgba(232, 237, 255, 0.88);
+            line-height: 1.8;
+        }
+
+        .learning-route-grid,
+        .route-track {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .route-step-card,
+        .route-track-item {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 18px;
+            padding: 18px;
+            color: #eef2ff;
+        }
+
+        .route-step-number,
+        .route-track-index {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255, 215, 0, 0.18);
+            color: #ffe082;
+            font-weight: bold;
+            margin-bottom: 12px;
+        }
+
+        .route-step-card h3,
+        .route-track-item h3 {
+            font-size: 1.05em;
+            margin-bottom: 10px;
+        }
+
+        .route-step-card p,
+        .route-track-item p {
+            line-height: 1.75;
+            color: rgba(233, 238, 255, 0.88);
+        }
+
+        .route-track-head {
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .route-track-status {
+            font-size: 0.82em;
+            color: #d8e2ff;
+        }
+
+        .route-track-note {
+            margin-top: 12px;
+            color: #ffe8a3;
+            line-height: 1.7;
+            font-size: 0.92em;
+        }
+
+        .route-track-item--active {
+            border-color: rgba(255, 215, 0, 0.5);
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.16), rgba(255, 255, 255, 0.08));
+            box-shadow: 0 18px 36px rgba(255, 215, 0, 0.12);
+        }
+
+        .route-track-item--done {
+            border-color: rgba(0, 255, 136, 0.36);
+        }
+
         .menu-featured-grid {
             display: grid;
             grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2523,14 +2636,18 @@
         .unit-subtitle {
             color: #a0a0a0;
             font-size: 1.1em;
-            margin-bottom: 50px;
+            margin-bottom: 26px;
+            max-width: 760px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.8;
         }
 
         .units-container {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
-            max-width: 800px;
+            max-width: 1100px;
             margin: 0 auto 40px;
         }
 
@@ -2544,8 +2661,14 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-height: 250px;
+            justify-content: flex-start;
+            min-height: 320px;
+            text-align: center;
+        }
+
+        .unit-card--recommended {
+            border-color: rgba(255, 215, 0, 0.8);
+            box-shadow: 0 18px 40px rgba(255, 215, 0, 0.18);
         }
 
         .unit-card:hover {
@@ -2559,6 +2682,49 @@
             border-color: #00ff88;
             box-shadow: 0 0 30px rgba(0, 255, 136, 0.5);
             background: linear-gradient(135deg, rgba(0, 255, 136, 0.1), rgba(0, 255, 136, 0.05));
+        }
+
+        .unit-card-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 12px;
+        }
+
+        .unit-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.14);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #eef2ff;
+            font-size: 0.82em;
+        }
+
+        .unit-badge--recommended {
+            background: rgba(255, 215, 0, 0.2);
+            border-color: rgba(255, 215, 0, 0.34);
+            color: #ffe082;
+        }
+
+        .unit-badge--done {
+            background: rgba(0, 255, 136, 0.18);
+            border-color: rgba(0, 255, 136, 0.34);
+            color: #c6ffe6;
+        }
+
+        .unit-card-tip {
+            margin-top: 12px;
+            color: #fff0b3;
+            line-height: 1.7;
+            font-size: 0.95em;
+        }
+
+        .unit-card-tip--muted {
+            color: rgba(232, 237, 255, 0.82);
+            font-size: 0.9em;
         }
 
         .unit-buttons {
@@ -2759,6 +2925,34 @@
                         </button>
                     </div>
                 </div>
+
+                <section class="learning-route-panel learning-route-panel--home">
+                    <span class="learning-route-kicker">新手路线</span>
+                    <h2 class="learning-route-title">第一次玩，建议按这条线学</h2>
+                    <p class="learning-route-copy">别急着所有模式都试一遍。先按“运算符 → 条件判断 → 循环”的顺序推进，卡住时再去修炼场补基础，学习会稳很多。</p>
+                    <div class="learning-route-grid">
+                        <article class="route-step-card">
+                            <span class="route-step-number">1</span>
+                            <h3>先学运算符</h3>
+                            <p>先把表达式算明白，后面读条件和循环才不会乱。</p>
+                        </article>
+                        <article class="route-step-card">
+                            <span class="route-step-number">2</span>
+                            <h3>再学条件判断</h3>
+                            <p>先判断真假，再决定程序应该走哪一条分支。</p>
+                        </article>
+                        <article class="route-step-card">
+                            <span class="route-step-number">3</span>
+                            <h3>然后进入循环</h3>
+                            <p>把“程序重复做事”的思路建立起来，难度会自然抬升。</p>
+                        </article>
+                        <article class="route-step-card">
+                            <span class="route-step-number">4</span>
+                            <h3>卡住就去修炼场</h3>
+                            <p>先把薄弱点补清楚，再回主线推进，比硬顶更有效。</p>
+                        </article>
+                    </div>
+                </section>
             </div>
         </div>
 
@@ -2797,7 +2991,9 @@
         <div class="screen" id="unitSelectScreen">
             <div class="unit-select-screen">
                 <h1 class="unit-title">📚 选择学习单元</h1>
-                <p class="unit-subtitle">选择你要挑战的单元，开始你的Python之旅</p>
+                <p class="unit-subtitle" id="unitSelectSubtitle">选择你要挑战的单元，开始你的Python之旅</p>
+
+                <div id="learningPathPanel"></div>
 
                 <div class="units-container" id="unitsContainer"></div>
 
@@ -2856,7 +3052,7 @@
             <div class="practice-mode">
                 <div class="practice-badge">📚 修炼场模式</div>
                 <p class="practice-mode-title" id="practiceTitle">随机练习</p>
-                <p class="practice-mode-subtitle">不计时、不扣血，专注学习</p>
+                <p class="practice-mode-subtitle" id="practiceSubtitle">不计时、不扣血，专注学习</p>
             </div>
 
             <div class="question-card question-card--spaced">
@@ -3161,6 +3357,8 @@
                 icon: '➕',
                 subtitle: '各类运算符的详解',
                 description: '深入学习算术、比较、逻辑、赋值、成员等运算符的用法',
+                learningGoal: '先把表达式怎么计算、真假怎么判断弄明白。',
+                starterTip: '第一次建议先打通前两关，再回修炼场把算式题刷顺。',
                 levels: 6,
                 color: '#ffd700'
             },
@@ -3170,8 +3368,21 @@
                 icon: '🚦',
                 subtitle: '条件判断的基础概念',
                 description: '学习Python的If语句，包括基础if、if-else、elif等多种条件结构',
+                learningGoal: '练会“先判断条件，再决定走哪条分支”的思维。',
+                starterTip: '建议边读题边用纸笔写出条件真假和变量变化。',
                 levels: 6,
                 color: '#667eea'
+            },
+            {
+                id: 2,
+                name: '第三单元：循环入门',
+                icon: '🔁',
+                subtitle: '重复执行与流程控制',
+                description: '学习for、range、while、break、continue和循环嵌套，真正建立“重复执行”的程序思维',
+                learningGoal: '把“执行几次、什么时候停、每次变量怎么变”看清楚。',
+                starterTip: '先盯住循环次数，再一轮一轮模拟变量变化，会轻松很多。',
+                levels: 6,
+                color: '#36cfc9'
             }
         ];
 
@@ -4191,9 +4402,517 @@ const unit2Questions = [
 // 第一单元：运算符题目
 
 
+// 第三单元：循环入门题目数据
+    const unit3Questions = [
+            // ================= 第1关：for循环入门 (5道) =================
+            {
+                id: 201,
+                category: 'for循环入门',
+                categoryId: 0,
+                type: '选择题',
+                content: '执行代码：<br><code>for item in [1, 2, 3]:<br>&nbsp;&nbsp;&nbsp;&nbsp;print(item)</code><br>循环体会执行几次？',
+                answer: 'C',
+                options: [
+                    { letter: 'A', text: '1 次' },
+                    { letter: 'B', text: '2 次' },
+                    { letter: 'C', text: '3 次' },
+                    { letter: 'D', text: '4 次' }
+                ],
+                knowledge: {
+                    meaning: '列表里有 3 个元素，for 会依次取出每个元素，所以循环体执行 3 次。',
+                    rule: 'for ... in ... 的本质是“从可迭代对象里一个一个取值”。对象里有几个元素，就会跑几轮。',
+                    error: '很多人会把“元素值 1、2、3”误看成“执行到 3 就停”，其实这里看的是元素个数。',
+                    example: '<code>for x in [10, 20]:</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;print(x)</code><br>会执行 2 次。'
+                }
+            },
+            {
+                id: 202,
+                category: 'for循环入门',
+                categoryId: 0,
+                type: '判断题',
+                content: '在代码 <code>for letter in "hi":</code> 中，变量 <code>letter</code> 会先后取到 <code>h</code> 和 <code>i</code>。',
+                answer: 'true',
+                knowledge: {
+                    meaning: '字符串也能被 for 逐个字符遍历，所以会先拿到 h，再拿到 i。',
+                    rule: '列表、字符串、元组等都可以被 for 遍历。字符串遍历时，一次拿到一个字符。',
+                    error: '不要以为 for 只能遍历数字列表，字符串同样可以一位一位地取。',
+                    example: '<code>for ch in "cat":</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;print(ch)</code><br>依次输出 c、a、t。'
+                }
+            },
+            {
+                id: 203,
+                category: 'for循环入门',
+                categoryId: 0,
+                type: '填空题',
+                content: '执行代码：<br><code>total = 0<br>for n in [1, 2, 3]:<br>&nbsp;&nbsp;&nbsp;&nbsp;total += n<br>print(total)</code><br>输出结果是 ',
+                answer: '6',
+                knowledge: {
+                    meaning: 'total 从 0 开始，三轮分别加上 1、2、3，最后得到 6。',
+                    rule: '循环里改变量时，要记住每一轮都基于“上一轮后的新值”继续算。',
+                    error: '不要把每次都当成从 0 重新开始，这种题最容易漏掉“累计”的过程。',
+                    example: '变化过程：<code>0 → 1 → 3 → 6</code>。'
+                }
+            },
+            {
+                id: 204,
+                category: 'for循环入门',
+                categoryId: 0,
+                type: '选择题',
+                content: '下面哪段代码是正确的 for 循环写法？',
+                answer: 'B',
+                options: [
+                    { letter: 'A', text: '<code>for x in [1, 2, 3]</code>' },
+                    { letter: 'B', text: '<code>for x in [1, 2, 3]:</code>' },
+                    { letter: 'C', text: '<code>for (x in [1, 2, 3]):</code>' },
+                    { letter: 'D', text: '<code>for x = [1, 2, 3]:</code>' }
+                ],
+                knowledge: {
+                    meaning: '正确写法必须包含关键字 for、in、可迭代对象和结尾的冒号。',
+                    rule: 'Python 的 for 语句格式是 <code>for 变量 in 对象:</code>。',
+                    error: '最常见错误是漏掉冒号，或者把 in 错写成 =。',
+                    example: '<code>for name in names:</code>'
+                }
+            },
+            {
+                id: 205,
+                category: 'for循环入门',
+                categoryId: 0,
+                type: '填空题',
+                content: '执行代码：<br><code>count = 0<br>for _ in ["a", "b", "c", "d"]:<br>&nbsp;&nbsp;&nbsp;&nbsp;count += 1<br>print(count)</code><br>输出结果是 ',
+                answer: '4',
+                knowledge: {
+                    meaning: '列表里有 4 个元素，所以 count 会累加 4 次。',
+                    rule: '变量名写成 <code>_</code> 时，通常表示“这个值我不关心，只关心循环会跑几次”。',
+                    error: '不要被 a、b、c、d 的内容干扰，这题重点是轮数，不是元素本身。',
+                    example: '<code>for _ in [10, 20]:</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;count += 1</code><br>最终会加 2 次。'
+                }
+            },
+
+            // ================= 第2关：range与计数 (5道) =================
+            {
+                id: 206,
+                category: 'range与计数',
+                categoryId: 1,
+                type: '选择题',
+                content: '<code>range(4)</code> 生成的数字序列是？',
+                answer: 'A',
+                options: [
+                    { letter: 'A', text: '0, 1, 2, 3' },
+                    { letter: 'B', text: '1, 2, 3, 4' },
+                    { letter: 'C', text: '0, 1, 2, 3, 4' },
+                    { letter: 'D', text: '4' }
+                ],
+                knowledge: {
+                    meaning: 'range(4) 从 0 开始，到 4 之前结束，所以是 0、1、2、3。',
+                    rule: '<code>range(stop)</code> 会生成从 0 到 <code>stop - 1</code> 的整数。',
+                    error: '新手最容易把 4 也算进去，但 range 的右边界是“取不到”的。',
+                    example: '<code>range(3)</code> 是 0、1、2，不包含 3。'
+                }
+            },
+            {
+                id: 207,
+                category: 'range与计数',
+                categoryId: 1,
+                type: '填空题',
+                content: '执行代码：<br><code>total = 0<br>for i in range(1, 5):<br>&nbsp;&nbsp;&nbsp;&nbsp;total += i<br>print(total)</code><br>输出结果是 ',
+                answer: '10',
+                knowledge: {
+                    meaning: 'range(1, 5) 会得到 1、2、3、4，把它们加起来就是 10。',
+                    rule: '<code>range(start, stop)</code> 包含 start，不包含 stop。',
+                    error: '不要把 5 也加进去，停在 5 之前是这类题最关键的点。',
+                    example: '<code>range(2, 5)</code> 是 2、3、4。'
+                }
+            },
+            {
+                id: 208,
+                category: 'range与计数',
+                categoryId: 1,
+                type: '判断题',
+                content: '<code>range(2, 6)</code> 生成的序列中包含数字 <code>6</code>。',
+                answer: 'false',
+                knowledge: {
+                    meaning: 'range(2, 6) 的最后一个数是 5，不会包含 6。',
+                    rule: 'range 总是“左边取到，右边取不到”。',
+                    error: '这和数学里的区间概念不同，写代码时要强迫自己记住 stop 只是终点，不是成员。',
+                    example: '<code>range(0, 2)</code> 只有 0 和 1。'
+                }
+            },
+            {
+                id: 209,
+                category: 'range与计数',
+                categoryId: 1,
+                type: '选择题',
+                content: '<code>range(0, 10, 2)</code> 生成的数字序列是？',
+                answer: 'C',
+                options: [
+                    { letter: 'A', text: '1, 3, 5, 7, 9' },
+                    { letter: 'B', text: '0, 2, 4, 6, 8, 10' },
+                    { letter: 'C', text: '0, 2, 4, 6, 8' },
+                    { letter: 'D', text: '2, 4, 6, 8, 10' }
+                ],
+                knowledge: {
+                    meaning: '从 0 开始，每次加 2，到 10 之前停止，所以得到 0、2、4、6、8。',
+                    rule: '<code>range(start, stop, step)</code> 中第三个参数表示“每次跳多少”。',
+                    error: '不要把终点 10 算进去，也不要忘了它是从 0 起步。',
+                    example: '<code>range(1, 6, 2)</code> 会得到 1、3、5。'
+                }
+            },
+            {
+                id: 210,
+                category: 'range与计数',
+                categoryId: 1,
+                type: '填空题',
+                content: '执行代码：<br><code>count = 0<br>for _ in range(3):<br>&nbsp;&nbsp;&nbsp;&nbsp;count += 1<br>print(count)</code><br>输出结果是 ',
+                answer: '3',
+                knowledge: {
+                    meaning: 'range(3) 会让循环跑 3 轮，所以 count 最后变成 3。',
+                    rule: '想让一段代码固定执行 N 次，用 <code>for _ in range(N):</code> 最直接。',
+                    error: '很多人会误以为 range(3) 代表“从 1 到 3”，其实它只是让循环跑 3 次。',
+                    example: '<code>for _ in range(5):</code> 表示执行 5 次。'
+                }
+            },
+
+            // ================= 第3关：while循环 (5道) =================
+            {
+                id: 211,
+                category: 'while循环',
+                categoryId: 2,
+                type: '判断题',
+                content: '<code>while</code> 循环会在条件为 <code>True</code> 时重复执行代码块。',
+                answer: 'true',
+                knowledge: {
+                    meaning: 'while 的核心就是“条件还成立，就继续做”。',
+                    rule: 'while 每轮开始前都会重新判断一次条件。条件为真才进循环体。',
+                    error: '不要把 while 想成“只判断一次”，它是每轮都重新判断。',
+                    example: '<code>while x < 3:</code> 只要 x 还小于 3，就继续执行。'
+                }
+            },
+            {
+                id: 212,
+                category: 'while循环',
+                categoryId: 2,
+                type: '填空题',
+                content: '执行代码：<br><code>x = 1<br>count = 0<br>while x < 4:<br>&nbsp;&nbsp;&nbsp;&nbsp;count += 1<br>&nbsp;&nbsp;&nbsp;&nbsp;x += 1<br>print(count)</code><br>输出结果是 ',
+                answer: '3',
+                knowledge: {
+                    meaning: 'x 会经历 1、2、3 三次满足条件，因此 count 累加 3 次。',
+                    rule: '做 while 题时，最稳的方法是把“条件”和“变量变化”一起盯住。',
+                    error: '容易只看 x 最后变成 4，就误判成执行 4 次。实际上 x=4 时已经不进循环了。',
+                    example: '轮次是：x=1、2、3 进循环；x=4 停止。'
+                }
+            },
+            {
+                id: 213,
+                category: 'while循环',
+                categoryId: 2,
+                type: '选择题',
+                content: '下面哪种做法最能避免 <code>while</code> 循环一直停不下来？',
+                answer: 'B',
+                options: [
+                    { letter: 'A', text: '把冒号删掉' },
+                    { letter: 'B', text: '在循环里更新参与判断的变量' },
+                    { letter: 'C', text: '把 while 改成 if' },
+                    { letter: 'D', text: '让条件永远为 True' }
+                ],
+                knowledge: {
+                    meaning: '如果循环里的变量一直不变，条件可能永远成立，程序就会一直重复。',
+                    rule: 'while 常常需要在循环体里修改条件相关的变量，让程序有机会停下来。',
+                    error: '新手最常见的 bug 就是忘了写 <code>x += 1</code> 这类更新语句。',
+                    example: '<code>while x < 5:</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;x += 1</code>'
+                }
+            },
+            {
+                id: 214,
+                category: 'while循环',
+                categoryId: 2,
+                type: '填空题',
+                content: '执行代码：<br><code>count = 0<br>while False:<br>&nbsp;&nbsp;&nbsp;&nbsp;count += 1<br>print(count)</code><br>输出结果是 ',
+                answer: '0',
+                knowledge: {
+                    meaning: '条件一开始就是 False，所以循环体一次也不会执行。',
+                    rule: 'while 会先判断条件，再决定要不要执行代码块。',
+                    error: '不要想当然地进入循环。看到 while 先问自己：第一轮条件成立吗？',
+                    example: '<code>while 3 &lt; 2:</code> 也是 0 次都不执行。'
+                }
+            },
+            {
+                id: 215,
+                category: 'while循环',
+                categoryId: 2,
+                type: '选择题',
+                content: '下面哪段代码是正确的 while 语句写法？',
+                answer: 'D',
+                options: [
+                    { letter: 'A', text: '<code>while x &lt; 5</code>' },
+                    { letter: 'B', text: '<code>while (x &lt; 5)</code>' },
+                    { letter: 'C', text: '<code>while x = 5:</code>' },
+                    { letter: 'D', text: '<code>while x &lt; 5:</code>' }
+                ],
+                knowledge: {
+                    meaning: '正确写法和 if 一样，条件后要有冒号。',
+                    rule: 'while 语句格式是 <code>while 条件:</code>。',
+                    error: 'A 漏冒号，C 把判断写成赋值，都是初学者常见语法错误。',
+                    example: '<code>while score &lt; 10:</code>'
+                }
+            },
+
+            // ================= 第4关：break与continue (5道) =================
+            {
+                id: 216,
+                category: 'break与continue',
+                categoryId: 3,
+                type: '选择题',
+                content: '<code>break</code> 在循环中的作用是？',
+                answer: 'A',
+                options: [
+                    { letter: 'A', text: '立刻结束当前循环' },
+                    { letter: 'B', text: '跳过本轮，继续下一轮' },
+                    { letter: 'C', text: '让循环从头开始' },
+                    { letter: 'D', text: '让条件自动变成 False' }
+                ],
+                knowledge: {
+                    meaning: 'break 的意思就是“断开”，一执行就直接跳出当前循环。',
+                    rule: 'break 只负责结束它所在的那一层循环。',
+                    error: '不要把 break 和 continue 混淆。continue 只是跳过本轮，不是结束整个循环。',
+                    example: '<code>if x == 3:</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;break</code>'
+                }
+            },
+            {
+                id: 217,
+                category: 'break与continue',
+                categoryId: 3,
+                type: '判断题',
+                content: '<code>continue</code> 会跳过本轮剩余代码，直接进入下一轮循环。',
+                answer: 'true',
+                knowledge: {
+                    meaning: 'continue 的作用是“本轮别往下做了，去下一轮”。',
+                    rule: 'continue 不会结束整个循环，只会结束当前这一轮。',
+                    error: '有些人看到 continue 就以为循环结束了，其实它只是跳过当前这次。',
+                    example: '<code>if x == 2:</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;continue</code>'
+                }
+            },
+            {
+                id: 218,
+                category: 'break与continue',
+                categoryId: 3,
+                type: '填空题',
+                content: '执行代码：<br><code>count = 0<br>for i in [1, 2, 3, 4]:<br>&nbsp;&nbsp;&nbsp;&nbsp;if i == 3:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;break<br>&nbsp;&nbsp;&nbsp;&nbsp;count += 1<br>print(count)</code><br>输出结果是 ',
+                answer: '2',
+                knowledge: {
+                    meaning: 'i 为 1、2 时都会让 count 加 1；到 3 时 break，后面不再执行。',
+                    rule: 'break 出现后，当前循环直接结束，连本轮后面的代码也不再执行。',
+                    error: '不要把 i=3 这一轮也算进去，因为在 count += 1 之前就已经 break 了。',
+                    example: '执行到 3 时停止，所以只累计了前两轮。'
+                }
+            },
+            {
+                id: 219,
+                category: 'break与continue',
+                categoryId: 3,
+                type: '选择题',
+                content: '执行代码：<br><code>for i in [1, 2, 3, 4]:<br>&nbsp;&nbsp;&nbsp;&nbsp;if i == 2:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;continue<br>&nbsp;&nbsp;&nbsp;&nbsp;print(i)</code><br>会打印什么？',
+                answer: 'B',
+                options: [
+                    { letter: 'A', text: '1 2 3 4' },
+                    { letter: 'B', text: '1 3 4' },
+                    { letter: 'C', text: '2 3 4' },
+                    { letter: 'D', text: '只有 2' }
+                ],
+                knowledge: {
+                    meaning: 'i=2 时被 continue 跳过，所以只会打印 1、3、4。',
+                    rule: 'continue 会跳过当前轮剩余代码，所以这一轮里的 print 不会执行。',
+                    error: '别把 continue 当成 break，它不会阻止后面的 3 和 4 继续执行。',
+                    example: '跳过哪一轮，就少打印哪一个值。'
+                }
+            },
+            {
+                id: 220,
+                category: 'break与continue',
+                categoryId: 3,
+                type: '判断题',
+                content: '在嵌套循环里，<code>break</code> 默认只会跳出它所在的那一层循环。',
+                answer: 'true',
+                knowledge: {
+                    meaning: 'break 只认识自己当前所在的循环，不会自动把外层也一起结束。',
+                    rule: '嵌套循环里，break 只结束最近的一层循环。',
+                    error: '这类题很容易把“跳出当前层”误看成“整个程序都停了”。',
+                    example: '内层 break 结束内层，外层还会继续下一轮。'
+                }
+            },
+
+            // ================= 第5关：循环嵌套 (5道) =================
+            {
+                id: 221,
+                category: '循环嵌套',
+                categoryId: 4,
+                type: '选择题',
+                content: '什么叫“循环嵌套”？',
+                answer: 'D',
+                options: [
+                    { letter: 'A', text: '一个循环写两次' },
+                    { letter: 'B', text: '把 while 改成 for' },
+                    { letter: 'C', text: '循环里写 if' },
+                    { letter: 'D', text: '在一个循环里面再放一个循环' }
+                ],
+                knowledge: {
+                    meaning: '循环嵌套就是“外层每跑一轮，内层完整跑一遍”。',
+                    rule: '嵌套结构中，内层循环属于外层循环体的一部分。',
+                    error: '不要把“循环里有判断”误认为循环嵌套，嵌套要求里面还是循环。',
+                    example: '<code>for row in rows:</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;for col in cols:</code>'
+                }
+            },
+            {
+                id: 222,
+                category: '循环嵌套',
+                categoryId: 4,
+                type: '填空题',
+                content: '执行代码：<br><code>count = 0<br>for a in [1, 2]:<br>&nbsp;&nbsp;&nbsp;&nbsp;for b in ["x", "y", "z"]:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;count += 1<br>print(count)</code><br>输出结果是 ',
+                answer: '6',
+                knowledge: {
+                    meaning: '外层有 2 轮，每一轮内层都跑 3 次，所以总共是 2 × 3 = 6。',
+                    rule: '嵌套循环的总次数，常常可以理解成“外层轮数 × 内层轮数”。',
+                    error: '不要只看到内层 3 次，也不要只看到外层 2 次，两层要一起算。',
+                    example: '如果外层 4 次、内层 5 次，总共就是 20 次。'
+                }
+            },
+            {
+                id: 223,
+                category: '循环嵌套',
+                categoryId: 4,
+                type: '判断题',
+                content: '在嵌套循环中，外层循环每执行一轮，内层循环都会从头完整执行一遍。',
+                answer: 'true',
+                knowledge: {
+                    meaning: '这正是嵌套循环最核心的运行方式。',
+                    rule: '内层循环不是“接着上次继续”，而是外层每一轮都会重新从第一步开始。',
+                    error: '新手常误以为内层跑完一次就结束了，其实它会随着外层重复多次。',
+                    example: '外层 2 轮时，内层会“完整跑一遍”发生 2 次。'
+                }
+            },
+            {
+                id: 224,
+                category: '循环嵌套',
+                categoryId: 4,
+                type: '选择题',
+                content: '执行代码：<br><code>for x in [1, 2]:<br>&nbsp;&nbsp;&nbsp;&nbsp;for y in ["A", "B"]:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;print(x, y)</code><br>最先打印的两组内容是？',
+                answer: 'A',
+                options: [
+                    { letter: 'A', text: '1 A，然后 1 B' },
+                    { letter: 'B', text: '1 A，然后 2 A' },
+                    { letter: 'C', text: '2 A，然后 2 B' },
+                    { letter: 'D', text: '1 B，然后 2 B' }
+                ],
+                knowledge: {
+                    meaning: 'x=1 时，内层 y 会完整跑 A、B，所以最先是 1 A、1 B。',
+                    rule: '做嵌套题要固定住外层当前值，再把内层完整跑一遍。',
+                    error: '很多人会太快切到 x=2，漏掉了 x=1 这一轮里还没跑完的内层。',
+                    example: '顺序一般是：固定外层，扫完内层；再换下一个外层。'
+                }
+            },
+            {
+                id: 225,
+                category: '循环嵌套',
+                categoryId: 4,
+                type: '填空题',
+                content: '执行代码：<br><code>total = 0<br>for row in range(2):<br>&nbsp;&nbsp;&nbsp;&nbsp;for col in range(2):<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;total += 1<br>print(total)</code><br>输出结果是 ',
+                answer: '4',
+                knowledge: {
+                    meaning: '外层 2 轮，内层每轮 2 次，所以 total 一共加了 4 次。',
+                    rule: '看到两层都用 range(2)，就可以快速想到是 2 × 2。',
+                    error: '不要把 range(2) 看成 2 和 2 两个值本身，重点是它代表“执行两轮”。',
+                    example: '<code>range(3)</code> 搭配 <code>range(4)</code> 时，总次数是 12。'
+                }
+            },
+
+            // ================= 第6关：综合挑战 (5道) =================
+            {
+                id: 226,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '填空题',
+                content: '执行代码：<br><code>total = 0<br>for n in range(1, 6):<br>&nbsp;&nbsp;&nbsp;&nbsp;total += n<br>print(total)</code><br>输出结果是 ',
+                answer: '15',
+                knowledge: {
+                    meaning: 'range(1, 6) 是 1、2、3、4、5，加起来等于 15。',
+                    rule: '综合题依然要拆开做：先看序列，再看循环次数，最后看变量怎么累加。',
+                    error: '不要被“综合挑战”吓住，本质仍然是前面学过的 range 和累加。',
+                    example: '1+2+3+4+5 = 15。'
+                }
+            },
+            {
+                id: 227,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '选择题',
+                content: '下面哪段代码会输出 0、1、2 这三个数字？',
+                answer: 'B',
+                options: [
+                    { letter: 'A', text: '<code>for i in range(1, 3):<br>&nbsp;&nbsp;&nbsp;&nbsp;print(i)</code>' },
+                    { letter: 'B', text: '<code>for i in range(3):<br>&nbsp;&nbsp;&nbsp;&nbsp;print(i)</code>' },
+                    { letter: 'C', text: '<code>for i in range(1, 4):<br>&nbsp;&nbsp;&nbsp;&nbsp;print(i)</code>' },
+                    { letter: 'D', text: '<code>for i in range(0, 2):<br>&nbsp;&nbsp;&nbsp;&nbsp;print(i)</code>' }
+                ],
+                knowledge: {
+                    meaning: 'range(3) 刚好会从 0 打到 2。',
+                    rule: '想打印 0 到 n-1，用 <code>range(n)</code> 最直接。',
+                    error: 'A 和 D 都少一个数，C 则从 1 开始，不符合要求。',
+                    example: '<code>range(5)</code> 对应 0、1、2、3、4。'
+                }
+            },
+            {
+                id: 228,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '判断题',
+                content: '执行代码 <code>n = 3<br>while n &gt; 0:<br>&nbsp;&nbsp;&nbsp;&nbsp;n -= 1</code> 后，循环最终会停下来。',
+                answer: 'true',
+                knowledge: {
+                    meaning: 'n 每轮都会减 1，所以会经历 3、2、1，最后变成 0，条件不再成立。',
+                    rule: '只要循环里的更新让条件朝“终止方向”前进，while 就能正常结束。',
+                    error: '很多人只盯着 while，不看里面的变化语句，结果判断不出会不会停。',
+                    example: '当 n 变成 0 时，<code>n &gt; 0</code> 为假，循环结束。'
+                }
+            },
+            {
+                id: 229,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '填空题',
+                content: '执行代码：<br><code>total = 0<br>for i in range(1, 6):<br>&nbsp;&nbsp;&nbsp;&nbsp;if i % 2 == 0:<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;continue<br>&nbsp;&nbsp;&nbsp;&nbsp;total += i<br>print(total)</code><br>输出结果是 ',
+                answer: '9',
+                knowledge: {
+                    meaning: '偶数 2 和 4 被 continue 跳过，只加上 1、3、5，所以得到 9。',
+                    rule: 'continue 常用于“跳过不想处理的情况，只保留满足条件的值”。',
+                    error: '如果没看出 continue 会跳过偶数，就容易把 1 到 5 全部加进去。',
+                    example: '保留下来的数是 1、3、5，因此 1+3+5=9。'
+                }
+            },
+            {
+                id: 230,
+                category: '综合挑战',
+                categoryId: 5,
+                type: '选择题',
+                content: '如果你想让程序把“你好”打印 3 次，下面哪段代码最合适？',
+                answer: 'D',
+                options: [
+                    { letter: 'A', text: '<code>if 3:<br>&nbsp;&nbsp;&nbsp;&nbsp;print("你好")</code>' },
+                    { letter: 'B', text: '<code>while 3:<br>&nbsp;&nbsp;&nbsp;&nbsp;print("你好")</code>' },
+                    { letter: 'C', text: '<code>for i in range(4):<br>&nbsp;&nbsp;&nbsp;&nbsp;print("你好")</code>' },
+                    { letter: 'D', text: '<code>for i in range(3):<br>&nbsp;&nbsp;&nbsp;&nbsp;print("你好")</code>' }
+                ],
+                knowledge: {
+                    meaning: 'range(3) 正好控制循环执行 3 次，是最标准的做法。',
+                    rule: '固定次数重复任务，优先想到 <code>for ... in range(...)</code>。',
+                    error: 'B 中 <code>while 3</code> 会一直为真，容易造成死循环；C 会打印 4 次。',
+                    example: '<code>for _ in range(3):</code><br><code>&nbsp;&nbsp;&nbsp;&nbsp;print("你好")</code>'
+                }
+            }
+        ];
+
 const unitQuestionsMap = {
             0: unit1Questions,
-            1: unit2Questions
+            1: unit2Questions,
+            2: unit3Questions
         };
 
 // 单元关卡配置
@@ -4212,6 +4931,14 @@ const unitQuestionsMap = {
                 { name: 'elif多重分支', icon: '🚥', bg: '🌈', questions: 5 },
                 { name: '嵌套条件结构', icon: '🪆', bg: '🕸️', questions: 5 },
                 { name: '隐式真假值', icon: '🎭', bg: '☯️', questions: 5 },
+                { name: '综合挑战', icon: '🏆', bg: '🎯', questions: 5 }
+            ],
+            2: [
+                { name: 'for循环入门', icon: '🔂', bg: '🌱', questions: 5 },
+                { name: 'range与计数', icon: '🔢', bg: '🧮', questions: 5 },
+                { name: 'while循环', icon: '🔄', bg: '⏳', questions: 5 },
+                { name: 'break与continue', icon: '🛑', bg: '🚧', questions: 5 },
+                { name: '循环嵌套', icon: '🧩', bg: '🧱', questions: 5 },
                 { name: '综合挑战', icon: '🏆', bg: '🎯', questions: 5 }
             ]
         };
@@ -4697,6 +5424,66 @@ const STORAGE_KEY = 'pythonOperatorGame';
             return firstWrong ? firstWrong.unitIndex : 0;
         }
 
+        function isUnitFullyCleared(unitIndex) {
+            const unitLevels = getLevelsForUnit(unitIndex);
+            const unitStars = gameState.unitLevelStars[unitIndex] || [];
+            return unitLevels.length > 0 && unitLevels.every((_, levelIndex) => (unitStars[levelIndex] || 0) > 0);
+        }
+
+        function getRecommendedUnitIndex() {
+            const nextUnitIndex = units.findIndex((_, unitIndex) => !isUnitFullyCleared(unitIndex));
+            return nextUnitIndex === -1 ? Math.max(units.length - 1, 0) : nextUnitIndex;
+        }
+
+        function renderLearningPathPanel() {
+            const panel = document.getElementById('learningPathPanel');
+            const subtitle = document.getElementById('unitSelectSubtitle');
+            const isPracticeSelection = gameState.pendingMode === 'practice';
+
+            if (subtitle) {
+                subtitle.textContent = isPracticeSelection
+                    ? '先挑一个单元查漏补缺，再进入随机练习。'
+                    : '按推荐顺序学习，会比随机跳关更容易把基础打牢。';
+            }
+
+            if (!panel) {
+                return;
+            }
+
+            const recommendedUnitIndex = getRecommendedUnitIndex();
+
+            panel.innerHTML = `
+                <section class="learning-route-panel learning-route-panel--select">
+                    <span class="learning-route-kicker">${isPracticeSelection ? '补基础路线' : '新手推荐路线'}</span>
+                    <h2 class="learning-route-title">${isPracticeSelection ? '修炼场前，建议先补这一站' : '现在最适合先学什么'}</h2>
+                    <p class="learning-route-copy">${isPracticeSelection ? '先把推荐单元前几关过一遍，再去随机练，正确率会更稳定。' : '系统按“运算符 → 条件判断 → 循环”递进，新手照这个顺序最容易吸收。'}</p>
+                    <div class="route-track">
+                        ${units.map((unit, unitIndex) => {
+                            const isRecommended = unitIndex === recommendedUnitIndex;
+                            const isDone = isUnitFullyCleared(unitIndex);
+                            const statusText = isDone
+                                ? '已通关，可回顾'
+                                : isRecommended
+                                    ? '建议现在学习'
+                                    : '建议排在后面';
+
+                            return `
+                                <article class="route-track-item ${isRecommended ? 'route-track-item--active' : ''} ${isDone ? 'route-track-item--done' : ''}">
+                                    <div class="route-track-head">
+                                        <span class="route-track-index">${unitIndex + 1}</span>
+                                        <span class="route-track-status">${statusText}</span>
+                                    </div>
+                                    <h3>${unit.name}</h3>
+                                    <p>${unit.learningGoal || unit.description}</p>
+                                    <div class="route-track-note">${unit.starterTip || '按顺序学习会更轻松。'}</div>
+                                </article>
+                            `;
+                        }).join('')}
+                    </div>
+                </section>
+            `;
+        }
+
         // 游戏状态
         let gameState = createDefaultGameState();
 
@@ -4711,18 +5498,35 @@ const STORAGE_KEY = 'pythonOperatorGame';
         // 渲染单元选择卡片
         function renderUnits() {
             const container = document.getElementById('unitsContainer');
+            const recommendedUnitIndex = getRecommendedUnitIndex();
+
+            renderLearningPathPanel();
             container.innerHTML = units.map((unit, idx) => {
                 const unitLevels = getLevelsForUnit(idx);
                 const stars = gameState.unitLevelStars[idx].reduce((a, b) => a + b, 0);
                 const totalStars = unitLevels.length * 3;
                 const unlockedCount = gameState.unitLevelUnlocked[idx].filter(Boolean).length;
+                const isRecommended = idx === recommendedUnitIndex;
+                const isCleared = isUnitFullyCleared(idx);
+                const routeLabel = isCleared
+                    ? '已通关'
+                    : isRecommended
+                        ? (gameState.pendingMode === 'practice' ? '建议先补这里' : '推荐当前学习')
+                        : idx < recommendedUnitIndex
+                            ? '适合复习'
+                            : '建议后学';
 
                 return `
-                    <div class="unit-card" onclick="chooseUnit(${idx})">
+                    <div class="unit-card ${isRecommended ? 'unit-card--recommended' : ''}" onclick="chooseUnit(${idx})">
+                        <div class="unit-card-badges">
+                            <span class="unit-badge ${isRecommended ? 'unit-badge--recommended' : isCleared ? 'unit-badge--done' : ''}">${routeLabel}</span>
+                        </div>
                         <div class="unit-icon">${unit.icon}</div>
                         <div class="unit-title">${unit.name}</div>
                         <div class="unit-subtitle">${unit.subtitle}</div>
                         <div class="unit-desc">${unit.description}</div>
+                        <div class="unit-card-tip">${unit.learningGoal || ''}</div>
+                        <div class="unit-card-tip unit-card-tip--muted">${unit.starterTip || ''}</div>
                         <div class="unit-progress">已解锁 ${unlockedCount}/${unitLevels.length} 关 ・ ⭐ ${stars}/${totalStars}</div>
                     </div>
                 `;
@@ -5442,6 +6246,10 @@ function showStartScreen() {
             currentLevelQuestions = shuffleQuestions(unitQuestions);
 
             document.getElementById('practiceTitle').textContent = `${units[gameState.currentUnit].name} · 随机练习`;
+            const practiceSubtitle = document.getElementById('practiceSubtitle');
+            if (practiceSubtitle) {
+                practiceSubtitle.textContent = units[gameState.currentUnit].starterTip || '不计时、不扣血，专注学习';
+            }
             switchScreen('practiceScreen');
             renderPracticeQuestion();
         }

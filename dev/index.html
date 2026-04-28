@@ -84,6 +84,34 @@
                         </button>
                     </div>
                 </div>
+
+                <section class="learning-route-panel learning-route-panel--home">
+                    <span class="learning-route-kicker">新手路线</span>
+                    <h2 class="learning-route-title">第一次玩，建议按这条线学</h2>
+                    <p class="learning-route-copy">别急着所有模式都试一遍。先按“运算符 → 条件判断 → 循环”的顺序推进，卡住时再去修炼场补基础，学习会稳很多。</p>
+                    <div class="learning-route-grid">
+                        <article class="route-step-card">
+                            <span class="route-step-number">1</span>
+                            <h3>先学运算符</h3>
+                            <p>先把表达式算明白，后面读条件和循环才不会乱。</p>
+                        </article>
+                        <article class="route-step-card">
+                            <span class="route-step-number">2</span>
+                            <h3>再学条件判断</h3>
+                            <p>先判断真假，再决定程序应该走哪一条分支。</p>
+                        </article>
+                        <article class="route-step-card">
+                            <span class="route-step-number">3</span>
+                            <h3>然后进入循环</h3>
+                            <p>把“程序重复做事”的思路建立起来，难度会自然抬升。</p>
+                        </article>
+                        <article class="route-step-card">
+                            <span class="route-step-number">4</span>
+                            <h3>卡住就去修炼场</h3>
+                            <p>先把薄弱点补清楚，再回主线推进，比硬顶更有效。</p>
+                        </article>
+                    </div>
+                </section>
             </div>
         </div>
 
@@ -122,7 +150,9 @@
         <div class="screen" id="unitSelectScreen">
             <div class="unit-select-screen">
                 <h1 class="unit-title">📚 选择学习单元</h1>
-                <p class="unit-subtitle">选择你要挑战的单元，开始你的Python之旅</p>
+                <p class="unit-subtitle" id="unitSelectSubtitle">选择你要挑战的单元，开始你的Python之旅</p>
+
+                <div id="learningPathPanel"></div>
 
                 <div class="units-container" id="unitsContainer"></div>
 
@@ -181,7 +211,7 @@
             <div class="practice-mode">
                 <div class="practice-badge">📚 修炼场模式</div>
                 <p class="practice-mode-title" id="practiceTitle">随机练习</p>
-                <p class="practice-mode-subtitle">不计时、不扣血，专注学习</p>
+                <p class="practice-mode-subtitle" id="practiceSubtitle">不计时、不扣血，专注学习</p>
             </div>
 
             <div class="question-card question-card--spaced">

@@ -1,6 +1,7 @@
 const unitQuestionsMap = {
             0: unit1Questions,
-            1: unit2Questions
+            1: unit2Questions,
+            2: unit3Questions
         };
 
 // 单元关卡配置
@@ -19,6 +20,14 @@ const unitQuestionsMap = {
                 { name: 'elif多重分支', icon: '🚥', bg: '🌈', questions: 5 },
                 { name: '嵌套条件结构', icon: '🪆', bg: '🕸️', questions: 5 },
                 { name: '隐式真假值', icon: '🎭', bg: '☯️', questions: 5 },
+                { name: '综合挑战', icon: '🏆', bg: '🎯', questions: 5 }
+            ],
+            2: [
+                { name: 'for循环入门', icon: '🔂', bg: '🌱', questions: 5 },
+                { name: 'range与计数', icon: '🔢', bg: '🧮', questions: 5 },
+                { name: 'while循环', icon: '🔄', bg: '⏳', questions: 5 },
+                { name: 'break与continue', icon: '🛑', bg: '🚧', questions: 5 },
+                { name: '循环嵌套', icon: '🧩', bg: '🧱', questions: 5 },
                 { name: '综合挑战', icon: '🏆', bg: '🎯', questions: 5 }
             ]
         };

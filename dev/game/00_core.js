@@ -156,6 +156,66 @@ const STORAGE_KEY = 'pythonOperatorGame';
             return firstWrong ? firstWrong.unitIndex : 0;
         }
 
+        function isUnitFullyCleared(unitIndex) {
+            const unitLevels = getLevelsForUnit(unitIndex);
+            const unitStars = gameState.unitLevelStars[unitIndex] || [];
+            return unitLevels.length > 0 && unitLevels.every((_, levelIndex) => (unitStars[levelIndex] || 0) > 0);
+        }
+
+        function getRecommendedUnitIndex() {
+            const nextUnitIndex = units.findIndex((_, unitIndex) => !isUnitFullyCleared(unitIndex));
+            return nextUnitIndex === -1 ? Math.max(units.length - 1, 0) : nextUnitIndex;
+        }
+
+        function renderLearningPathPanel() {
+            const panel = document.getElementById('learningPathPanel');
+            const subtitle = document.getElementById('unitSelectSubtitle');
+            const isPracticeSelection = gameState.pendingMode === 'practice';
+
+            if (subtitle) {
+                subtitle.textContent = isPracticeSelection
+                    ? '先挑一个单元查漏补缺，再进入随机练习。'
+                    : '按推荐顺序学习，会比随机跳关更容易把基础打牢。';
+            }
+
+            if (!panel) {
+                return;
+            }
+
+            const recommendedUnitIndex = getRecommendedUnitIndex();
+
+            panel.innerHTML = `
+                <section class="learning-route-panel learning-route-panel--select">
+                    <span class="learning-route-kicker">${isPracticeSelection ? '补基础路线' : '新手推荐路线'}</span>
+                    <h2 class="learning-route-title">${isPracticeSelection ? '修炼场前，建议先补这一站' : '现在最适合先学什么'}</h2>
+                    <p class="learning-route-copy">${isPracticeSelection ? '先把推荐单元前几关过一遍，再去随机练，正确率会更稳定。' : '系统按“运算符 → 条件判断 → 循环”递进，新手照这个顺序最容易吸收。'}</p>
+                    <div class="route-track">
+                        ${units.map((unit, unitIndex) => {
+                            const isRecommended = unitIndex === recommendedUnitIndex;
+                            const isDone = isUnitFullyCleared(unitIndex);
+                            const statusText = isDone
+                                ? '已通关，可回顾'
+                                : isRecommended
+                                    ? '建议现在学习'
+                                    : '建议排在后面';
+
+                            return `
+                                <article class="route-track-item ${isRecommended ? 'route-track-item--active' : ''} ${isDone ? 'route-track-item--done' : ''}">
+                                    <div class="route-track-head">
+                                        <span class="route-track-index">${unitIndex + 1}</span>
+                                        <span class="route-track-status">${statusText}</span>
+                                    </div>
+                                    <h3>${unit.name}</h3>
+                                    <p>${unit.learningGoal || unit.description}</p>
+                                    <div class="route-track-note">${unit.starterTip || '按顺序学习会更轻松。'}</div>
+                                </article>
+                            `;
+                        }).join('')}
+                    </div>
+                </section>
+            `;
+        }
+
         // 游戏状态
         let gameState = createDefaultGameState();
 
@@ -170,18 +230,35 @@ const STORAGE_KEY = 'pythonOperatorGame';
         // 渲染单元选择卡片
         function renderUnits() {
             const container = document.getElementById('unitsContainer');
+            const recommendedUnitIndex = getRecommendedUnitIndex();
+
+            renderLearningPathPanel();
             container.innerHTML = units.map((unit, idx) => {
                 const unitLevels = getLevelsForUnit(idx);
                 const stars = gameState.unitLevelStars[idx].reduce((a, b) => a + b, 0);
                 const totalStars = unitLevels.length * 3;
                 const unlockedCount = gameState.unitLevelUnlocked[idx].filter(Boolean).length;
+                const isRecommended = idx === recommendedUnitIndex;
+                const isCleared = isUnitFullyCleared(idx);
+                const routeLabel = isCleared
+                    ? '已通关'
+                    : isRecommended
+                        ? (gameState.pendingMode === 'practice' ? '建议先补这里' : '推荐当前学习')
+                        : idx < recommendedUnitIndex
+                            ? '适合复习'
+                            : '建议后学';
 
                 return `
-                    <div class="unit-card" onclick="chooseUnit(${idx})">
+                    <div class="unit-card ${isRecommended ? 'unit-card--recommended' : ''}" onclick="chooseUnit(${idx})">
+                        <div class="unit-card-badges">
+                            <span class="unit-badge ${isRecommended ? 'unit-badge--recommended' : isCleared ? 'unit-badge--done' : ''}">${routeLabel}</span>
+                        </div>
                         <div class="unit-icon">${unit.icon}</div>
                         <div class="unit-title">${unit.name}</div>
                         <div class="unit-subtitle">${unit.subtitle}</div>
                         <div class="unit-desc">${unit.description}</div>
+                        <div class="unit-card-tip">${unit.learningGoal || ''}</div>
+                        <div class="unit-card-tip unit-card-tip--muted">${unit.starterTip || ''}</div>
                         <div class="unit-progress">已解锁 ${unlockedCount}/${unitLevels.length} 关 ・ ⭐ ${stars}/${totalStars}</div>
                     </div>
                 `;

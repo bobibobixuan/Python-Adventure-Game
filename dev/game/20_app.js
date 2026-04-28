@@ -61,6 +61,10 @@ function showStartScreen() {
             currentLevelQuestions = shuffleQuestions(unitQuestions);
 
             document.getElementById('practiceTitle').textContent = `${units[gameState.currentUnit].name} · 随机练习`;
+            const practiceSubtitle = document.getElementById('practiceSubtitle');
+            if (practiceSubtitle) {
+                practiceSubtitle.textContent = units[gameState.currentUnit].starterTip || '不计时、不扣血，专注学习';
+            }
             switchScreen('practiceScreen');
             renderPracticeQuestion();
         }
