@@ -19,6 +19,30 @@ SMOKE_CHECK_MARKERS = [
 ]
 
 
+def resolve_bundle_source(file_name, directory_name):
+    directory_path = DEV_DIR / directory_name
+    if directory_path.exists():
+        return directory_path
+    return DEV_DIR / file_name
+
+
+def load_bundle_content(source_path, suffix):
+    if source_path.is_file():
+        return source_path.read_text(encoding='utf-8')
+
+    if source_path.is_dir():
+        source_files = sorted(
+            [path for path in source_path.rglob(f'*{suffix}') if path.is_file()],
+            key=lambda path: path.relative_to(source_path).as_posix(),
+        )
+        if not source_files:
+            raise ValueError(f'目录 {source_path.relative_to(ROOT_DIR)} 中未找到 {suffix} 文件。')
+
+        return '\n\n'.join(path.read_text(encoding='utf-8') for path in source_files)
+
+    raise FileNotFoundError(f'未找到可打包资源：{source_path.relative_to(ROOT_DIR)}')
+
+
 def run_data_validation():
     if not DATA_VALIDATOR.exists():
         return
@@ -53,8 +77,10 @@ def build_game():
 
     html_content = (DEV_DIR / 'index.html').read_text(encoding='utf-8')
     css_content = f"<style>\n{(DEV_DIR / 'style.css').read_text(encoding='utf-8')}\n</style>"
-    data_content = f"<script>\n{(DEV_DIR / 'data.js').read_text(encoding='utf-8')}\n</script>"
-    js_content = f"<script>\n{(DEV_DIR / 'game.js').read_text(encoding='utf-8')}\n</script>"
+    data_source = resolve_bundle_source('data.js', 'data')
+    game_source = resolve_bundle_source('game.js', 'game')
+    data_content = f"<script>\n{load_bundle_content(data_source, '.js')}\n</script>"
+    js_content = f"<script>\n{load_bundle_content(game_source, '.js')}\n</script>"
 
     final_html = html_content.replace('<!-- BUILD:STYLES -->', css_content)
     final_html = final_html.replace('<!-- BUILD:DATA -->', data_content)

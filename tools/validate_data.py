@@ -7,7 +7,9 @@ import sys
 
 
 ROOT_DIR = Path(__file__).resolve().parents[1]
-DATA_FILE = ROOT_DIR / 'dev' / 'data.js'
+DEV_DIR = ROOT_DIR / 'dev'
+DATA_FILE = DEV_DIR / 'data.js'
+DATA_DIR = DEV_DIR / 'data'
 
 QUESTION_BLOCK_PATTERN = re.compile(r"const\s+(unit\d+Questions)\s*=\s*\[(.*?)\n\s*\];", re.S)
 QUESTION_MAP_PATTERN = re.compile(r"const\s+unitQuestionsMap\s*=\s*\{(.*?)\n\s*\};", re.S)
@@ -21,10 +23,26 @@ QUESTION_COUNT_PATTERN = re.compile(r"questions:\s*(\d+)")
 ACHIEVEMENT_ID_PATTERN = re.compile(r"id:\s*'([^']+)'")
 
 
+def load_data_source() -> tuple[str, str]:
+    if DATA_DIR.exists():
+        source_files = sorted(
+            [path for path in DATA_DIR.rglob('*.js') if path.is_file()],
+            key=lambda path: path.relative_to(DATA_DIR).as_posix(),
+        )
+        if not source_files:
+            raise ValueError('dev/data 目录中未找到可校验的 .js 文件。')
+        return '\n\n'.join(path.read_text(encoding='utf-8') for path in source_files), 'dev/data'
+
+    if DATA_FILE.exists():
+        return DATA_FILE.read_text(encoding='utf-8'), 'dev/data.js'
+
+    raise FileNotFoundError('未找到题库源码，期望存在 dev/data.js 或 dev/data/*.js。')
+
+
 def extract_block(pattern: re.Pattern[str], text: str, name: str) -> str:
     match = pattern.search(text)
     if not match:
-        raise ValueError(f'无法在 data.js 中定位 {name}。')
+        raise ValueError(f'无法在题库源码中定位 {name}。')
     return match.group(1)
 
 
@@ -60,7 +78,7 @@ def parse_achievement_ids(text: str) -> list[str]:
 
 
 def validate_data_file() -> tuple[list[str], list[str]]:
-    text = DATA_FILE.read_text(encoding='utf-8')
+    text, source_name = load_data_source()
     errors: list[str] = []
     warnings: list[str] = []
 
@@ -121,7 +139,7 @@ def validate_data_file() -> tuple[list[str], list[str]]:
     if duplicate_achievement_ids:
         errors.append(f'存在重复的成就 ID: {", ".join(sorted(duplicate_achievement_ids))}')
 
-    print(f'已检查 {len(units)} 个单元、{total_questions} 道题、{len(achievement_ids)} 个成就。')
+    print(f'已检查 {len(units)} 个单元、{total_questions} 道题、{len(achievement_ids)} 个成就。来源：{source_name}')
     return errors, warnings
 
 

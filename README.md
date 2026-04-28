@@ -35,8 +35,17 @@
 .
 ├─ build.py
 ├─ dev
-│  ├─ data.js
-│  ├─ game.js
+│  ├─ data
+│  │  ├─ 00_units.js
+│  │  ├─ 10_unit1_questions.js
+│  │  ├─ 11_unit2_questions.js
+│  │  ├─ 20_unit_maps.js
+│  │  └─ 30_achievements.js
+│  ├─ game
+│  │  ├─ 00_core.js
+│  │  ├─ 10_state.js
+│  │  ├─ 20_app.js
+│  │  └─ 30_devtools.js
 │  ├─ index.html
 │  └─ style.css
 └─ dist
@@ -46,9 +55,9 @@
 
 - dev/index.html：页面骨架，包含各个界面的 HTML 结构以及打包占位符。
 - dev/style.css：游戏的样式、动画和响应式布局。
-- dev/data.js：题库数据、单元配置、成就配置。
-- dev/game.js：游戏状态、答题流程、界面切换、记录与成就逻辑。
-- build.py：先执行题库校验和 smoke check，再将开发目录中的 HTML、CSS、JS 合并为单文件版本。
+- dev/data/*.js：按单元配置、题库映射、成就配置拆开的数据文件。
+- dev/game/*.js：按核心状态、存档逻辑、主流程、开发者工具拆开的交互逻辑。
+- build.py：先执行题库校验和 smoke check，再按文件名顺序聚合 dev/data 和 dev/game 下的脚本生成单文件版本。
 
 ## 开发与发布
 
@@ -104,8 +113,8 @@ build.py 会执行以下操作：
 1. 调用 tools/validate_data.py 校验题库结构
 2. 读取 dev/index.html
 3. 读取 dev/style.css，并包装为 style 标签
-4. 读取 dev/data.js，并包装为 script 标签
-5. 读取 dev/game.js，并包装为 script 标签
+4. 按文件名顺序读取 dev/data 下的全部 js 文件，并包装为一个 script 标签
+5. 按文件名顺序读取 dev/game 下的全部 js 文件，并包装为一个 script 标签
 6. 将占位符替换到 HTML 中
 7. 对打包结果执行 smoke check
 8. 输出到 dist 目录
@@ -140,8 +149,8 @@ build.py 会执行以下操作：
 
 如果后续要继续扩展内容，建议按下面方式维护：
 
-1. 新增题目时，优先修改 dev/data.js。
-2. 新增界面或调整交互时，修改 dev/index.html 和 dev/game.js。
+1. 新增题目时，优先落到对应的 dev/data/*.js 文件，而不是重新堆回单体脚本。
+2. 新增界面或调整交互时，修改 dev/index.html 和对应职责的 dev/game/*.js 文件。
 3. 调整视觉样式时，修改 dev/style.css。
 4. 提交前先执行 python tools/validate_data.py。
 5. 每次改动完成后执行 python build.py 重新生成发布文件。
