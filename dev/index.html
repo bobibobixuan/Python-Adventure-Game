@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐍 Python基础闯关游戏</title>
+    <title>🐍 从0开始的Python基础教程</title>
     <!-- BUILD:STYLES -->
 </head>
 
@@ -51,28 +51,30 @@
         <!-- 开始界面 -->
         <div class="screen active" id="startScreen">
             <div class="start-screen">
-                <h1 class="game-title">🐍 Python基础闯关</h1>
-                <p class="game-subtitle">趣味学习，挑战自我！</p>
+                <h1 class="game-title">🐍 从0开始的Python基础教程</h1>
+                <p class="game-subtitle">给零基础孩子也能看懂的一步一步 Python 入门课。</p>
+                <p class="start-screen-note">不会编程也没关系。这里会先告诉你看什么、怎么想、再怎么答。</p>
+                <div id="continueLearningCard"></div>
 
                 <div class="character">🐍</div>
 
                 <div class="mode-buttons">
                     <div class="menu-featured-grid">
                         <button class="mode-btn mode-btn--featured primary" onclick="startAdventure()">
-                            <span class="mode-btn-kicker">核心路线</span>
-                            <span class="mode-btn-title">⚔️ 冒险模式</span>
-                            <span class="mode-btn-desc">逐关推进、拿星解锁，适合从头开始系统闯关。</span>
+                            <span class="mode-btn-kicker">从0开始</span>
+                            <span class="mode-btn-title">🧑‍🏫 跟老师学</span>
+                            <span class="mode-btn-desc">按课程顺序一关一关学，每题前后都会给你提示和讲解。</span>
                         </button>
                         <button class="mode-btn mode-btn--featured danger" onclick="showExtremeModeSelect()">
-                            <span class="mode-btn-kicker">高压挑战</span>
+                            <span class="mode-btn-kicker">学完再挑战</span>
                             <span class="mode-btn-title">👑 极限测试</span>
-                            <span class="mode-btn-desc">一命到底，答错即止，适合检验节奏和稳定度。</span>
+                            <span class="mode-btn-desc">一命到底，答错即止，适合学完之后检查自己是否真的会了。</span>
                         </button>
                     </div>
                     <div class="menu-secondary-grid">
                         <button class="mode-btn mode-btn--panel secondary" onclick="startPractice()">
-                            <span class="mode-btn-title">📚 修炼场</span>
-                            <span class="mode-btn-desc">随机练习，不扣血不计时，专门拿来补基础。</span>
+                            <span class="mode-btn-title">📝 练习场</span>
+                            <span class="mode-btn-desc">不扣血不计时，专门用来慢慢练、反复练、把基础练熟。</span>
                         </button>
                         <button class="mode-btn mode-btn--panel secondary" onclick="showRecords()">
                             <span class="mode-btn-title">📊 做题记录</span>
@@ -186,9 +188,14 @@
             <div class="level-header">
                 <div class="level-bg" id="levelBg">🏰</div>
                 <h2 class="level-title" id="levelTitle">第1关：算术运算符</h2>
+                <p class="level-subtitle" id="levelSubtitle">今天这关会先教你看什么，再带你一步一步作答。</p>
             </div>
 
+            <div class="lesson-coach-card" id="lessonCoachCard"></div>
+
             <div class="question-card">
+                <div class="question-prep" id="questionPrep"></div>
+
                 <div class="question-meta">
                     <span class="question-type-badge" id="questionType">选择题</span>
                     <span class="question-progress" id="questionProgress">1 / 5</span>
@@ -214,7 +221,11 @@
                 <p class="practice-mode-subtitle" id="practiceSubtitle">不计时、不扣血，专注学习</p>
             </div>
 
+            <div class="lesson-coach-card lesson-coach-card--practice" id="practiceCoachCard"></div>
+
             <div class="question-card question-card--spaced">
+                <div class="question-prep question-prep--practice" id="practiceQuestionPrep"></div>
+
                 <div class="question-meta">
                     <span class="question-type-badge" id="practiceQuestionType">选择题</span>
                     <span class="question-progress" id="practiceProgress">1 / 25</span>
@@ -494,6 +505,7 @@
             <div class="result-title" id="resultTitle">回答正确！</div>
             <div class="result-score" id="resultScore">+100</div>
             <div class="result-bonus" id="resultBonus"></div>
+            <div class="result-coach-summary" id="resultCoachSummary"></div>
             <div class="knowledge-box" id="knowledgeBox"></div>
             <button class="continue-btn" onclick="closeResult()">继续</button>
         </div>

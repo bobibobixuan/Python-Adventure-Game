@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐍 Python基础闯关游戏</title>
+    <title>🐍 从0开始的Python基础教程</title>
     <style>
 :root {
             --motion-fast: 180ms;
@@ -321,6 +321,9 @@
         .lives-container {
             display: flex;
             gap: 5px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+            max-width: 128px;
         }
 
         .life {
@@ -445,6 +448,69 @@
             margin-left: auto;
             margin-right: auto;
             line-height: 1.8;
+        }
+
+        .start-screen-note {
+            width: min(100%, 620px);
+            margin: -18px auto 28px;
+            padding: 12px 16px;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            color: #eef4ff;
+            line-height: 1.8;
+        }
+
+        .continue-learning-card {
+            width: min(100%, 760px);
+            margin: 0 auto 28px;
+            padding: 20px 22px;
+            border-radius: 22px;
+            background: linear-gradient(145deg, rgba(255, 244, 194, 0.18), rgba(255, 255, 255, 0.08));
+            border: 1px solid rgba(255, 215, 0, 0.22);
+            box-shadow: 0 18px 36px rgba(17, 24, 39, 0.16);
+            display: flex;
+            justify-content: space-between;
+            gap: 18px;
+            align-items: center;
+            text-align: left;
+        }
+
+        .continue-learning-kicker {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(255, 215, 0, 0.18);
+            color: #ffe082;
+            font-size: 0.8em;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .continue-learning-title {
+            margin-top: 14px;
+            color: #ffffff;
+            font-size: clamp(1.2rem, 2.3vw, 1.7rem);
+        }
+
+        .continue-learning-copy,
+        .continue-learning-meta {
+            margin-top: 10px;
+            color: rgba(238, 244, 255, 0.9);
+            line-height: 1.8;
+        }
+
+        .continue-learning-meta {
+            color: #ffe9a8;
+            font-size: 0.95em;
+        }
+
+        .continue-btn--home {
+            width: auto;
+            min-width: 180px;
+            flex-shrink: 0;
         }
 
         /* Python蛇角色 */
@@ -1154,6 +1220,104 @@
             margin-bottom: 10px;
         }
 
+        .level-subtitle {
+            color: rgba(231, 239, 255, 0.92);
+            line-height: 1.8;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        .lesson-coach-card {
+            margin-bottom: 18px;
+            padding: 22px;
+            border-radius: 22px;
+            background: linear-gradient(145deg, rgba(255, 250, 214, 0.94), rgba(255, 255, 255, 0.98));
+            border: 1px solid rgba(255, 207, 84, 0.36);
+            box-shadow: 0 16px 30px rgba(255, 204, 79, 0.14);
+        }
+
+        .lesson-coach-card--practice {
+            background: linear-gradient(145deg, rgba(229, 247, 255, 0.94), rgba(255, 255, 255, 0.98));
+            border-color: rgba(77, 208, 225, 0.3);
+            box-shadow: 0 16px 30px rgba(77, 208, 225, 0.12);
+        }
+
+        .lesson-coach-kicker,
+        .result-coach-kicker,
+        .question-prep-kicker {
+            display: inline-flex;
+            align-items: center;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: rgba(255, 193, 7, 0.16);
+            color: #8f6400;
+            font-size: 0.78em;
+            font-weight: 700;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .lesson-coach-title,
+        .question-prep-title {
+            margin-top: 14px;
+            color: #2a2f45;
+            font-size: 1.42em;
+        }
+
+        .lesson-coach-copy,
+        .question-prep-copy,
+        .result-coach-summary p {
+            margin-top: 10px;
+            color: #4f566e;
+            line-height: 1.85;
+        }
+
+        .lesson-coach-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .lesson-coach-section {
+            padding: 16px;
+            border-radius: 18px;
+            background: rgba(255, 255, 255, 0.84);
+            border: 1px solid rgba(54, 65, 102, 0.08);
+        }
+
+        .lesson-coach-section--highlight {
+            background: linear-gradient(135deg, rgba(255, 240, 179, 0.45), rgba(255, 255, 255, 0.92));
+            border-color: rgba(255, 193, 7, 0.26);
+        }
+
+        .lesson-coach-section h4 {
+            color: #2b3b79;
+            margin-bottom: 8px;
+            font-size: 1em;
+        }
+
+        .lesson-coach-section p {
+            color: #4f566e;
+            line-height: 1.8;
+        }
+
+        .lesson-coach-steps,
+        .question-prep-steps,
+        .result-coach-steps {
+            margin: 12px 0 0;
+            padding-left: 20px;
+            color: #48506a;
+            line-height: 1.8;
+        }
+
+        .lesson-coach-note {
+            margin-top: 16px;
+            color: #7a5a00;
+            font-weight: 600;
+            line-height: 1.8;
+        }
+
         .question-card {
             background: rgba(255, 255, 255, 0.95);
             border-radius: 25px;
@@ -1161,6 +1325,19 @@
             margin-bottom: 20px;
             position: relative;
             overflow: hidden;
+        }
+
+        .question-prep {
+            margin-bottom: 24px;
+            padding: 20px;
+            border-radius: 20px;
+            background: linear-gradient(145deg, rgba(241, 245, 255, 0.96), rgba(253, 254, 255, 0.98));
+            border: 1px solid rgba(102, 126, 234, 0.16);
+        }
+
+        .question-prep--practice {
+            background: linear-gradient(145deg, rgba(239, 252, 255, 0.96), rgba(253, 254, 255, 0.98));
+            border-color: rgba(77, 208, 225, 0.2);
         }
 
         .question-card::before {
@@ -1786,6 +1963,21 @@
             margin-bottom: 20px;
         }
 
+        .result-coach-summary {
+            margin: 0 0 16px;
+            padding: 18px;
+            border-radius: 18px;
+            background: linear-gradient(145deg, rgba(255, 248, 225, 0.95), rgba(255, 255, 255, 0.98));
+            border: 1px solid rgba(255, 193, 7, 0.22);
+            text-align: left;
+        }
+
+        .result-coach-summary h4 {
+            margin-top: 14px;
+            color: #2a2f45;
+            font-size: 1.12em;
+        }
+
         .knowledge-box {
             background: linear-gradient(180deg, rgba(255, 255, 255, 0.94), rgba(242, 246, 255, 0.96));
             border: 1px solid rgba(102, 126, 234, 0.16);
@@ -1933,6 +2125,15 @@
         }
 
         @media (max-width: 768px) {
+            .continue-learning-card {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .continue-btn--home {
+                width: 100%;
+            }
+
             .result-overlay {
                 padding: 10px;
             }
@@ -1940,6 +2141,10 @@
             .result-card {
                 padding: 20px;
                 max-height: calc(100vh - 20px);
+            }
+
+            .lesson-coach-grid {
+                grid-template-columns: 1fr;
             }
 
             .knowledge-heading {
@@ -2892,28 +3097,30 @@
         <!-- 开始界面 -->
         <div class="screen active" id="startScreen">
             <div class="start-screen">
-                <h1 class="game-title">🐍 Python基础闯关</h1>
-                <p class="game-subtitle">趣味学习，挑战自我！</p>
+                <h1 class="game-title">🐍 从0开始的Python基础教程</h1>
+                <p class="game-subtitle">给零基础孩子也能看懂的一步一步 Python 入门课。</p>
+                <p class="start-screen-note">不会编程也没关系。这里会先告诉你看什么、怎么想、再怎么答。</p>
+                <div id="continueLearningCard"></div>
 
                 <div class="character">🐍</div>
 
                 <div class="mode-buttons">
                     <div class="menu-featured-grid">
                         <button class="mode-btn mode-btn--featured primary" onclick="startAdventure()">
-                            <span class="mode-btn-kicker">核心路线</span>
-                            <span class="mode-btn-title">⚔️ 冒险模式</span>
-                            <span class="mode-btn-desc">逐关推进、拿星解锁，适合从头开始系统闯关。</span>
+                            <span class="mode-btn-kicker">从0开始</span>
+                            <span class="mode-btn-title">🧑‍🏫 跟老师学</span>
+                            <span class="mode-btn-desc">按课程顺序一关一关学，每题前后都会给你提示和讲解。</span>
                         </button>
                         <button class="mode-btn mode-btn--featured danger" onclick="showExtremeModeSelect()">
-                            <span class="mode-btn-kicker">高压挑战</span>
+                            <span class="mode-btn-kicker">学完再挑战</span>
                             <span class="mode-btn-title">👑 极限测试</span>
-                            <span class="mode-btn-desc">一命到底，答错即止，适合检验节奏和稳定度。</span>
+                            <span class="mode-btn-desc">一命到底，答错即止，适合学完之后检查自己是否真的会了。</span>
                         </button>
                     </div>
                     <div class="menu-secondary-grid">
                         <button class="mode-btn mode-btn--panel secondary" onclick="startPractice()">
-                            <span class="mode-btn-title">📚 修炼场</span>
-                            <span class="mode-btn-desc">随机练习，不扣血不计时，专门拿来补基础。</span>
+                            <span class="mode-btn-title">📝 练习场</span>
+                            <span class="mode-btn-desc">不扣血不计时，专门用来慢慢练、反复练、把基础练熟。</span>
                         </button>
                         <button class="mode-btn mode-btn--panel secondary" onclick="showRecords()">
                             <span class="mode-btn-title">📊 做题记录</span>
@@ -3027,9 +3234,14 @@
             <div class="level-header">
                 <div class="level-bg" id="levelBg">🏰</div>
                 <h2 class="level-title" id="levelTitle">第1关：算术运算符</h2>
+                <p class="level-subtitle" id="levelSubtitle">今天这关会先教你看什么，再带你一步一步作答。</p>
             </div>
 
+            <div class="lesson-coach-card" id="lessonCoachCard"></div>
+
             <div class="question-card">
+                <div class="question-prep" id="questionPrep"></div>
+
                 <div class="question-meta">
                     <span class="question-type-badge" id="questionType">选择题</span>
                     <span class="question-progress" id="questionProgress">1 / 5</span>
@@ -3055,7 +3267,11 @@
                 <p class="practice-mode-subtitle" id="practiceSubtitle">不计时、不扣血，专注学习</p>
             </div>
 
+            <div class="lesson-coach-card lesson-coach-card--practice" id="practiceCoachCard"></div>
+
             <div class="question-card question-card--spaced">
+                <div class="question-prep question-prep--practice" id="practiceQuestionPrep"></div>
+
                 <div class="question-meta">
                     <span class="question-type-badge" id="practiceQuestionType">选择题</span>
                     <span class="question-progress" id="practiceProgress">1 / 25</span>
@@ -3335,6 +3551,7 @@
             <div class="result-title" id="resultTitle">回答正确！</div>
             <div class="result-score" id="resultScore">+100</div>
             <div class="result-bonus" id="resultBonus"></div>
+            <div class="result-coach-summary" id="resultCoachSummary"></div>
             <div class="knowledge-box" id="knowledgeBox"></div>
             <button class="continue-btn" onclick="closeResult()">继续</button>
         </div>
@@ -3356,8 +3573,9 @@
                 name: '第一单元：运算符进阶',
                 icon: '➕',
                 subtitle: '各类运算符的详解',
-                description: '深入学习算术、比较、逻辑、赋值、成员等运算符的用法',
+                description: '从最简单的算式开始，学会让电脑按顺序计算和判断。',
                 learningGoal: '先把表达式怎么计算、真假怎么判断弄明白。',
+                coachLine: '别急着背规则，先把每个符号当成“会做什么的小工具”来看。',
                 starterTip: '第一次建议先打通前两关，再回修炼场把算式题刷顺。',
                 levels: 6,
                 color: '#ffd700'
@@ -3367,8 +3585,9 @@
                 name: '第二单元：If语句基础',
                 icon: '🚦',
                 subtitle: '条件判断的基础概念',
-                description: '学习Python的If语句，包括基础if、if-else、elif等多种条件结构',
+                description: '学会先判断条件，再决定程序接下来要走哪一条路。',
                 learningGoal: '练会“先判断条件，再决定走哪条分支”的思维。',
+                coachLine: '把条件想成“要不要过关”的问题，先看真假，再看动作。',
                 starterTip: '建议边读题边用纸笔写出条件真假和变量变化。',
                 levels: 6,
                 color: '#667eea'
@@ -3378,8 +3597,9 @@
                 name: '第三单元：循环入门',
                 icon: '🔁',
                 subtitle: '重复执行与流程控制',
-                description: '学习for、range、while、break、continue和循环嵌套，真正建立“重复执行”的程序思维',
+                description: '学会让程序把同一件事重复做好几次，建立真正的代码流程感。',
                 learningGoal: '把“执行几次、什么时候停、每次变量怎么变”看清楚。',
+                coachLine: '做循环题时不要跳着看，一轮一轮地写下来，答案就会自己出现。',
                 starterTip: '先盯住循环次数，再一轮一轮模拟变量变化，会轻松很多。',
                 levels: 6,
                 color: '#36cfc9'
@@ -5424,6 +5644,34 @@ const STORAGE_KEY = 'pythonOperatorGame';
             return firstWrong ? firstWrong.unitIndex : 0;
         }
 
+        function isGuidedLearningMode() {
+            return !gameState.isExtremeMode && !gameState.isPracticeMode;
+        }
+
+        function getQuestionTimeLimitSeconds() {
+            if (gameState.isExtremeMode) {
+                return 10;
+            }
+
+            if (isGuidedLearningMode()) {
+                return 60;
+            }
+
+            return 15;
+        }
+
+        function getMaxLivesForCurrentMode() {
+            if (gameState.isExtremeMode) {
+                return 1;
+            }
+
+            if (isGuidedLearningMode()) {
+                return 5;
+            }
+
+            return 3;
+        }
+
         function isUnitFullyCleared(unitIndex) {
             const unitLevels = getLevelsForUnit(unitIndex);
             const unitStars = gameState.unitLevelStars[unitIndex] || [];
@@ -5433,6 +5681,68 @@ const STORAGE_KEY = 'pythonOperatorGame';
         function getRecommendedUnitIndex() {
             const nextUnitIndex = units.findIndex((_, unitIndex) => !isUnitFullyCleared(unitIndex));
             return nextUnitIndex === -1 ? Math.max(units.length - 1, 0) : nextUnitIndex;
+        }
+
+        function getRecommendedLevelIndex(unitIndex = getRecommendedUnitIndex()) {
+            const unitLevels = getLevelsForUnit(unitIndex);
+            const unlocked = gameState.unitLevelUnlocked[unitIndex] || [];
+            const stars = gameState.unitLevelStars[unitIndex] || [];
+            const nextUnclearedIndex = unitLevels.findIndex((_, levelIndex) => unlocked[levelIndex] && (stars[levelIndex] || 0) === 0);
+
+            if (nextUnclearedIndex !== -1) {
+                return nextUnclearedIndex;
+            }
+
+            const furthestUnlockedIndex = unlocked.lastIndexOf(true);
+            return furthestUnlockedIndex === -1 ? 0 : furthestUnlockedIndex;
+        }
+
+        function getContinueLearningTarget() {
+            const unitIndex = getRecommendedUnitIndex();
+            const levelIndex = getRecommendedLevelIndex(unitIndex);
+            const unit = units[unitIndex] || units[0];
+            const level = getLevelsForUnit(unitIndex)[levelIndex] || getLevelsForUnit(unitIndex)[0];
+
+            return {
+                unitIndex,
+                levelIndex,
+                unit,
+                level
+            };
+        }
+
+        function renderContinueLearningCard() {
+            const container = document.getElementById('continueLearningCard');
+            if (!container) {
+                return;
+            }
+
+            const target = getContinueLearningTarget();
+            const totalStars = gameState.unitLevelStars.reduce((sum, unitStars) => sum + unitStars.reduce((unitSum, stars) => unitSum + stars, 0), 0);
+            const unlockedBeyondFirst = gameState.unitLevelUnlocked.some(unitUnlocked => unitUnlocked.filter(Boolean).length > 1);
+            const hasProgress = gameState.totalQuestions > 0 || totalStars > 0 || unlockedBeyondFirst;
+
+            container.innerHTML = `
+                <section class="continue-learning-card">
+                    <div>
+                        <span class="continue-learning-kicker">${hasProgress ? '继续上次学习' : '推荐起点'}</span>
+                        <h2 class="continue-learning-title">${hasProgress ? `${target.unit.name} · 第${target.levelIndex + 1}关` : '直接从第一课开始'}</h2>
+                        <p class="continue-learning-copy">${hasProgress ? `你最适合继续学习 ${target.level.name}。已经学过的内容不用重头找，直接回到当前最该学的地方。` : '如果你完全没有基础，就从第一单元第一关开始。这里只要求你一步一步照着提示学。'}</p>
+                        <div class="continue-learning-meta">${hasProgress ? `累计已练 ${gameState.totalQuestions} 题 · 已拿 ${totalStars} 颗星` : '新手保护：每题 60 秒、5 颗爱心、答错先看讲解。'}</div>
+                    </div>
+                    <button class="continue-btn continue-btn--home" onclick="continueLearningJourney()">${hasProgress ? `继续：${target.level.name}` : '开始第一课'}</button>
+                </section>
+            `;
+        }
+
+        function continueLearningJourney() {
+            resetExtremeMode();
+            gameState.pendingMode = 'adventure';
+            gameState.isPracticeMode = false;
+
+            const target = getContinueLearningTarget();
+            gameState.currentUnit = target.unitIndex;
+            startLevel(target.levelIndex);
         }
 
         function renderLearningPathPanel() {
@@ -5554,6 +5864,7 @@ const STORAGE_KEY = 'pythonOperatorGame';
         function init() {
             loadGameState();
             createParticles();
+            renderContinueLearningCard();
             renderUnits();
             renderAchievements();
             refreshDeveloperConsole();
@@ -5797,11 +6108,35 @@ function normalizeUnitProgress(savedProgress, fallbackValue) {
         function getBeginnerThinkingSteps(question) {
             const questionText = String(question?.content || '');
 
+            if (question?.type === '填空题' && /[+\-*/%]/.test(questionText) && !questionText.includes('执行代码') && !questionText.includes('print(')) {
+                return [
+                    '先看算式里有没有乘法、除法或括号，先算最优先的部分。',
+                    '再把中间结果代回原题，继续往下算。',
+                    '最后写出最终答案，不要把中间那一步当成最后结果。'
+                ];
+            }
+
             if (question?.type === '填空题' && (questionText.includes('执行代码') || questionText.includes('print('))) {
+                if (questionText.includes('for ') || questionText.includes('while ')) {
+                    return [
+                        '先看循环会跑几轮，不要急着盯最后一行。',
+                        '再一轮一轮写出变量怎么变化，别跳步。',
+                        '最后看 print 会输出什么，或者变量最后停在哪个值。'
+                    ];
+                }
+
+                if (questionText.includes('if ') || questionText.includes('if(')) {
+                    return [
+                        '先看变量一开始的值，不要急着看最后一行。',
+                        '再判断 if 条件是真是假，只执行真正会走到的分支。',
+                        '最后按顺序模拟每一行代码，算出最终输出。'
+                    ];
+                }
+
                 return [
                     '先看变量一开始的值，不要急着看最后一行。',
-                    '再判断 if 条件是真是假，只执行真正会走到的分支。',
-                    '最后按顺序模拟每一行代码，算出最终输出。'
+                    '再按顺序一行一行往下算，先做优先级高的运算。',
+                    '最后看 print 输出什么，或者变量最后留下什么值。'
                 ];
             }
 
@@ -6189,6 +6524,7 @@ function showStartScreen() {
             gameState.isPracticeMode = false;
             resetExtremeMode();
             switchScreen('startScreen');
+            renderContinueLearningCard();
             document.getElementById('statusBar').classList.add('hidden');
         }
 
@@ -6254,6 +6590,133 @@ function showStartScreen() {
             renderPracticeQuestion();
         }
 
+        function getQuestionFocusHint(question) {
+            if (!question) {
+                return '先把题目读慢一点，再决定从哪里开始想。';
+            }
+
+            if (question.type === '填空题') {
+                const questionText = String(question.content || '');
+
+                if (/[+\-*/%]/.test(questionText) && !questionText.includes('执行代码') && !questionText.includes('print(')) {
+                    return '先看有没有乘法、除法和括号，再决定先算哪一步。';
+                }
+
+                if (questionText.includes('for ') || questionText.includes('while ')) {
+                    return '先数清循环会跑几轮，再一轮一轮地算变量变化。';
+                }
+
+                if (questionText.includes('if ') || questionText.includes('if(')) {
+                    return '先判断条件真假，再决定哪几行代码真的会执行。';
+                }
+
+                return '先想“答案应该长什么样”，再动手输入。';
+            }
+
+            if (question.type === '判断题') {
+                return '不要凭感觉，先找规则，再判断对错。';
+            }
+
+            return '先看题目到底在问规则、写法还是运行结果。';
+        }
+
+        function getQuestionWarmupLine(question, mode = 'adventure') {
+            if (!question) {
+                return mode === 'practice'
+                    ? '练习场里不拼速度，只要看懂就已经很棒了。'
+                    : '这一关先学会方法，再去追求通关速度。';
+            }
+
+            if (mode === 'practice') {
+                return question.knowledge?.error || '练习时可以放心慢慢想，错了也只是告诉你下一次怎么更稳。';
+            }
+
+            return question.knowledge?.meaning || '今天这题先学会看懂题目，再去选答案。';
+        }
+
+        function buildLessonCoachMarkup(question, mode = 'adventure') {
+            const unit = units[gameState.currentUnit] || units[0];
+            const level = getLevelsForUnit()[gameState.currentLevel] || null;
+            const steps = getBeginnerThinkingSteps(question).slice(0, 3);
+            const heading = mode === 'practice' ? '练习前先热身' : '上课前先听老师说';
+            const title = mode === 'practice'
+                ? `现在在复习：${unit.name}`
+                : `今天这关先学：${level ? level.name : unit.name}`;
+            const modeNote = mode === 'practice'
+                ? '这里不拼速度，只要看懂、答对、记住方法就算赢。'
+                : `新手保护已开启：每题 ${getQuestionTimeLimitSeconds()} 秒、${getMaxLivesForCurrentMode()} 颗爱心，答错先看讲解再继续。`;
+
+            return `
+                <div class="lesson-coach-kicker">${heading}</div>
+                <h3 class="lesson-coach-title">${title}</h3>
+                <p class="lesson-coach-copy">${unit.coachLine || unit.learningGoal || unit.description}</p>
+                <div class="lesson-coach-grid">
+                    <section class="lesson-coach-section lesson-coach-section--highlight">
+                        <h4>今天先抓住这件事</h4>
+                        <p>${getQuestionWarmupLine(question, mode)}</p>
+                    </section>
+                    <section class="lesson-coach-section">
+                        <h4>做题前的小提醒</h4>
+                        <ol class="lesson-coach-steps">
+                            ${steps.map(step => `<li>${step}</li>`).join('')}
+                        </ol>
+                    </section>
+                </div>
+                <div class="lesson-coach-note">${modeNote}</div>
+            `;
+        }
+
+        function buildQuestionPrepMarkup(question, mode = 'adventure') {
+            const steps = getBeginnerThinkingSteps(question).slice(0, 3);
+            const title = mode === 'practice' ? '这一题先这样练' : '老师带你拆这道题';
+            const copy = `${getQuestionFocusHint(question)} ${question?.knowledge?.rule || ''}`.trim();
+
+            return `
+                <span class="question-prep-kicker">${mode === 'practice' ? '先想后答' : '做题前先看'}</span>
+                <h3 class="question-prep-title">${title}</h3>
+                <p class="question-prep-copy">${copy}</p>
+                <ol class="question-prep-steps">
+                    ${steps.map(step => `<li>${step}</li>`).join('')}
+                </ol>
+            `;
+        }
+
+        function renderQuestionCoachUI(question, mode = 'adventure') {
+            const coachCard = document.getElementById(mode === 'practice' ? 'practiceCoachCard' : 'lessonCoachCard');
+            const prepCard = document.getElementById(mode === 'practice' ? 'practiceQuestionPrep' : 'questionPrep');
+
+            if (coachCard) {
+                coachCard.innerHTML = buildLessonCoachMarkup(question, mode);
+            }
+
+            if (prepCard) {
+                prepCard.innerHTML = buildQuestionPrepMarkup(question, mode);
+                formatMultilineCodeBlocks(prepCard);
+            }
+        }
+
+        function renderResultCoachSummary(question, isCorrect) {
+            const summary = document.getElementById('resultCoachSummary');
+            if (!summary) {
+                return;
+            }
+
+            if (!question) {
+                summary.innerHTML = '';
+                return;
+            }
+
+            const steps = getBeginnerThinkingSteps(question).slice(0, 2);
+            summary.innerHTML = `
+                <div class="result-coach-kicker">${isCorrect ? '这次学会了什么' : '下次可以这样做'}</div>
+                <h4>${isCorrect ? '你答对的不只是答案，更是方法。' : '先别急着难过，按步骤重来一次就行。'}</h4>
+                <p>${isCorrect ? question.knowledge?.meaning : question.knowledge?.error}</p>
+                <ol class="result-coach-steps">
+                    ${steps.map(step => `<li>${step}</li>`).join('')}
+                </ol>
+            `;
+        }
+
         // 渲染关卡地图
         function renderLevelMap() {
             const mapPath = document.getElementById('mapPath');
@@ -6284,7 +6747,7 @@ function showStartScreen() {
         function startLevel(levelIndex) {
             gameState.currentLevel = levelIndex;
             gameState.currentQuestion = 0;
-            gameState.lives = gameState.isExtremeMode ? 1 : 3;
+            gameState.lives = getMaxLivesForCurrentMode();
             gameState.levelScore = 0;
             gameState.levelCorrect = 0;
             gameState.levelTime = 0;
@@ -6314,14 +6777,22 @@ function showStartScreen() {
         // 渲染关卡头部
         function renderLevelHeader() {
             const level = getLevelsForUnit()[gameState.currentLevel];
+            const unit = units[gameState.currentUnit] || units[0];
+            const levelSubtitle = document.getElementById('levelSubtitle');
             document.getElementById('levelBg').textContent = level.bg;
             if (gameState.isExtremeMode) {
                 const segmentText = `${gameState.extremeSegmentIndex + 1}/${gameState.extremeSegments.length}`;
                 document.getElementById('levelTitle').textContent = `${getExtremeScopeLabel()} · 第${segmentText}段：${level.name}`;
                 document.getElementById('levelIndicator').textContent = `考核 ${segmentText}`;
+                if (levelSubtitle) {
+                    levelSubtitle.textContent = '这是连续考核，先稳住节奏，再按平时学过的方法答题。';
+                }
             } else {
                 document.getElementById('levelTitle').textContent = `第${gameState.currentLevel + 1}关：${level.name}`;
                 document.getElementById('levelIndicator').textContent = `第${gameState.currentLevel + 1}关`;
+                if (levelSubtitle) {
+                    levelSubtitle.textContent = `${unit.learningGoal} 这一关会重点练：${level.name}。新手保护：每题 ${getQuestionTimeLimitSeconds()} 秒。`;
+                }
             }
         }
 
@@ -6336,6 +6807,7 @@ function showStartScreen() {
                 `${gameState.currentQuestion + 1} / ${currentLevelQuestions.length}`;
             questionContent.innerHTML = q.content;
             formatMultilineCodeBlocks(questionContent);
+            renderQuestionCoachUI(q);
 
             const optionsContainer = document.getElementById('optionsContainer');
             gameState.selectedAnswer = null;
@@ -6660,7 +7132,7 @@ function showStartScreen() {
             icon.textContent = isCorrect ? '✓' : '✗';
             icon.style.fontSize = isCorrect ? '80px' : '80px';
             title.className = `result-title ${isCorrect ? 'correct' : 'wrong'}`;
-            title.textContent = isCorrect ? '回答正确！🎉' : '回答错误';
+            title.textContent = isCorrect ? '答对啦，继续前进！' : '这题先别急，再看一遍讲解';
 
             scoreDiv.textContent = isCorrect ? `+${points}` : '+0';
             scoreDiv.style.display = isCorrect ? 'block' : 'none';
@@ -6668,6 +7140,7 @@ function showStartScreen() {
             bonusDiv.style.display = bonus ? 'block' : 'none';
 
             const q = currentLevelQuestions[gameState.currentQuestion];
+            renderResultCoachSummary(q, isCorrect);
             renderKnowledgeDetails(knowledgeBox, q);
             clearQuestionFeedback();
 
@@ -6795,7 +7268,8 @@ function showStartScreen() {
         function updateLivesDisplay() {
             const container = document.getElementById('livesContainer');
             let html = '';
-            for (let i = 0; i < 3; i++) {
+            const maxLives = getMaxLivesForCurrentMode();
+            for (let i = 0; i < maxLives; i++) {
                 const lost = i >= gameState.lives ? 'lost' : '';
                 html += `<span class="life ${lost}">💖</span>`;
             }
@@ -6825,7 +7299,8 @@ function showStartScreen() {
 
         // 开始计时器
         function startTimer() {
-            let timeLeft = 100;
+            const timeLimitSeconds = getQuestionTimeLimitSeconds();
+            let timeLeftMs = timeLimitSeconds * 1000;
             const fill = document.getElementById('timerFill');
             fill.style.width = '100%';
             fill.className = 'timer-fill';
@@ -6835,20 +7310,21 @@ function showStartScreen() {
             timerInterval = setInterval(() => {
                 if (gameState.isPaused) return;
 
-                timeLeft -= 1;
-                fill.style.width = timeLeft + '%';
+                timeLeftMs -= 100;
+                const fillPercent = Math.max(0, (timeLeftMs / (timeLimitSeconds * 1000)) * 100);
+                fill.style.width = fillPercent + '%';
 
-                if (timeLeft <= 30) {
+                if (fillPercent <= 25) {
                     fill.className = 'timer-fill danger';
-                } else if (timeLeft <= 50) {
+                } else if (fillPercent <= 50) {
                     fill.className = 'timer-fill warning';
                 }
-                if (timeLeft <= 0) {
+                if (timeLeftMs <= 0) {
                     clearInterval(timerInterval);
                     if (!gameState.selectedAnswer) {
                         gameState.selectedAnswer = '';
                     }
-                    submitAnswer(); // 挪到 if 语句外面
+                    submitAnswer();
                 }
             }, 100);
         }
@@ -6900,7 +7376,7 @@ function showStartScreen() {
 
             // 显示结算
             document.getElementById('completeTitle').textContent =
-                stars === 3 ? '🏆 完美通关！' : '🎉 关卡完成！';
+                stars === 3 ? '🏆 这一关完全学会啦！' : '🎉 这一关学会了！';
             document.getElementById('starsEarned').textContent = '⭐'.repeat(stars);
             document.getElementById('statScore').textContent = gameState.levelScore;
             document.getElementById('statCorrect').textContent = correctRate;
@@ -7091,9 +7567,9 @@ function showStartScreen() {
                 document.getElementById('gameOverCorrect').textContent =
                     `${gameState.extremeRunCorrect}/${gameState.extremeRunAttempted}`;
             } else {
-                document.querySelector('.game-over-title').textContent = '💔 挑战失败';
-                document.getElementById('gameOverMessage').textContent = '生命值耗尽，请重新挑战！';
-                document.getElementById('retryLevelBtn').textContent = '🔄 重新挑战';
+                document.querySelector('.game-over-title').textContent = '🌱 这一关先休息一下';
+                document.getElementById('gameOverMessage').textContent = '没关系，我们把这关再练一次。刚才不会的地方，已经在讲解里告诉你该怎么想了。';
+                document.getElementById('retryLevelBtn').textContent = '🔄 再学一遍这一关';
                 document.getElementById('gameOverLevel').textContent =
                     `${gameState.currentLevel + 1}/${getLevelsForUnit().length}`;
                 document.getElementById('gameOverCorrect').textContent =
@@ -7131,6 +7607,7 @@ function showStartScreen() {
                 `${gameState.practiceQuestionIndex + 1} / ${currentLevelQuestions.length}`;
             practiceQuestionContent.innerHTML = q.content;
             formatMultilineCodeBlocks(practiceQuestionContent);
+            renderQuestionCoachUI(q, 'practice');
 
             const optionsContainer = document.getElementById('practiceOptionsContainer');
             gameState.selectedAnswer = null;
@@ -7452,7 +7929,7 @@ function showStartScreen() {
         function confirmQuitLevel() {
             const confirmMessage = gameState.isExtremeMode
                 ? '确定要退出极限测试吗？退出后本次考核直接作废，再次挑战必须从起点重来。'
-                : '确定要退出关卡吗？本关的进度将不会被保存。';
+                : '确定要先离开这一关吗？离开后本关会重新开始，但你随时都可以回来继续学。';
 
             if (confirm(confirmMessage)) {
                 stopTimer();

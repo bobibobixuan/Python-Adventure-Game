@@ -156,6 +156,34 @@ const STORAGE_KEY = 'pythonOperatorGame';
             return firstWrong ? firstWrong.unitIndex : 0;
         }
 
+        function isGuidedLearningMode() {
+            return !gameState.isExtremeMode && !gameState.isPracticeMode;
+        }
+
+        function getQuestionTimeLimitSeconds() {
+            if (gameState.isExtremeMode) {
+                return 10;
+            }
+
+            if (isGuidedLearningMode()) {
+                return 60;
+            }
+
+            return 15;
+        }
+
+        function getMaxLivesForCurrentMode() {
+            if (gameState.isExtremeMode) {
+                return 1;
+            }
+
+            if (isGuidedLearningMode()) {
+                return 5;
+            }
+
+            return 3;
+        }
+
         function isUnitFullyCleared(unitIndex) {
             const unitLevels = getLevelsForUnit(unitIndex);
             const unitStars = gameState.unitLevelStars[unitIndex] || [];
@@ -165,6 +193,68 @@ const STORAGE_KEY = 'pythonOperatorGame';
         function getRecommendedUnitIndex() {
             const nextUnitIndex = units.findIndex((_, unitIndex) => !isUnitFullyCleared(unitIndex));
             return nextUnitIndex === -1 ? Math.max(units.length - 1, 0) : nextUnitIndex;
+        }
+
+        function getRecommendedLevelIndex(unitIndex = getRecommendedUnitIndex()) {
+            const unitLevels = getLevelsForUnit(unitIndex);
+            const unlocked = gameState.unitLevelUnlocked[unitIndex] || [];
+            const stars = gameState.unitLevelStars[unitIndex] || [];
+            const nextUnclearedIndex = unitLevels.findIndex((_, levelIndex) => unlocked[levelIndex] && (stars[levelIndex] || 0) === 0);
+
+            if (nextUnclearedIndex !== -1) {
+                return nextUnclearedIndex;
+            }
+
+            const furthestUnlockedIndex = unlocked.lastIndexOf(true);
+            return furthestUnlockedIndex === -1 ? 0 : furthestUnlockedIndex;
+        }
+
+        function getContinueLearningTarget() {
+            const unitIndex = getRecommendedUnitIndex();
+            const levelIndex = getRecommendedLevelIndex(unitIndex);
+            const unit = units[unitIndex] || units[0];
+            const level = getLevelsForUnit(unitIndex)[levelIndex] || getLevelsForUnit(unitIndex)[0];
+
+            return {
+                unitIndex,
+                levelIndex,
+                unit,
+                level
+            };
+        }
+
+        function renderContinueLearningCard() {
+            const container = document.getElementById('continueLearningCard');
+            if (!container) {
+                return;
+            }
+
+            const target = getContinueLearningTarget();
+            const totalStars = gameState.unitLevelStars.reduce((sum, unitStars) => sum + unitStars.reduce((unitSum, stars) => unitSum + stars, 0), 0);
+            const unlockedBeyondFirst = gameState.unitLevelUnlocked.some(unitUnlocked => unitUnlocked.filter(Boolean).length > 1);
+            const hasProgress = gameState.totalQuestions > 0 || totalStars > 0 || unlockedBeyondFirst;
+
+            container.innerHTML = `
+                <section class="continue-learning-card">
+                    <div>
+                        <span class="continue-learning-kicker">${hasProgress ? '继续上次学习' : '推荐起点'}</span>
+                        <h2 class="continue-learning-title">${hasProgress ? `${target.unit.name} · 第${target.levelIndex + 1}关` : '直接从第一课开始'}</h2>
+                        <p class="continue-learning-copy">${hasProgress ? `你最适合继续学习 ${target.level.name}。已经学过的内容不用重头找，直接回到当前最该学的地方。` : '如果你完全没有基础，就从第一单元第一关开始。这里只要求你一步一步照着提示学。'}</p>
+                        <div class="continue-learning-meta">${hasProgress ? `累计已练 ${gameState.totalQuestions} 题 · 已拿 ${totalStars} 颗星` : '新手保护：每题 60 秒、5 颗爱心、答错先看讲解。'}</div>
+                    </div>
+                    <button class="continue-btn continue-btn--home" onclick="continueLearningJourney()">${hasProgress ? `继续：${target.level.name}` : '开始第一课'}</button>
+                </section>
+            `;
+        }
+
+        function continueLearningJourney() {
+            resetExtremeMode();
+            gameState.pendingMode = 'adventure';
+            gameState.isPracticeMode = false;
+
+            const target = getContinueLearningTarget();
+            gameState.currentUnit = target.unitIndex;
+            startLevel(target.levelIndex);
         }
 
         function renderLearningPathPanel() {
@@ -286,6 +376,7 @@ const STORAGE_KEY = 'pythonOperatorGame';
         function init() {
             loadGameState();
             createParticles();
+            renderContinueLearningCard();
             renderUnits();
             renderAchievements();
             refreshDeveloperConsole();

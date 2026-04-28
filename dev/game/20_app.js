@@ -4,6 +4,7 @@ function showStartScreen() {
             gameState.isPracticeMode = false;
             resetExtremeMode();
             switchScreen('startScreen');
+            renderContinueLearningCard();
             document.getElementById('statusBar').classList.add('hidden');
         }
 
@@ -69,6 +70,133 @@ function showStartScreen() {
             renderPracticeQuestion();
         }
 
+        function getQuestionFocusHint(question) {
+            if (!question) {
+                return '先把题目读慢一点，再决定从哪里开始想。';
+            }
+
+            if (question.type === '填空题') {
+                const questionText = String(question.content || '');
+
+                if (/[+\-*/%]/.test(questionText) && !questionText.includes('执行代码') && !questionText.includes('print(')) {
+                    return '先看有没有乘法、除法和括号，再决定先算哪一步。';
+                }
+
+                if (questionText.includes('for ') || questionText.includes('while ')) {
+                    return '先数清循环会跑几轮，再一轮一轮地算变量变化。';
+                }
+
+                if (questionText.includes('if ') || questionText.includes('if(')) {
+                    return '先判断条件真假，再决定哪几行代码真的会执行。';
+                }
+
+                return '先想“答案应该长什么样”，再动手输入。';
+            }
+
+            if (question.type === '判断题') {
+                return '不要凭感觉，先找规则，再判断对错。';
+            }
+
+            return '先看题目到底在问规则、写法还是运行结果。';
+        }
+
+        function getQuestionWarmupLine(question, mode = 'adventure') {
+            if (!question) {
+                return mode === 'practice'
+                    ? '练习场里不拼速度，只要看懂就已经很棒了。'
+                    : '这一关先学会方法，再去追求通关速度。';
+            }
+
+            if (mode === 'practice') {
+                return question.knowledge?.error || '练习时可以放心慢慢想，错了也只是告诉你下一次怎么更稳。';
+            }
+
+            return question.knowledge?.meaning || '今天这题先学会看懂题目，再去选答案。';
+        }
+
+        function buildLessonCoachMarkup(question, mode = 'adventure') {
+            const unit = units[gameState.currentUnit] || units[0];
+            const level = getLevelsForUnit()[gameState.currentLevel] || null;
+            const steps = getBeginnerThinkingSteps(question).slice(0, 3);
+            const heading = mode === 'practice' ? '练习前先热身' : '上课前先听老师说';
+            const title = mode === 'practice'
+                ? `现在在复习：${unit.name}`
+                : `今天这关先学：${level ? level.name : unit.name}`;
+            const modeNote = mode === 'practice'
+                ? '这里不拼速度，只要看懂、答对、记住方法就算赢。'
+                : `新手保护已开启：每题 ${getQuestionTimeLimitSeconds()} 秒、${getMaxLivesForCurrentMode()} 颗爱心，答错先看讲解再继续。`;
+
+            return `
+                <div class="lesson-coach-kicker">${heading}</div>
+                <h3 class="lesson-coach-title">${title}</h3>
+                <p class="lesson-coach-copy">${unit.coachLine || unit.learningGoal || unit.description}</p>
+                <div class="lesson-coach-grid">
+                    <section class="lesson-coach-section lesson-coach-section--highlight">
+                        <h4>今天先抓住这件事</h4>
+                        <p>${getQuestionWarmupLine(question, mode)}</p>
+                    </section>
+                    <section class="lesson-coach-section">
+                        <h4>做题前的小提醒</h4>
+                        <ol class="lesson-coach-steps">
+                            ${steps.map(step => `<li>${step}</li>`).join('')}
+                        </ol>
+                    </section>
+                </div>
+                <div class="lesson-coach-note">${modeNote}</div>
+            `;
+        }
+
+        function buildQuestionPrepMarkup(question, mode = 'adventure') {
+            const steps = getBeginnerThinkingSteps(question).slice(0, 3);
+            const title = mode === 'practice' ? '这一题先这样练' : '老师带你拆这道题';
+            const copy = `${getQuestionFocusHint(question)} ${question?.knowledge?.rule || ''}`.trim();
+
+            return `
+                <span class="question-prep-kicker">${mode === 'practice' ? '先想后答' : '做题前先看'}</span>
+                <h3 class="question-prep-title">${title}</h3>
+                <p class="question-prep-copy">${copy}</p>
+                <ol class="question-prep-steps">
+                    ${steps.map(step => `<li>${step}</li>`).join('')}
+                </ol>
+            `;
+        }
+
+        function renderQuestionCoachUI(question, mode = 'adventure') {
+            const coachCard = document.getElementById(mode === 'practice' ? 'practiceCoachCard' : 'lessonCoachCard');
+            const prepCard = document.getElementById(mode === 'practice' ? 'practiceQuestionPrep' : 'questionPrep');
+
+            if (coachCard) {
+                coachCard.innerHTML = buildLessonCoachMarkup(question, mode);
+            }
+
+            if (prepCard) {
+                prepCard.innerHTML = buildQuestionPrepMarkup(question, mode);
+                formatMultilineCodeBlocks(prepCard);
+            }
+        }
+
+        function renderResultCoachSummary(question, isCorrect) {
+            const summary = document.getElementById('resultCoachSummary');
+            if (!summary) {
+                return;
+            }
+
+            if (!question) {
+                summary.innerHTML = '';
+                return;
+            }
+
+            const steps = getBeginnerThinkingSteps(question).slice(0, 2);
+            summary.innerHTML = `
+                <div class="result-coach-kicker">${isCorrect ? '这次学会了什么' : '下次可以这样做'}</div>
+                <h4>${isCorrect ? '你答对的不只是答案，更是方法。' : '先别急着难过，按步骤重来一次就行。'}</h4>
+                <p>${isCorrect ? question.knowledge?.meaning : question.knowledge?.error}</p>
+                <ol class="result-coach-steps">
+                    ${steps.map(step => `<li>${step}</li>`).join('')}
+                </ol>
+            `;
+        }
+
         // 渲染关卡地图
         function renderLevelMap() {
             const mapPath = document.getElementById('mapPath');
@@ -99,7 +227,7 @@ function showStartScreen() {
         function startLevel(levelIndex) {
             gameState.currentLevel = levelIndex;
             gameState.currentQuestion = 0;
-            gameState.lives = gameState.isExtremeMode ? 1 : 3;
+            gameState.lives = getMaxLivesForCurrentMode();
             gameState.levelScore = 0;
             gameState.levelCorrect = 0;
             gameState.levelTime = 0;
@@ -129,14 +257,22 @@ function showStartScreen() {
         // 渲染关卡头部
         function renderLevelHeader() {
             const level = getLevelsForUnit()[gameState.currentLevel];
+            const unit = units[gameState.currentUnit] || units[0];
+            const levelSubtitle = document.getElementById('levelSubtitle');
             document.getElementById('levelBg').textContent = level.bg;
             if (gameState.isExtremeMode) {
                 const segmentText = `${gameState.extremeSegmentIndex + 1}/${gameState.extremeSegments.length}`;
                 document.getElementById('levelTitle').textContent = `${getExtremeScopeLabel()} · 第${segmentText}段：${level.name}`;
                 document.getElementById('levelIndicator').textContent = `考核 ${segmentText}`;
+                if (levelSubtitle) {
+                    levelSubtitle.textContent = '这是连续考核，先稳住节奏，再按平时学过的方法答题。';
+                }
             } else {
                 document.getElementById('levelTitle').textContent = `第${gameState.currentLevel + 1}关：${level.name}`;
                 document.getElementById('levelIndicator').textContent = `第${gameState.currentLevel + 1}关`;
+                if (levelSubtitle) {
+                    levelSubtitle.textContent = `${unit.learningGoal} 这一关会重点练：${level.name}。新手保护：每题 ${getQuestionTimeLimitSeconds()} 秒。`;
+                }
             }
         }
 
@@ -151,6 +287,7 @@ function showStartScreen() {
                 `${gameState.currentQuestion + 1} / ${currentLevelQuestions.length}`;
             questionContent.innerHTML = q.content;
             formatMultilineCodeBlocks(questionContent);
+            renderQuestionCoachUI(q);
 
             const optionsContainer = document.getElementById('optionsContainer');
             gameState.selectedAnswer = null;
@@ -475,7 +612,7 @@ function showStartScreen() {
             icon.textContent = isCorrect ? '✓' : '✗';
             icon.style.fontSize = isCorrect ? '80px' : '80px';
             title.className = `result-title ${isCorrect ? 'correct' : 'wrong'}`;
-            title.textContent = isCorrect ? '回答正确！🎉' : '回答错误';
+            title.textContent = isCorrect ? '答对啦，继续前进！' : '这题先别急，再看一遍讲解';
 
             scoreDiv.textContent = isCorrect ? `+${points}` : '+0';
             scoreDiv.style.display = isCorrect ? 'block' : 'none';
@@ -483,6 +620,7 @@ function showStartScreen() {
             bonusDiv.style.display = bonus ? 'block' : 'none';
 
             const q = currentLevelQuestions[gameState.currentQuestion];
+            renderResultCoachSummary(q, isCorrect);
             renderKnowledgeDetails(knowledgeBox, q);
             clearQuestionFeedback();
 
@@ -610,7 +748,8 @@ function showStartScreen() {
         function updateLivesDisplay() {
             const container = document.getElementById('livesContainer');
             let html = '';
-            for (let i = 0; i < 3; i++) {
+            const maxLives = getMaxLivesForCurrentMode();
+            for (let i = 0; i < maxLives; i++) {
                 const lost = i >= gameState.lives ? 'lost' : '';
                 html += `<span class="life ${lost}">💖</span>`;
             }
@@ -640,7 +779,8 @@ function showStartScreen() {
 
         // 开始计时器
         function startTimer() {
-            let timeLeft = 100;
+            const timeLimitSeconds = getQuestionTimeLimitSeconds();
+            let timeLeftMs = timeLimitSeconds * 1000;
             const fill = document.getElementById('timerFill');
             fill.style.width = '100%';
             fill.className = 'timer-fill';
@@ -650,20 +790,21 @@ function showStartScreen() {
             timerInterval = setInterval(() => {
                 if (gameState.isPaused) return;
 
-                timeLeft -= 1;
-                fill.style.width = timeLeft + '%';
+                timeLeftMs -= 100;
+                const fillPercent = Math.max(0, (timeLeftMs / (timeLimitSeconds * 1000)) * 100);
+                fill.style.width = fillPercent + '%';
 
-                if (timeLeft <= 30) {
+                if (fillPercent <= 25) {
                     fill.className = 'timer-fill danger';
-                } else if (timeLeft <= 50) {
+                } else if (fillPercent <= 50) {
                     fill.className = 'timer-fill warning';
                 }
-                if (timeLeft <= 0) {
+                if (timeLeftMs <= 0) {
                     clearInterval(timerInterval);
                     if (!gameState.selectedAnswer) {
                         gameState.selectedAnswer = '';
                     }
-                    submitAnswer(); // 挪到 if 语句外面
+                    submitAnswer();
                 }
             }, 100);
         }
@@ -715,7 +856,7 @@ function showStartScreen() {
 
             // 显示结算
             document.getElementById('completeTitle').textContent =
-                stars === 3 ? '🏆 完美通关！' : '🎉 关卡完成！';
+                stars === 3 ? '🏆 这一关完全学会啦！' : '🎉 这一关学会了！';
             document.getElementById('starsEarned').textContent = '⭐'.repeat(stars);
             document.getElementById('statScore').textContent = gameState.levelScore;
             document.getElementById('statCorrect').textContent = correctRate;
@@ -906,9 +1047,9 @@ function showStartScreen() {
                 document.getElementById('gameOverCorrect').textContent =
                     `${gameState.extremeRunCorrect}/${gameState.extremeRunAttempted}`;
             } else {
-                document.querySelector('.game-over-title').textContent = '💔 挑战失败';
-                document.getElementById('gameOverMessage').textContent = '生命值耗尽，请重新挑战！';
-                document.getElementById('retryLevelBtn').textContent = '🔄 重新挑战';
+                document.querySelector('.game-over-title').textContent = '🌱 这一关先休息一下';
+                document.getElementById('gameOverMessage').textContent = '没关系，我们把这关再练一次。刚才不会的地方，已经在讲解里告诉你该怎么想了。';
+                document.getElementById('retryLevelBtn').textContent = '🔄 再学一遍这一关';
                 document.getElementById('gameOverLevel').textContent =
                     `${gameState.currentLevel + 1}/${getLevelsForUnit().length}`;
                 document.getElementById('gameOverCorrect').textContent =
@@ -946,6 +1087,7 @@ function showStartScreen() {
                 `${gameState.practiceQuestionIndex + 1} / ${currentLevelQuestions.length}`;
             practiceQuestionContent.innerHTML = q.content;
             formatMultilineCodeBlocks(practiceQuestionContent);
+            renderQuestionCoachUI(q, 'practice');
 
             const optionsContainer = document.getElementById('practiceOptionsContainer');
             gameState.selectedAnswer = null;
@@ -1267,7 +1409,7 @@ function showStartScreen() {
         function confirmQuitLevel() {
             const confirmMessage = gameState.isExtremeMode
                 ? '确定要退出极限测试吗？退出后本次考核直接作废，再次挑战必须从起点重来。'
-                : '确定要退出关卡吗？本关的进度将不会被保存。';
+                : '确定要先离开这一关吗？离开后本关会重新开始，但你随时都可以回来继续学。';
 
             if (confirm(confirmMessage)) {
                 stopTimer();
