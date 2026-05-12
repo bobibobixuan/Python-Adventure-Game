@@ -28,8 +28,8 @@ def register(body: UserRegister, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(user)
 
-    access_token = create_access_token({"sub": user.id})
-    refresh_token = create_refresh_token({"sub": user.id})
+    access_token = create_access_token({"sub": str(user.id)})
+    refresh_token = create_refresh_token({"sub": str(user.id)})
 
     return TokenResponse(
         access_token=access_token,
@@ -44,8 +44,8 @@ def login(body: UserLogin, db: Session = Depends(get_db)):
     if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="用户名或密码错误")
 
-    access_token = create_access_token({"sub": user.id})
-    refresh_token = create_refresh_token({"sub": user.id})
+    access_token = create_access_token({"sub": str(user.id)})
+    refresh_token = create_refresh_token({"sub": str(user.id)})
 
     return TokenResponse(
         access_token=access_token,
@@ -65,8 +65,8 @@ def refresh(body: TokenRefresh, db: Session = Depends(get_db)):
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="用户不存在")
 
-    access_token = create_access_token({"sub": user.id})
-    refresh_token = create_refresh_token({"sub": user.id})
+    access_token = create_access_token({"sub": str(user.id)})
+    refresh_token = create_refresh_token({"sub": str(user.id)})
 
     return TokenResponse(
         access_token=access_token,

@@ -522,6 +522,29 @@ function normalizeUnitProgress(savedProgress, fallbackValue) {
             return { migrated, warnings };
         }
 
+        function syncToBackend() {
+            if (!ApiClient.isLoggedIn()) return;
+
+            var progressData = {
+                unit_level_stars: gameState.unitLevelStars,
+                unit_level_unlocked: gameState.unitLevelUnlocked,
+                achievements: gameState.achievements,
+                total_correct: gameState.totalCorrect,
+                total_questions: gameState.totalQuestions,
+                score: gameState.score,
+                practice_count: gameState.practiceCount,
+                extreme_passes: gameState.extremePasses,
+                extreme_dual_passes: gameState.extremeDualPasses,
+            };
+            ApiClient.syncProgress(progressData);
+        }
+
+        async function loadFromBackend() {
+            if (!ApiClient.isLoggedIn()) return null;
+            var progress = await ApiClient.getProgress();
+            return progress;
+        }
+
         function resetExtremeMode() {
             gameState.isExtremeMode = false;
             gameState.extremeScope = null;
@@ -613,6 +636,7 @@ function normalizeUnitProgress(savedProgress, fallbackValue) {
         function saveGameState() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedGameState()));
+                syncToBackend();
                 return true;
             } catch (error) {
                 console.warn('保存存档失败。', error);

@@ -1,5 +1,5 @@
 from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey, func
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy import JSON
 from sqlalchemy.orm import relationship
 
 from server.database import Base
@@ -12,7 +12,7 @@ class Question(Base):
     level_id = Column(Integer, ForeignKey("levels.id"), nullable=False)
     type = Column(String(20), nullable=False)
     content = Column(String(2000), nullable=False)
-    options = Column(JSONB, nullable=True)
+    options = Column(JSON, nullable=True)
     answer = Column(String(500), nullable=False)
     knowledge_meaning = Column(String(1000), nullable=False, default="")
     knowledge_rule = Column(String(1000), nullable=False, default="")
