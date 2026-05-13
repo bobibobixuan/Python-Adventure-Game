@@ -7,9 +7,9 @@ let currentSort = 'total_score';
 let currentSortOrder = 'desc';
 let currentStudentPage = 1;
 
-function getToken() { return localStorage.getItem(ADMIN_TOKEN_KEY) || localStorage.getItem('jwt_token'); }
-function setToken(t) { localStorage.setItem(ADMIN_TOKEN_KEY, t); localStorage.setItem('jwt_token', t); }
-function clearToken() { localStorage.removeItem(ADMIN_TOKEN_KEY); localStorage.removeItem('jwt_token'); localStorage.removeItem(ADMIN_USER_KEY); localStorage.removeItem('current_user'); }
+function getToken() { return localStorage.getItem(ADMIN_TOKEN_KEY); }
+function setToken(t) { localStorage.setItem(ADMIN_TOKEN_KEY, t); }
+function clearToken() { localStorage.removeItem(ADMIN_TOKEN_KEY); localStorage.removeItem(ADMIN_USER_KEY); }
 
 function showError(msg) {
     const el = document.getElementById('adminContent');
@@ -82,7 +82,6 @@ async function doAdminLogin() {
 
         setToken(data.access_token);
         localStorage.setItem(ADMIN_USER_KEY, JSON.stringify(data.user));
-        document.getElementById('loginError').textContent = '';
         showContent(data.user);
     } catch (e) {
         errEl.textContent = e.message;
@@ -99,7 +98,7 @@ function doLogout() {
 // ---- Init ----
 (function init() {
     const token = getToken();
-    const userJson = localStorage.getItem(ADMIN_USER_KEY) || localStorage.getItem('current_user');
+    const userJson = localStorage.getItem(ADMIN_USER_KEY);
     if (token && userJson) {
         try {
             const user = JSON.parse(userJson);
