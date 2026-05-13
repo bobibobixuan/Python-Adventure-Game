@@ -4,8 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐍 从0开始的Python基础教程</title>
-    <link rel="stylesheet" href="style.css">
+    <title>🐍 Python基础闯关游戏</title>
+    <!-- BUILD:STYLES -->
 </head>
 
 <body>
@@ -46,63 +46,33 @@
                 <span class="status-icon">⭐</span>
                 <span class="score-display" id="scoreDisplay">0</span>
             </div>
-            <div class="status-item">
-                <span class="status-icon" id="authStatusIcon" style="display:none; cursor:pointer;" onclick="showAuthScreen()">👤</span>
-            </div>
-        </div>
-
-        <!-- 登录/注册界面 -->
-        <div class="screen" id="authScreen">
-            <div class="auth-card">
-                <h2 class="auth-title" id="authTitle">登录 / 注册</h2>
-                <p class="auth-subtitle">登录后可以保存进度到云端，跨设备同步学习记录。</p>
-                <div class="auth-tabs">
-                    <button class="auth-tab active" onclick="switchAuthTab('login')">登录</button>
-                    <button class="auth-tab" onclick="switchAuthTab('register')">注册</button>
-                </div>
-                <div id="loginForm" class="auth-form">
-                    <input type="text" id="loginUsername" class="auth-input" placeholder="用户名">
-                    <input type="password" id="loginPassword" class="auth-input" placeholder="密码" onkeypress="if(event.key==='Enter') doLogin()">
-                    <button class="continue-btn" onclick="doLogin()">登录</button>
-                </div>
-                <div id="registerForm" class="auth-form" style="display:none;">
-                    <input type="text" id="regUsername" class="auth-input" placeholder="用户名">
-                    <input type="text" id="regNickname" class="auth-input" placeholder="昵称">
-                    <input type="password" id="regPassword" class="auth-input" placeholder="密码（至少6位）">
-                    <button class="continue-btn" onclick="doRegister()">注册</button>
-                </div>
-                <div id="authError" class="auth-error" style="display:none;"></div>
-                <button class="continue-btn continue-btn--ghost" onclick="skipAuth()" style="margin-top:12px;">跳过，离线使用</button>
-            </div>
         </div>
 
         <!-- 开始界面 -->
         <div class="screen active" id="startScreen">
             <div class="start-screen">
-                <h1 class="game-title">🐍 从0开始的Python基础教程</h1>
-                <p class="game-subtitle">给零基础孩子也能看懂的一步一步 Python 入门课。</p>
-                <p class="start-screen-note">不会编程也没关系。这里会先告诉你看什么、怎么想、再怎么答。</p>
-                <div id="continueLearningCard"></div>
+                <h1 class="game-title">🐍 Python基础闯关</h1>
+                <p class="game-subtitle">趣味学习，挑战自我！</p>
 
                 <div class="character">🐍</div>
 
                 <div class="mode-buttons">
                     <div class="menu-featured-grid">
                         <button class="mode-btn mode-btn--featured primary" onclick="startAdventure()">
-                            <span class="mode-btn-kicker">从0开始</span>
-                            <span class="mode-btn-title">🧑‍🏫 跟老师学</span>
-                            <span class="mode-btn-desc">按课程顺序一关一关学，每题前后都会给你提示和讲解。</span>
+                            <span class="mode-btn-kicker">核心路线</span>
+                            <span class="mode-btn-title">⚔️ 冒险模式</span>
+                            <span class="mode-btn-desc">逐关推进、拿星解锁，适合从头开始系统闯关。</span>
                         </button>
                         <button class="mode-btn mode-btn--featured danger" onclick="showExtremeModeSelect()">
-                            <span class="mode-btn-kicker">学完再挑战</span>
+                            <span class="mode-btn-kicker">高压挑战</span>
                             <span class="mode-btn-title">👑 极限测试</span>
-                            <span class="mode-btn-desc">一命到底，答错即止，适合学完之后检查自己是否真的会了。</span>
+                            <span class="mode-btn-desc">一命到底，答错即止，适合检验节奏和稳定度。</span>
                         </button>
                     </div>
                     <div class="menu-secondary-grid">
                         <button class="mode-btn mode-btn--panel secondary" onclick="startPractice()">
-                            <span class="mode-btn-title">📝 练习场</span>
-                            <span class="mode-btn-desc">不扣血不计时，专门用来慢慢练、反复练、把基础练熟。</span>
+                            <span class="mode-btn-title">📚 修炼场</span>
+                            <span class="mode-btn-desc">随机练习，不扣血不计时，专门拿来补基础。</span>
                         </button>
                         <button class="mode-btn mode-btn--panel secondary" onclick="showRecords()">
                             <span class="mode-btn-title">📊 做题记录</span>
@@ -114,34 +84,6 @@
                         </button>
                     </div>
                 </div>
-
-                <section class="learning-route-panel learning-route-panel--home">
-                    <span class="learning-route-kicker">新手路线</span>
-                    <h2 class="learning-route-title">第一次玩，建议按这条线学</h2>
-                    <p class="learning-route-copy">别急着所有模式都试一遍。先按“运算符 → 条件判断 → 循环”的顺序推进，卡住时再去修炼场补基础，学习会稳很多。</p>
-                    <div class="learning-route-grid">
-                        <article class="route-step-card">
-                            <span class="route-step-number">1</span>
-                            <h3>先学运算符</h3>
-                            <p>先把表达式算明白，后面读条件和循环才不会乱。</p>
-                        </article>
-                        <article class="route-step-card">
-                            <span class="route-step-number">2</span>
-                            <h3>再学条件判断</h3>
-                            <p>先判断真假，再决定程序应该走哪一条分支。</p>
-                        </article>
-                        <article class="route-step-card">
-                            <span class="route-step-number">3</span>
-                            <h3>然后进入循环</h3>
-                            <p>把“程序重复做事”的思路建立起来，难度会自然抬升。</p>
-                        </article>
-                        <article class="route-step-card">
-                            <span class="route-step-number">4</span>
-                            <h3>卡住就去修炼场</h3>
-                            <p>先把薄弱点补清楚，再回主线推进，比硬顶更有效。</p>
-                        </article>
-                    </div>
-                </section>
             </div>
         </div>
 
@@ -180,9 +122,7 @@
         <div class="screen" id="unitSelectScreen">
             <div class="unit-select-screen">
                 <h1 class="unit-title">📚 选择学习单元</h1>
-                <p class="unit-subtitle" id="unitSelectSubtitle">选择你要挑战的单元，开始你的Python之旅</p>
-
-                <div id="learningPathPanel"></div>
+                <p class="unit-subtitle">选择你要挑战的单元，开始你的Python之旅</p>
 
                 <div class="units-container" id="unitsContainer"></div>
 
@@ -216,14 +156,9 @@
             <div class="level-header">
                 <div class="level-bg" id="levelBg">🏰</div>
                 <h2 class="level-title" id="levelTitle">第1关：算术运算符</h2>
-                <p class="level-subtitle" id="levelSubtitle">今天这关会先教你看什么，再带你一步一步作答。</p>
             </div>
 
-            <div class="lesson-coach-card" id="lessonCoachCard"></div>
-
             <div class="question-card">
-                <div class="question-prep" id="questionPrep"></div>
-
                 <div class="question-meta">
                     <span class="question-type-badge" id="questionType">选择题</span>
                     <span class="question-progress" id="questionProgress">1 / 5</span>
@@ -246,14 +181,10 @@
             <div class="practice-mode">
                 <div class="practice-badge">📚 修炼场模式</div>
                 <p class="practice-mode-title" id="practiceTitle">随机练习</p>
-                <p class="practice-mode-subtitle" id="practiceSubtitle">不计时、不扣血，专注学习</p>
+                <p class="practice-mode-subtitle">不计时、不扣血，专注学习</p>
             </div>
 
-            <div class="lesson-coach-card lesson-coach-card--practice" id="practiceCoachCard"></div>
-
             <div class="question-card question-card--spaced">
-                <div class="question-prep question-prep--practice" id="practiceQuestionPrep"></div>
-
                 <div class="question-meta">
                     <span class="question-type-badge" id="practiceQuestionType">选择题</span>
                     <span class="question-progress" id="practiceProgress">1 / 25</span>
@@ -533,7 +464,6 @@
             <div class="result-title" id="resultTitle">回答正确！</div>
             <div class="result-score" id="resultScore">+100</div>
             <div class="result-bonus" id="resultBonus"></div>
-            <div class="result-coach-summary" id="resultCoachSummary"></div>
             <div class="knowledge-box" id="knowledgeBox"></div>
             <button class="continue-btn" onclick="closeResult()">继续</button>
         </div>
@@ -547,77 +477,8 @@
         <div class="achievement-popup-desc" id="popupDesc"></div>
     </div>
 
-    <script src="game/40_api.js"></script>
-    <script src="data/00_units.js"></script>
-    <script src="data/10_unit1_questions.js"></script>
-    <script src="data/11_unit2_questions.js"></script>
-    <script src="data/12_unit3_questions.js"></script>
-    <script src="data/20_unit_maps.js"></script>
-    <script src="data/30_achievements.js"></script>
-    <script src="game/00_core.js"></script>
-    <script src="game/10_state.js"></script>
-    <script src="game/20_app.js"></script>
-    <script src="game/30_devtools.js"></script>
-
-    <script>
-    // === Auth UI Functions ===
-    function switchAuthTab(tab) {
-        document.querySelectorAll('.auth-tab').forEach(function(t) { t.classList.remove('active'); });
-        event.target.classList.add('active');
-        document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
-        document.getElementById('registerForm').style.display = tab === 'register' ? 'block' : 'none';
-        document.getElementById('authError').style.display = 'none';
-    }
-
-    async function doLogin() {
-        var username = document.getElementById('loginUsername').value.trim();
-        var password = document.getElementById('loginPassword').value;
-        if (!username || !password) return;
-
-        var result = await ApiClient.login(username, password);
-        if (result.ok) {
-            document.getElementById('authStatusIcon').style.display = 'block';
-            showStartScreen();
-        } else {
-            var err = document.getElementById('authError');
-            err.textContent = result.data.detail || '登录失败';
-            err.style.display = 'block';
-        }
-    }
-
-    async function doRegister() {
-        var username = document.getElementById('regUsername').value.trim();
-        var nickname = document.getElementById('regNickname').value.trim();
-        var password = document.getElementById('regPassword').value;
-        if (!username || !nickname || !password) return;
-
-        var result = await ApiClient.register(username, password, nickname);
-        if (result.ok) {
-            document.getElementById('authStatusIcon').style.display = 'block';
-            showStartScreen();
-        } else {
-            var err = document.getElementById('authError');
-            err.textContent = result.data.detail || '注册失败';
-            err.style.display = 'block';
-        }
-    }
-
-    function skipAuth() {
-        showStartScreen();
-    }
-
-    function showAuthScreen() {
-        if (ApiClient.isLoggedIn()) {
-            if (confirm('确定要退出登录吗？')) {
-                ApiClient.logout();
-                document.getElementById('authStatusIcon').style.display = 'none';
-            }
-            return;
-        }
-        switchScreen('authScreen');
-    }
-    </script>
-
+    <!-- BUILD:DATA -->
+    <!-- BUILD:GAME -->
 </body>
 
 </html>

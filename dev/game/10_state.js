@@ -214,35 +214,11 @@ function normalizeUnitProgress(savedProgress, fallbackValue) {
         function getBeginnerThinkingSteps(question) {
             const questionText = String(question?.content || '');
 
-            if (question?.type === '填空题' && /[+\-*/%]/.test(questionText) && !questionText.includes('执行代码') && !questionText.includes('print(')) {
-                return [
-                    '先看算式里有没有乘法、除法或括号，先算最优先的部分。',
-                    '再把中间结果代回原题，继续往下算。',
-                    '最后写出最终答案，不要把中间那一步当成最后结果。'
-                ];
-            }
-
             if (question?.type === '填空题' && (questionText.includes('执行代码') || questionText.includes('print('))) {
-                if (questionText.includes('for ') || questionText.includes('while ')) {
-                    return [
-                        '先看循环会跑几轮，不要急着盯最后一行。',
-                        '再一轮一轮写出变量怎么变化，别跳步。',
-                        '最后看 print 会输出什么，或者变量最后停在哪个值。'
-                    ];
-                }
-
-                if (questionText.includes('if ') || questionText.includes('if(')) {
-                    return [
-                        '先看变量一开始的值，不要急着看最后一行。',
-                        '再判断 if 条件是真是假，只执行真正会走到的分支。',
-                        '最后按顺序模拟每一行代码，算出最终输出。'
-                    ];
-                }
-
                 return [
                     '先看变量一开始的值，不要急着看最后一行。',
-                    '再按顺序一行一行往下算，先做优先级高的运算。',
-                    '最后看 print 输出什么，或者变量最后留下什么值。'
+                    '再判断 if 条件是真是假，只执行真正会走到的分支。',
+                    '最后按顺序模拟每一行代码，算出最终输出。'
                 ];
             }
 
@@ -522,29 +498,6 @@ function normalizeUnitProgress(savedProgress, fallbackValue) {
             return { migrated, warnings };
         }
 
-        function syncToBackend() {
-            if (!ApiClient.isLoggedIn()) return;
-
-            var progressData = {
-                unit_level_stars: gameState.unitLevelStars,
-                unit_level_unlocked: gameState.unitLevelUnlocked,
-                achievements: gameState.achievements,
-                total_correct: gameState.totalCorrect,
-                total_questions: gameState.totalQuestions,
-                score: gameState.score,
-                practice_count: gameState.practiceCount,
-                extreme_passes: gameState.extremePasses,
-                extreme_dual_passes: gameState.extremeDualPasses,
-            };
-            ApiClient.syncProgress(progressData);
-        }
-
-        async function loadFromBackend() {
-            if (!ApiClient.isLoggedIn()) return null;
-            var progress = await ApiClient.getProgress();
-            return progress;
-        }
-
         function resetExtremeMode() {
             gameState.isExtremeMode = false;
             gameState.extremeScope = null;
@@ -636,7 +589,6 @@ function normalizeUnitProgress(savedProgress, fallbackValue) {
         function saveGameState() {
             try {
                 localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedGameState()));
-                syncToBackend();
                 return true;
             } catch (error) {
                 console.warn('保存存档失败。', error);
