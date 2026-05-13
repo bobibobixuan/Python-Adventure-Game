@@ -33,6 +33,10 @@ build/
 dist/game/
 *.spec.bak
 
+# Claude Code
+.claude/settings.local.json
+.claude/worktrees/
+
 # Environment
 .env
 .env.local
