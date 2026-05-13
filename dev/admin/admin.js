@@ -15,7 +15,6 @@ let adminIntentionalClose = false;
 
 function connectAdminWebSocket(token) {
     adminIntentionalClose = false;
-    adminReconnectAttempt = 0;
 
     if (adminReconnectTimer) {
         clearTimeout(adminReconnectTimer);
@@ -114,6 +113,7 @@ async function fetchAdmin(path, options = {}) {
     if (token) headers['Authorization'] = `Bearer ${token}`;
     const resp = await fetch(path, { ...options, headers });
     if (resp.status === 401) {
+        disconnectAdminWebSocket();
         clearToken();
         showLogin();
         throw new Error('登录已过期');
