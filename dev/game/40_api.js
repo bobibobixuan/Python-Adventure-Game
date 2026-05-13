@@ -16,10 +16,20 @@ const OnlineHeartbeat = (() => {
     function connect(token) {
         if (!token) return;
         intentionalClose = false;
-        reconnectAttempt = 0;
+        // 清理旧的重连定时器和连接
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
 
         function doConnect() {
             if (intentionalClose) return;
+            // 关闭旧的 WebSocket，防止重复连接
+            if (ws) {
+                ws.onclose = null;
+                ws.close();
+                ws = null;
+            }
 
             const url = `${getBaseUrl()}/ws/online`;
             ws = new WebSocket(url);
@@ -46,7 +56,7 @@ const OnlineHeartbeat = (() => {
             };
 
             ws.onerror = () => {
-                // onclose 会紧随其后触发，在 onclose 中处理重连
+                console.warn('[OnlineHeartbeat] WebSocket error, onclose will follow');
             };
         }
 
@@ -69,6 +79,7 @@ const OnlineHeartbeat = (() => {
 
     function disconnect() {
         intentionalClose = true;
+        reconnectAttempt = 0;
         if (reconnectTimer) {
             clearTimeout(reconnectTimer);
             reconnectTimer = null;
