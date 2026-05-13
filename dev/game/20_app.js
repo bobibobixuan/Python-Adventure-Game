@@ -863,51 +863,60 @@ function showStartScreen() {
         }
 
         function displayNextAchievementPopup() {
-            const popup = document.getElementById('achievementPopup');
-            const popupMeta = document.getElementById('popupMeta');
             const achievement = achievementPopupQueue.shift();
 
-            if (!popup || !achievement) {
+            if (!achievement) {
                 achievementPopupActive = false;
                 return;
             }
 
-            // 计算堆叠偏移：统计当前页面可见的 toast 数量
-            const visibleToasts = document.querySelectorAll('.achievement-popup.show').length;
-            const baseBottom = 24;
-            const stackOffset = visibleToasts * 102; // toast 估算高度 + 12px 间距
-            popup.style.bottom = (baseBottom + stackOffset) + 'px';
-
             const rarityMeta = getAchievementRarityMeta(achievement.rarity);
             const categoryMeta = getAchievementCategoryMeta(achievement.category);
 
+            // 计算堆叠偏移
+            const visibleToasts = document.querySelectorAll('.achievement-popup.show').length;
+            const baseBottom = 24;
+            const stackOffset = visibleToasts * 102;
+
+            // 超过 3 个同时显示，跳过队列中最旧的
+            if (visibleToasts >= 3) {
+                const oldest = document.querySelector('.achievement-popup.show');
+                if (oldest) {
+                    oldest.classList.remove('show');
+                    oldest.classList.add('hide');
+                    setTimeout(() => {
+                        if (oldest.parentNode) oldest.parentNode.removeChild(oldest);
+                    }, 240);
+                }
+            }
+
+            // 动态创建 toast 元素
+            const popup = document.createElement('div');
+            popup.className = 'achievement-popup';
             popup.dataset.rarity = achievement.rarity || 'common';
             popup.style.setProperty('--achievement-popup-accent', rarityMeta.accent);
-            document.getElementById('popupIcon').textContent = achievement.icon;
-            document.getElementById('popupTitle').textContent = achievement.name;
-            if (popupMeta) {
-                popupMeta.textContent = `${categoryMeta.icon} ${achievement.category} · ${rarityMeta.label}`;
-            }
-            document.getElementById('popupDesc').textContent = achievement.desc;
+            popup.style.bottom = (baseBottom + stackOffset) + 'px';
 
-            // 同时显示上限：超过 3 个则跳过队列中最旧的
-            if (visibleToasts >= 3) {
-                achievementPopupQueue.shift();
-            }
+            popup.innerHTML = `
+                <div class="achievement-popup-icon">${achievement.icon}</div>
+                <div class="achievement-popup-title">${achievement.name}</div>
+                <div class="achievement-popup-meta">${categoryMeta.icon} ${achievement.category} · ${rarityMeta.label}</div>
+                <div class="achievement-popup-desc">${achievement.desc}</div>
+            `;
 
-            popup.style.display = 'block';
-            popup.classList.remove('hide');
+            document.body.appendChild(popup);
+
+            // 触发入场动画
             void popup.offsetWidth;
             popup.classList.add('show');
 
+            // 自动消失
             setTimeout(() => {
                 popup.classList.remove('show');
                 popup.classList.add('hide');
 
-                // 其他可见 toast 回落
                 setTimeout(() => {
-                    popup.style.display = 'none';
-                    popup.classList.remove('hide');
+                    if (popup.parentNode) popup.parentNode.removeChild(popup);
                     repositionRemainingToasts();
                     displayNextAchievementPopup();
                 }, 240);

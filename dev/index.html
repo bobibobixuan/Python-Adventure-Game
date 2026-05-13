@@ -1,401 +1,401 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🐍 Python基础闯关游戏</title>
+    <title>馃悕 Python鍩虹闂叧娓告垙</title>
     <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-    <!-- 粒子背景 -->
+    <!-- 绮掑瓙鑳屾櫙 -->
     <div class="particles" id="particles"></div>
 
-    <!-- 漂浮金币容器 -->
+    <!-- 婕傛诞閲戝竵瀹瑰櫒 -->
     <div class="floating-coins" id="floatingCoins"></div>
 
-    <!-- 漂浮星星容器 -->
+    <!-- 婕傛诞鏄熸槦瀹瑰櫒 -->
     <div class="floating-stars" id="floatingStars"></div>
 
     <div class="container">
-        <!-- 顶部状态栏 -->
+        <!-- 椤堕儴鐘舵€佹爮 -->
         <div class="status-bar hidden" id="statusBar">
             <div class="status-item">
-                <span class="status-icon">🎮</span>
-                <span class="level-indicator" id="levelIndicator">第1关</span>
+                <span class="status-icon">馃幃</span>
+                <span class="level-indicator" id="levelIndicator">绗?鍏?/span>
             </div>
             <div class="status-item">
-                <span class="status-icon">❤️</span>
+                <span class="status-icon">鉂わ笍</span>
                 <div class="lives-container" id="livesContainer">
-                    <span class="life">💖</span>
-                    <span class="life">💖</span>
-                    <span class="life">💖</span>
+                    <span class="life">馃挅</span>
+                    <span class="life">馃挅</span>
+                    <span class="life">馃挅</span>
                 </div>
             </div>
             <div class="status-item">
-                <span class="status-icon">⏱️</span>
+                <span class="status-icon">鈴憋笍</span>
                 <div class="timer-bar">
                     <div class="timer-fill" id="timerFill" style="width: 100%"></div>
                 </div>
             </div>
             <div class="status-item combo-display" id="comboDisplay" style="display: none;">
-                🔥 连击 <span id="comboCount">0</span>x
+                馃敟 杩炲嚮 <span id="comboCount">0</span>x
             </div>
             <div class="status-item">
-                <span class="status-icon">⭐</span>
+                <span class="status-icon">猸?/span>
                 <span class="score-display" id="scoreDisplay">0</span>
             </div>
         </div>
 
-        <!-- 开始界面 -->
+        <!-- 寮€濮嬬晫闈?-->
         <div class="screen active" id="startScreen">
             <div class="start-screen">
-                <h1 class="game-title">🐍 Python基础闯关</h1>
-                <p class="game-subtitle">趣味学习，挑战自我！</p>
+                <h1 class="game-title">馃悕 Python鍩虹闂叧</h1>
+                <p class="game-subtitle">瓒ｅ懗瀛︿範锛屾寫鎴樿嚜鎴戯紒</p>
 
                 <div class="auth-bar" id="authBar">
                     <span class="auth-bar-guest" id="authBarGuest">
-                        <button class="auth-bar-btn" onclick="showAuthScreen()">🔐 登录 / 注册</button>
-                        <span class="auth-bar-hint">登录后可云端同步进度</span>
+                        <button class="auth-bar-btn" onclick="showAuthScreen()">馃攼 鐧诲綍 / 娉ㄥ唽</button>
+                        <span class="auth-bar-hint">鐧诲綍鍚庡彲浜戠鍚屾杩涘害</span>
                     </span>
                     <span class="auth-bar-user" id="authBarUser" style="display:none;">
                         <span class="auth-bar-nickname" id="authBarNickname"></span>
-                        <button class="auth-bar-btn auth-bar-btn--small" onclick="doLogoutGame()">退出</button>
+                        <button class="auth-bar-btn auth-bar-btn--small" onclick="doLogoutGame()">閫€鍑?/button>
                     </span>
                 </div>
 
-                <div class="character">🐍</div>
+                <div class="character">馃悕</div>
 
                 <div class="mode-buttons">
                     <div class="menu-featured-grid">
                         <button class="mode-btn mode-btn--featured primary" onclick="startAdventure()">
-                            <span class="mode-btn-kicker">核心路线</span>
-                            <span class="mode-btn-title">⚔️ 冒险模式</span>
-                            <span class="mode-btn-desc">逐关推进、拿星解锁，适合从头开始系统闯关。</span>
+                            <span class="mode-btn-kicker">鏍稿績璺嚎</span>
+                            <span class="mode-btn-title">鈿旓笍 鍐掗櫓妯″紡</span>
+                            <span class="mode-btn-desc">閫愬叧鎺ㄨ繘銆佹嬁鏄熻В閿侊紝閫傚悎浠庡ご寮€濮嬬郴缁熼棷鍏炽€?/span>
                         </button>
                         <button class="mode-btn mode-btn--featured danger" onclick="showExtremeModeSelect()">
-                            <span class="mode-btn-kicker">高压挑战</span>
-                            <span class="mode-btn-title">👑 极限测试</span>
-                            <span class="mode-btn-desc">一命到底，答错即止，适合检验节奏和稳定度。</span>
+                            <span class="mode-btn-kicker">楂樺帇鎸戞垬</span>
+                            <span class="mode-btn-title">馃憫 鏋侀檺娴嬭瘯</span>
+                            <span class="mode-btn-desc">涓€鍛藉埌搴曪紝绛旈敊鍗虫锛岄€傚悎妫€楠岃妭濂忓拰绋冲畾搴︺€?/span>
                         </button>
                     </div>
                     <div class="menu-secondary-grid">
                         <button class="mode-btn mode-btn--panel secondary" onclick="startPractice()">
-                            <span class="mode-btn-title">📚 修炼场</span>
-                            <span class="mode-btn-desc">随机练习，不扣血不计时，专门拿来补基础。</span>
+                            <span class="mode-btn-title">馃摎 淇偧鍦?/span>
+                            <span class="mode-btn-desc">闅忔満缁冧範锛屼笉鎵ｈ涓嶈鏃讹紝涓撻棬鎷挎潵琛ュ熀纭€銆?/span>
                         </button>
                         <button class="mode-btn mode-btn--panel secondary" onclick="showRecords()">
-                            <span class="mode-btn-title">📊 做题记录</span>
-                            <span class="mode-btn-desc">回看正确率、荣誉记录和分单元进度。</span>
+                            <span class="mode-btn-title">馃搳 鍋氶璁板綍</span>
+                            <span class="mode-btn-desc">鍥炵湅姝ｇ‘鐜囥€佽崳瑾夎褰曞拰鍒嗗崟鍏冭繘搴︺€?/span>
                         </button>
                         <button class="mode-btn mode-btn--panel secondary" onclick="showAchievements()">
-                            <span class="mode-btn-title">🏆 成就一览</span>
-                            <span class="mode-btn-desc">查看勋章墙和当前解锁进度。</span>
+                            <span class="mode-btn-title">馃弳 鎴愬氨涓€瑙?/span>
+                            <span class="mode-btn-desc">鏌ョ湅鍕嬬珷澧欏拰褰撳墠瑙ｉ攣杩涘害銆?/span>
                         </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- 登录/注册界面 -->
+        <!-- 鐧诲綍/娉ㄥ唽鐣岄潰 -->
         <div class="screen" id="authScreen">
             <div class="auth-container">
                 <div class="auth-card">
                     <div class="auth-tabs">
-                        <button class="auth-tab active" id="authTabLogin" onclick="switchAuthTab('login')">登录</button>
-                        <button class="auth-tab" id="authTabRegister" onclick="switchAuthTab('register')">注册</button>
+                        <button class="auth-tab active" id="authTabLogin" onclick="switchAuthTab('login')">鐧诲綍</button>
+                        <button class="auth-tab" id="authTabRegister" onclick="switchAuthTab('register')">娉ㄥ唽</button>
                     </div>
 
-                    <!-- 登录表单 -->
+                    <!-- 鐧诲綍琛ㄥ崟 -->
                     <div class="auth-form" id="loginForm">
-                        <input type="text" id="loginUsername" placeholder="用户名" class="admin-input"
+                        <input type="text" id="loginUsername" placeholder="鐢ㄦ埛鍚? class="admin-input"
                                onkeydown="if(event.key==='Enter') document.getElementById('loginPassword').focus()">
-                        <input type="password" id="loginPassword" placeholder="密码" class="admin-input"
+                        <input type="password" id="loginPassword" placeholder="瀵嗙爜" class="admin-input"
                                onkeydown="if(event.key==='Enter') doGameLogin()">
-                        <button class="login-btn" onclick="doGameLogin()">登录</button>
+                        <button class="login-btn" onclick="doGameLogin()">鐧诲綍</button>
                         <div class="auth-error" id="loginError"></div>
                     </div>
 
-                    <!-- 注册表单 -->
+                    <!-- 娉ㄥ唽琛ㄥ崟 -->
                     <div class="auth-form" id="registerForm" style="display:none;">
-                        <input type="text" id="regNickname" placeholder="昵称" class="admin-input">
-                        <input type="text" id="regUsername" placeholder="用户名" class="admin-input">
-                        <input type="password" id="regPassword" placeholder="密码" class="admin-input"
+                        <input type="text" id="regNickname" placeholder="鏄电О" class="admin-input">
+                        <input type="text" id="regUsername" placeholder="鐢ㄦ埛鍚? class="admin-input">
+                        <input type="password" id="regPassword" placeholder="瀵嗙爜" class="admin-input"
                                onkeydown="if(event.key==='Enter') doGameRegister()">
-                        <button class="login-btn" onclick="doGameRegister()">注册</button>
+                        <button class="login-btn" onclick="doGameRegister()">娉ㄥ唽</button>
                         <div class="auth-error" id="registerError"></div>
                     </div>
 
-                    <div class="auth-skip" onclick="skipAuth()">跳过，离线游玩 →</div>
+                    <div class="auth-skip" onclick="skipAuth()">璺宠繃锛岀绾挎父鐜?鈫?/div>
                 </div>
             </div>
         </div>
 
-        <!-- 极限测试范围选择 -->
+        <!-- 鏋侀檺娴嬭瘯鑼冨洿閫夋嫨 -->
         <div class="screen" id="extremeModeScreen">
             <div class="challenge-select-card page-shell page-shell--narrow">
                 <div class="page-header page-header--center challenge-select-head">
-                    <h2 class="page-title page-title--warm">👑 极限测试</h2>
+                    <h2 class="page-title page-title--warm">馃憫 鏋侀檺娴嬭瘯</h2>
                     <p class="page-subtitle">
-                        一命到底，答错即止。想再次挑战，必须重新从考核起点开始。
+                        涓€鍛藉埌搴曪紝绛旈敊鍗虫銆傛兂鍐嶆鎸戞垬锛屽繀椤婚噸鏂颁粠鑰冩牳璧风偣寮€濮嬨€?
                     </p>
                 </div>
 
                 <button class="challenge-option" onclick="startExtremeTest('unit0')">
-                    <strong>🔥 单测第一单元</strong>
-                    <span>只考第一单元内容，6 段连续挑战，任何一题失误都直接判定失败。</span>
+                    <strong>馃敟 鍗曟祴绗竴鍗曞厓</strong>
+                    <span>鍙€冪涓€鍗曞厓鍐呭锛? 娈佃繛缁寫鎴橈紝浠讳綍涓€棰樺け璇兘鐩存帴鍒ゅ畾澶辫触銆?/span>
                 </button>
 
                 <button class="challenge-option" onclick="startExtremeTest('unit1')">
-                    <strong>🔥 单测第二单元</strong>
-                    <span>只考第二单元内容，完整跑完该单元全部关卡才算通过。</span>
+                    <strong>馃敟 鍗曟祴绗簩鍗曞厓</strong>
+                    <span>鍙€冪浜屽崟鍏冨唴瀹癸紝瀹屾暣璺戝畬璇ュ崟鍏冨叏閮ㄥ叧鍗℃墠绠楅€氳繃銆?/span>
                 </button>
 
                 <button class="challenge-option challenge-option--boss" onclick="startExtremeTest('dual')">
-                    <strong>👑 双单元综合大考</strong>
-                    <span>从第一单元第一关开始，一路打到第二单元最终挑战，全程不能错一题。</span>
+                    <strong>馃憫 鍙屽崟鍏冪患鍚堝ぇ鑰?/strong>
+                    <span>浠庣涓€鍗曞厓绗竴鍏冲紑濮嬶紝涓€璺墦鍒扮浜屽崟鍏冩渶缁堟寫鎴橈紝鍏ㄧ▼涓嶈兘閿欎竴棰樸€?/span>
                 </button>
 
                 <div class="screen-actions screen-actions--center">
-                    <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                    <button class="continue-btn" onclick="showStartScreen()">鈫?杩斿洖涓婚〉</button>
                 </div>
             </div>
         </div>
 
-        <!-- 单元选择界面 -->
+        <!-- 鍗曞厓閫夋嫨鐣岄潰 -->
         <div class="screen" id="unitSelectScreen">
             <div class="unit-select-screen">
-                <h1 class="unit-title">📚 选择学习单元</h1>
-                <p class="unit-subtitle">选择你要挑战的单元，开始你的Python之旅</p>
+                <h1 class="unit-title">馃摎 閫夋嫨瀛︿範鍗曞厓</h1>
+                <p class="unit-subtitle">閫夋嫨浣犺鎸戞垬鐨勫崟鍏冿紝寮€濮嬩綘鐨凱ython涔嬫梾</p>
 
                 <div class="units-container" id="unitsContainer"></div>
 
                 <div class="unit-buttons">
                     <button class="continue-btn continue-btn--ghost" onclick="showStartScreen()">
-                        ← 返回主页
+                        鈫?杩斿洖涓婚〉
                     </button>
                 </div>
             </div>
         </div>
 
-        <!-- 关卡选择界面 -->
+        <!-- 鍏冲崱閫夋嫨鐣岄潰 -->
         <div class="screen" id="levelSelectScreen">
             <div class="page-shell page-shell--wide">
                 <div class="level-map">
-                    <h2 class="map-title">🗺️ 冒险地图</h2>
+                    <h2 class="map-title">馃椇锔?鍐掗櫓鍦板浘</h2>
                     <div class="map-path" id="mapPath"></div>
                 </div>
                 <div class="screen-actions screen-actions--center">
-                    <button class="continue-btn" onclick="selectUnit()">← 选择单元</button>
-                    <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                    <button class="continue-btn" onclick="selectUnit()">鈫?閫夋嫨鍗曞厓</button>
+                    <button class="continue-btn" onclick="showStartScreen()">鈫?杩斿洖涓婚〉</button>
                 </div>
             </div>
         </div>
 
-        <!-- 答题界面 -->
+        <!-- 绛旈鐣岄潰 -->
         <div class="screen" id="gameScreen">
             <div class="screen-actions screen-actions--end">
-                <button class="continue-btn continue-btn--danger-ghost" onclick="confirmQuitLevel()">🚪 退出关卡</button>
+                <button class="continue-btn continue-btn--danger-ghost" onclick="confirmQuitLevel()">馃毆 閫€鍑哄叧鍗?/button>
             </div>
             <div class="level-header">
-                <div class="level-bg" id="levelBg">🏰</div>
-                <h2 class="level-title" id="levelTitle">第1关：算术运算符</h2>
+                <div class="level-bg" id="levelBg">馃彴</div>
+                <h2 class="level-title" id="levelTitle">绗?鍏筹細绠楁湳杩愮畻绗?/h2>
             </div>
 
             <div class="question-card">
                 <div class="question-meta">
-                    <span class="question-type-badge" id="questionType">选择题</span>
+                    <span class="question-type-badge" id="questionType">閫夋嫨棰?/span>
                     <span class="question-progress" id="questionProgress">1 / 5</span>
                 </div>
 
                 <div class="question-content" id="questionContent">
-                    题目加载中...
+                    棰樼洰鍔犺浇涓?..
                 </div>
 
                 <div id="optionsContainer"></div>
 
                 <button class="submit-btn" id="submitBtn" onclick="submitAnswer()" disabled>
-                    确认答案
+                    纭绛旀
                 </button>
             </div>
         </div>
 
-        <!-- 修炼场界面 -->
+        <!-- 淇偧鍦虹晫闈?-->
         <div class="screen" id="practiceScreen">
             <div class="practice-mode">
-                <div class="practice-badge">📚 修炼场模式</div>
-                <p class="practice-mode-title" id="practiceTitle">随机练习</p>
-                <p class="practice-mode-subtitle">不计时、不扣血，专注学习</p>
+                <div class="practice-badge">馃摎 淇偧鍦烘ā寮?/div>
+                <p class="practice-mode-title" id="practiceTitle">闅忔満缁冧範</p>
+                <p class="practice-mode-subtitle">涓嶈鏃躲€佷笉鎵ｈ锛屼笓娉ㄥ涔?/p>
             </div>
 
             <div class="question-card question-card--spaced">
                 <div class="question-meta">
-                    <span class="question-type-badge" id="practiceQuestionType">选择题</span>
+                    <span class="question-type-badge" id="practiceQuestionType">閫夋嫨棰?/span>
                     <span class="question-progress" id="practiceProgress">1 / 25</span>
                 </div>
 
                 <div class="question-content" id="practiceQuestionContent">
-                    题目加载中...
+                    棰樼洰鍔犺浇涓?..
                 </div>
 
                 <div id="practiceOptionsContainer"></div>
 
                 <button class="submit-btn" id="practiceSubmitBtn" onclick="submitPracticeAnswer()">
-                    查看答案
+                    鏌ョ湅绛旀
                 </button>
 
                 <button class="continue-btn" id="practiceNextBtn" onclick="nextPracticeQuestion()"
                     style="display: none;">
-                    下一题 →
+                    涓嬩竴棰?鈫?
                 </button>
             </div>
 
             <div class="screen-actions screen-actions--center">
-                <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                <button class="continue-btn" onclick="showStartScreen()">鈫?杩斿洖涓婚〉</button>
             </div>
         </div>
 
-        <!-- 关卡通关界面 -->
+        <!-- 鍏冲崱閫氬叧鐣岄潰 -->
         <div class="screen" id="levelCompleteScreen">
             <div class="level-complete">
-                <h2 class="level-complete-title" id="completeTitle">🎉 关卡完成！</h2>
-                <div class="stars-earned" id="starsEarned">⭐⭐⭐</div>
+                <h2 class="level-complete-title" id="completeTitle">馃帀 鍏冲崱瀹屾垚锛?/h2>
+                <div class="stars-earned" id="starsEarned">猸愨瓙猸?/div>
 
                 <div class="level-stats">
                     <div class="stat-item">
                         <div class="stat-value" id="statScore">0</div>
-                        <div class="stat-label">获得积分</div>
+                        <div class="stat-label">鑾峰緱绉垎</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="statCorrect">0/5</div>
-                        <div class="stat-label">正确率</div>
+                        <div class="stat-label">姝ｇ‘鐜?/div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="statTime">0s</div>
-                        <div class="stat-label">平均用时</div>
+                        <div class="stat-label">骞冲潎鐢ㄦ椂</div>
                     </div>
                 </div>
 
                 <div class="achievements-list" id="achievementsList"></div>
 
                 <div class="level-nav-buttons">
-                    <button class="level-nav-btn menu" onclick="showLevelSelect()">🗺️ 地图</button>
-                    <button class="level-nav-btn next" id="nextLevelBtn" onclick="nextLevel()">下一关 →</button>
+                    <button class="level-nav-btn menu" onclick="showLevelSelect()">馃椇锔?鍦板浘</button>
+                    <button class="level-nav-btn next" id="nextLevelBtn" onclick="nextLevel()">涓嬩竴鍏?鈫?/button>
                 </div>
             </div>
         </div>
 
-        <!-- 游戏结束界面 -->
+        <!-- 娓告垙缁撴潫鐣岄潰 -->
         <div class="screen" id="gameOverScreen">
             <div class="game-over">
-                <h2 class="game-over-title">💔 挑战失败</h2>
-                <p style="font-size: 1.2em; margin-bottom: 30px;" id="gameOverMessage">生命值耗尽，请重新挑战！</p>
+                <h2 class="game-over-title">馃挃 鎸戞垬澶辫触</h2>
+                <p style="font-size: 1.2em; margin-bottom: 30px;" id="gameOverMessage">鐢熷懡鍊艰€楀敖锛岃閲嶆柊鎸戞垬锛?/p>
                 <div class="level-stats" style="background: rgba(0,0,0,0.2);">
                     <div class="stat-item">
                         <div class="stat-value" id="gameOverScore">0</div>
-                        <div class="stat-label">获得积分</div>
+                        <div class="stat-label">鑾峰緱绉垎</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="gameOverLevel">0/6</div>
-                        <div class="stat-label">到达关卡</div>
+                        <div class="stat-label">鍒拌揪鍏冲崱</div>
                     </div>
                     <div class="stat-item">
                         <div class="stat-value" id="gameOverCorrect">0/0</div>
-                        <div class="stat-label">本次正确题数</div>
+                        <div class="stat-label">鏈姝ｇ‘棰樻暟</div>
                     </div>
                 </div>
-                <button class="continue-btn" style="margin-top: 30px;" id="retryLevelBtn" onclick="retryLevel()">🔄 重新挑战</button>
+                <button class="continue-btn" style="margin-top: 30px;" id="retryLevelBtn" onclick="retryLevel()">馃攧 閲嶆柊鎸戞垬</button>
                 <button class="continue-btn" style="background: rgba(255,255,255,0.1); margin-top: 15px;"
-                    onclick="showStartScreen()">← 返回主页</button>
+                    onclick="showStartScreen()">鈫?杩斿洖涓婚〉</button>
             </div>
         </div>
 
-        <!-- 做题记录界面 -->
+        <!-- 鍋氶璁板綍鐣岄潰 -->
         <div class="screen" id="recordsScreen">
             <div class="page-surface page-surface--light page-shell page-shell--wide">
                 <div class="page-header page-header--center page-header--clickable" onclick="triggerDevAccess()">
-                    <h2 class="page-title">📋 做题记录</h2>
-                    <p class="page-subtitle">集中查看总作答、正确率、荣誉记录和各单元进度，不再把信息挤在一块。</p>
+                    <h2 class="page-title">馃搵 鍋氶璁板綍</h2>
+                    <p class="page-subtitle">闆嗕腑鏌ョ湅鎬讳綔绛斻€佹纭巼銆佽崳瑾夎褰曞拰鍚勫崟鍏冭繘搴︼紝涓嶅啀鎶婁俊鎭尋鍦ㄤ竴鍧椼€?/p>
                 </div>
                 <div class="metrics-grid">
                     <div class="metric-card metric-card--indigo">
                         <div class="metric-value" id="recordTotalQuestions">0</div>
-                        <div class="metric-label">总做题数</div>
+                        <div class="metric-label">鎬诲仛棰樻暟</div>
                     </div>
                     <div class="metric-card metric-card--green">
                         <div class="metric-value" id="recordCorrect">0</div>
-                        <div class="metric-label">正确题数</div>
+                        <div class="metric-label">姝ｇ‘棰樻暟</div>
                     </div>
                     <div class="metric-card metric-card--gold">
                         <div class="metric-value" id="recordAccuracy">0%</div>
-                        <div class="metric-label">正确率</div>
+                        <div class="metric-label">姝ｇ‘鐜?/div>
                     </div>
                     <div class="metric-card metric-card--orange">
-                        <div class="metric-value" id="recordTotalStars">0⭐</div>
-                        <div class="metric-label">总星星数</div>
+                        <div class="metric-value" id="recordTotalStars">0猸?/div>
+                        <div class="metric-label">鎬绘槦鏄熸暟</div>
                     </div>
                 </div>
 
                 <div class="surface-panel surface-panel--amber">
-                    <h3 class="surface-panel-title">🏅 荣誉徽章</h3>
+                    <h3 class="surface-panel-title">馃弲 鑽ｈ獕寰界珷</h3>
                     <div class="detail-grid">
                         <div class="detail-card">
-                            <div class="detail-title">👑 极限模式通关次数</div>
-                            <div class="detail-value"><span id="recordExtremePasses">0</span> 次</div>
+                            <div class="detail-title">馃憫 鏋侀檺妯″紡閫氬叧娆℃暟</div>
+                            <div class="detail-value"><span id="recordExtremePasses">0</span> 娆?/div>
                         </div>
                         <div class="detail-card">
-                            <div class="detail-title">🏆 综合大考通关次数</div>
-                            <div class="detail-value"><span id="recordExtremeDualPasses">0</span> 次</div>
+                            <div class="detail-title">馃弳 缁煎悎澶ц€冮€氬叧娆℃暟</div>
+                            <div class="detail-value"><span id="recordExtremeDualPasses">0</span> 娆?/div>
                         </div>
                         <div class="detail-card">
-                            <div class="detail-title">🧘 修炼场完成题数</div>
-                            <div class="detail-value"><span id="recordPracticeCount">0</span> 题</div>
+                            <div class="detail-title">馃 淇偧鍦哄畬鎴愰鏁?/div>
+                            <div class="detail-value"><span id="recordPracticeCount">0</span> 棰?/div>
                         </div>
                     </div>
                 </div>
 
                 <div class="surface-panel surface-panel--indigo">
-                    <h3 class="surface-panel-title">📈 分单元关卡进度</h3>
+                    <h3 class="surface-panel-title">馃搱 鍒嗗崟鍏冨叧鍗¤繘搴?/h3>
                     <div id="recordProgressTabs" class="segmented-tabs"></div>
                     <div id="recordLevelStats" class="surface-panel-copy"></div>
                 </div>
 
                 <div class="screen-actions screen-actions--center">
-                    <button class="continue-btn" onclick="showWrongAnalysis()">🔍 错误分析</button>
-                    <button class="continue-btn" onclick="resetRecords()">🔄 重置全部记录</button>
-                    <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                    <button class="continue-btn" onclick="showWrongAnalysis()">馃攳 閿欒鍒嗘瀽</button>
+                    <button class="continue-btn" onclick="resetRecords()">馃攧 閲嶇疆鍏ㄩ儴璁板綍</button>
+                    <button class="continue-btn" onclick="showStartScreen()">鈫?杩斿洖涓婚〉</button>
                 </div>
             </div>
         </div>
         
-        <!-- 错误分析界面 -->
+        <!-- 閿欒鍒嗘瀽鐣岄潰 -->
         <div class="screen" id="wrongAnalysisScreen">
             <div class="page-surface page-surface--light page-shell page-shell--wide">
                 <div class="page-header page-header--center">
-                    <h2 class="page-title page-title--danger">🔍 错误分析</h2>
-                    <p class="page-subtitle">按单元回看错误题和知识点，把复盘区域做成更清晰的阅读流。</p>
+                    <h2 class="page-title page-title--danger">馃攳 閿欒鍒嗘瀽</h2>
+                    <p class="page-subtitle">鎸夊崟鍏冨洖鐪嬮敊璇鍜岀煡璇嗙偣锛屾妸澶嶇洏鍖哄煙鍋氭垚鏇存竻鏅扮殑闃呰娴併€?/p>
                 </div>
                 <div id="wrongAnalysisTabs" class="segmented-tabs"></div>
                 <div id="wrongAnalysisContainer" class="scroll-panel"></div>
                 <div class="screen-actions screen-actions--center">
-                    <button class="continue-btn" onclick="clearWrongQuestions('active')">🧹 清空当前单元</button>
-                    <button class="continue-btn" onclick="clearWrongQuestions('all')">🗑️ 清空全部错误</button>
-                    <button class="continue-btn" onclick="showRecords()">← 返回</button>
+                    <button class="continue-btn" onclick="clearWrongQuestions('active')">馃Ч 娓呯┖褰撳墠鍗曞厓</button>
+                    <button class="continue-btn" onclick="clearWrongQuestions('all')">馃棏锔?娓呯┖鍏ㄩ儴閿欒</button>
+                    <button class="continue-btn" onclick="showRecords()">鈫?杩斿洖</button>
                 </div>
             </div>
         </div>
         
-        <!-- 成就界面 -->
+        <!-- 鎴愬氨鐣岄潰 -->
         <div class="screen" id="achievementScreen">
             <div class="page-surface page-surface--light page-shell page-shell--wide">
                 <div class="page-header page-header--center">
-                    <h2 class="page-title">🏆 成就一览</h2>
-                    <p class="page-subtitle">把总览、卡片和返回操作放进统一版心，阅读和浏览会顺很多。</p>
+                    <h2 class="page-title">馃弳 鎴愬氨涓€瑙?/h2>
+                    <p class="page-subtitle">鎶婃€昏銆佸崱鐗囧拰杩斿洖鎿嶄綔鏀捐繘缁熶竴鐗堝績锛岄槄璇诲拰娴忚浼氶『寰堝銆?/p>
                 </div>
                 <div id="achievementsContainer"></div>
                 <div class="screen-actions screen-actions--center">
-                    <button class="continue-btn" onclick="showStartScreen()">← 返回主页</button>
+                    <button class="continue-btn" onclick="showStartScreen()">鈫?杩斿洖涓婚〉</button>
                 </div>
             </div>
         </div>
@@ -403,13 +403,13 @@
         <div id="devMenuScreen" class="dev-access-screen">
             <div class="dev-access-mask">
                 <div class="dev-access-panel">
-                    <div class="dev-access-badge">开发者模式</div>
-                    <h2 class="dev-access-title">验证开发者口令</h2>
-                    <p class="dev-access-desc" id="devPassHint">请输入口令以打开开发者控制台。</p>
-                    <input type="password" id="devPassInput" placeholder="请输入口令" class="dev-access-input" onkeypress="if(event.key==='Enter') verifyDevPass()">
+                    <div class="dev-access-badge">寮€鍙戣€呮ā寮?/div>
+                    <h2 class="dev-access-title">楠岃瘉寮€鍙戣€呭彛浠?/h2>
+                    <p class="dev-access-desc" id="devPassHint">璇疯緭鍏ュ彛浠や互鎵撳紑寮€鍙戣€呮帶鍒跺彴銆?/p>
+                    <input type="password" id="devPassInput" placeholder="璇疯緭鍏ュ彛浠? class="dev-access-input" onkeypress="if(event.key==='Enter') verifyDevPass()">
                     <div class="stacked-actions">
-                        <button class="continue-btn" onclick="verifyDevPass()">进入控制台</button>
-                        <button class="continue-btn continue-btn--ghost" onclick="closeDevMenu()">取消</button>
+                        <button class="continue-btn" onclick="verifyDevPass()">杩涘叆鎺у埗鍙?/button>
+                        <button class="continue-btn continue-btn--ghost" onclick="closeDevMenu()">鍙栨秷</button>
                     </div>
                 </div>
             </div>
@@ -420,8 +420,8 @@
                 <div class="dev-console-header">
                     <div>
                         <div class="dev-access-badge">Developer Console</div>
-                        <h2 class="dev-console-title">开发者控制台</h2>
-                        <p class="dev-console-subtitle">这里保留了完整后门能力，支持按单元操作、全局进度管理、存档诊断与导入导出。</p>
+                        <h2 class="dev-console-title">寮€鍙戣€呮帶鍒跺彴</h2>
+                        <p class="dev-console-subtitle">杩欓噷淇濈暀浜嗗畬鏁村悗闂ㄨ兘鍔涳紝鏀寔鎸夊崟鍏冩搷浣溿€佸叏灞€杩涘害绠＄悊銆佸瓨妗ｈ瘖鏂笌瀵煎叆瀵煎嚭銆?/p>
                     </div>
                 </div>
 
@@ -429,97 +429,89 @@
 
                 <div class="dev-panel-section">
                     <div class="dev-section-head">
-                        <h3>单元控制</h3>
-                        <p>切换目标单元后执行对应进度操作。</p>
+                        <h3>鍗曞厓鎺у埗</h3>
+                        <p>鍒囨崲鐩爣鍗曞厓鍚庢墽琛屽搴旇繘搴︽搷浣溿€?/p>
                     </div>
                     <div id="devUnitTabs" class="segmented-tabs"></div>
                     <div class="dev-unit-summary" id="devUnitSummary"></div>
                     <div class="dev-actions-grid">
-                        <button class="dev-action-btn success" onclick="devUnlockSelectedUnit()">解锁本单元全部关卡</button>
-                        <button class="dev-action-btn primary" onclick="devSetSelectedUnitMaxStars()">本单元直接满星</button>
-                        <button class="dev-action-btn warn" onclick="devResetSelectedUnit()">重置本单元进度</button>
+                        <button class="dev-action-btn success" onclick="devUnlockSelectedUnit()">瑙ｉ攣鏈崟鍏冨叏閮ㄥ叧鍗?/button>
+                        <button class="dev-action-btn primary" onclick="devSetSelectedUnitMaxStars()">鏈崟鍏冪洿鎺ユ弧鏄?/button>
+                        <button class="dev-action-btn warn" onclick="devResetSelectedUnit()">閲嶇疆鏈崟鍏冭繘搴?/button>
                     </div>
                 </div>
 
                 <div class="dev-panel-section">
                     <div class="dev-section-head">
-                        <h3>全局进度</h3>
-                        <p>面向整个存档的批量操作。</p>
+                        <h3>鍏ㄥ眬杩涘害</h3>
+                        <p>闈㈠悜鏁翠釜瀛樻。鐨勬壒閲忔搷浣溿€?/p>
                     </div>
                     <div class="dev-actions-grid">
-                        <button class="dev-action-btn success" onclick="devUnlockAllUnits()">解锁全部单元</button>
-                        <button class="dev-action-btn primary" onclick="devSetAllUnitsMaxStars()">全部单元满星</button>
-                        <button class="dev-action-btn danger" onclick="devResetAllProgress()">重置全部关卡进度</button>
+                        <button class="dev-action-btn success" onclick="devUnlockAllUnits()">瑙ｉ攣鍏ㄩ儴鍗曞厓</button>
+                        <button class="dev-action-btn primary" onclick="devSetAllUnitsMaxStars()">鍏ㄩ儴鍗曞厓婊℃槦</button>
+                        <button class="dev-action-btn danger" onclick="devResetAllProgress()">閲嶇疆鍏ㄩ儴鍏冲崱杩涘害</button>
                     </div>
                 </div>
 
                 <div class="dev-panel-section">
                     <div class="dev-section-head">
-                        <h3>成就与错题</h3>
-                        <p>用于快速验证成就、错题分析和统计画面。</p>
+                        <h3>鎴愬氨涓庨敊棰?/h3>
+                        <p>鐢ㄤ簬蹇€熼獙璇佹垚灏便€侀敊棰樺垎鏋愬拰缁熻鐢婚潰銆?/p>
                     </div>
                     <div class="dev-actions-grid">
-                        <button class="dev-action-btn primary" onclick="devUnlockAllAchievements()">解锁全部成就</button>
-                        <button class="dev-action-btn warn" onclick="devClearAchievements()">清空全部成就</button>
-                        <button class="dev-action-btn warn" onclick="devClearSelectedWrongQuestions()">清空本单元错题</button>
-                        <button class="dev-action-btn danger" onclick="devClearAllWrongQuestions()">清空全部错题</button>
+                        <button class="dev-action-btn primary" onclick="devUnlockAllAchievements()">瑙ｉ攣鍏ㄩ儴鎴愬氨</button>
+                        <button class="dev-action-btn warn" onclick="devClearAchievements()">娓呯┖鍏ㄩ儴鎴愬氨</button>
+                        <button class="dev-action-btn warn" onclick="devClearSelectedWrongQuestions()">娓呯┖鏈崟鍏冮敊棰?/button>
+                        <button class="dev-action-btn danger" onclick="devClearAllWrongQuestions()">娓呯┖鍏ㄩ儴閿欓</button>
                     </div>
                 </div>
 
                 <div class="dev-panel-section">
                     <div class="dev-section-head">
-                        <h3>记录与重置</h3>
-                        <p>精确控制统计数据，或直接恢复默认存档。</p>
+                        <h3>璁板綍涓庨噸缃?/h3>
+                        <p>绮剧‘鎺у埗缁熻鏁版嵁锛屾垨鐩存帴鎭㈠榛樿瀛樻。銆?/p>
                     </div>
                     <div class="dev-actions-grid">
-                        <button class="dev-action-btn ghost" onclick="devResetStatsOnly()">仅重置统计数据</button>
-                        <button class="dev-action-btn danger" onclick="devResetEverything()">恢复默认存档</button>
+                        <button class="dev-action-btn ghost" onclick="devResetStatsOnly()">浠呴噸缃粺璁℃暟鎹?/button>
+                        <button class="dev-action-btn danger" onclick="devResetEverything()">鎭㈠榛樿瀛樻。</button>
                     </div>
                 </div>
 
                 <div class="dev-panel-section">
                     <div class="dev-section-head">
-                        <h3>存档工具</h3>
-                        <p>查看当前快照、手动导入 JSON，或直接清空浏览器中的存档。</p>
+                        <h3>瀛樻。宸ュ叿</h3>
+                        <p>鏌ョ湅褰撳墠蹇収銆佹墜鍔ㄥ鍏?JSON锛屾垨鐩存帴娓呯┖娴忚鍣ㄤ腑鐨勫瓨妗ｃ€?/p>
                     </div>
                     <div class="dev-storage-meta" id="devStorageMeta"></div>
                     <textarea id="devStorageSnapshot" class="dev-storage-textarea" spellcheck="false"></textarea>
                     <div class="dev-actions-grid">
-                        <button class="dev-action-btn primary" onclick="copyDevSaveSnapshot()">复制当前快照</button>
-                        <button class="dev-action-btn success" onclick="importDevSaveSnapshot()">导入文本中的存档</button>
-                        <button class="dev-action-btn ghost" onclick="refreshDeveloperConsole('已刷新存档快照。')">刷新快照</button>
-                        <button class="dev-action-btn danger" onclick="clearStoredSave()">清空浏览器存档</button>
+                        <button class="dev-action-btn primary" onclick="copyDevSaveSnapshot()">澶嶅埗褰撳墠蹇収</button>
+                        <button class="dev-action-btn success" onclick="importDevSaveSnapshot()">瀵煎叆鏂囨湰涓殑瀛樻。</button>
+                        <button class="dev-action-btn ghost" onclick="refreshDeveloperConsole('宸插埛鏂板瓨妗ｅ揩鐓с€?)">鍒锋柊蹇収</button>
+                        <button class="dev-action-btn danger" onclick="clearStoredSave()">娓呯┖娴忚鍣ㄥ瓨妗?/button>
                     </div>
-                    <div class="dev-inline-tip" id="devStorageStatus">这里会显示存档诊断信息。</div>
+                    <div class="dev-inline-tip" id="devStorageStatus">杩欓噷浼氭樉绀哄瓨妗ｈ瘖鏂俊鎭€?/div>
                 </div>
 
-                <div class="dev-status" id="adminStatus">控制台待命中。</div>
+                <div class="dev-status" id="adminStatus">鎺у埗鍙板緟鍛戒腑銆?/div>
 
                 <div class="screen-actions screen-actions--center">
-                    <button class="continue-btn continue-btn--ghost" onclick="closeAdminMenu()">← 返回记录页</button>
+                    <button class="continue-btn continue-btn--ghost" onclick="closeAdminMenu()">鈫?杩斿洖璁板綍椤?/button>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 结果弹窗 -->
+    <!-- 缁撴灉寮圭獥 -->
     <div class="result-overlay" id="resultOverlay">
         <div class="result-card">
-            <div class="result-icon" id="resultIcon">✓</div>
-            <div class="result-title" id="resultTitle">回答正确！</div>
+            <div class="result-icon" id="resultIcon">鉁?/div>
+            <div class="result-title" id="resultTitle">鍥炵瓟姝ｇ‘锛?/div>
             <div class="result-score" id="resultScore">+100</div>
             <div class="result-bonus" id="resultBonus"></div>
             <div class="knowledge-box" id="knowledgeBox"></div>
-            <button class="continue-btn" onclick="closeResult()">继续</button>
+            <button class="continue-btn" onclick="closeResult()">缁х画</button>
         </div>
-    </div>
-
-    <!-- 成就弹窗 -->
-    <div class="achievement-popup" id="achievementPopup" style="display: none;">
-        <div class="achievement-popup-icon" id="popupIcon">🏆</div>
-        <div class="achievement-popup-title" id="popupTitle">成就解锁！</div>
-        <div class="achievement-popup-meta" id="popupMeta">🚀 启程 · 常规</div>
-        <div class="achievement-popup-desc" id="popupDesc"></div>
     </div>
 
     <script src="data/00_units.js"></script>
