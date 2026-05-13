@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>教师管理后台 - Python Adventure Game</title>
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <div class="admin-layout" id="adminLayout">
+        <!-- Sidebar -->
+        <nav class="admin-sidebar" id="adminSidebar">
+            <div class="sidebar-brand">🐍 教师后台</div>
+            <div class="sidebar-nav" id="sidebarNav">
+                <button class="nav-item active" data-page="dashboard">📊 仪表盘</button>
+                <button class="nav-item" data-page="students">👥 学生列表</button>
+                <button class="nav-item" data-page="level-analytics">📈 关卡分析</button>
+                <button class="nav-item" data-page="wrong-questions">❌ 错题统计</button>
+                <button class="nav-item" data-page="import">⬆️ 题库导入</button>
+            </div>
+            <div class="sidebar-footer">
+                <span id="adminUserDisplay"></span>
+                <button class="logout-btn" onclick="doLogout()">退出</button>
+            </div>
+        </nav>
+
+        <!-- Main Content -->
+        <main class="admin-main" id="adminMain">
+            <!-- Login form (shown when not authenticated) -->
+            <div class="login-container" id="loginContainer">
+                <div class="login-card">
+                    <h2>🔐 管理员登录</h2>
+                    <p class="login-subtitle">请输入管理员账号和密码</p>
+                    <input type="text" id="loginUsername" placeholder="用户名" class="admin-input"
+                           onkeypress="if(event.key==='Enter') document.getElementById('loginPassword').focus()">
+                    <input type="password" id="loginPassword" placeholder="密码" class="admin-input"
+                           onkeypress="if(event.key==='Enter') doAdminLogin()">
+                    <button class="login-btn" onclick="doAdminLogin()">登录</button>
+                    <div class="login-error" id="loginError"></div>
+                </div>
+            </div>
+
+            <!-- Content area (shown when authenticated) -->
+            <div class="admin-content" id="adminContent" style="display:none;">
+                <!-- Dashboard -->
+                <div class="page-section" id="page-dashboard">
+                    <h2 class="page-title">📊 仪表盘</h2>
+                    <div class="summary-cards" id="dashboardCards"></div>
+                    <div class="charts-row">
+                        <div class="chart-container">
+                            <h3 class="chart-title">最近7天答题趋势</h3>
+                            <canvas id="dailyTrendChart"></canvas>
+                        </div>
+                        <div class="chart-container">
+                            <h3 class="chart-title">各单元平均正确率</h3>
+                            <canvas id="unitAccuracyChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Students -->
+                <div class="page-section" id="page-students" style="display:none;">
+                    <h2 class="page-title">👥 学生列表</h2>
+                    <div class="students-toolbar">
+                        <input type="text" id="studentSearch" placeholder="按昵称搜索..."
+                               class="admin-input" style="max-width:300px;"
+                               oninput="loadStudentList()">
+                    </div>
+                    <div class="table-wrapper">
+                        <table class="admin-table" id="studentTable">
+                            <thead>
+                                <tr>
+                                    <th data-sort="nickname" class="sortable" onclick="setSort('nickname')">昵称</th>
+                                    <th data-sort="total_score" class="sortable" onclick="setSort('total_score')">总分</th>
+                                    <th data-sort="accuracy" class="sortable" onclick="setSort('accuracy')">正确率</th>
+                                    <th data-sort="completed_levels" class="sortable" onclick="setSort('completed_levels')">完成关卡</th>
+                                    <th>最近活跃</th>
+                                </tr>
+                            </thead>
+                            <tbody id="studentTableBody"></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="studentPagination"></div>
+                    <div class="student-detail" id="studentDetail" style="display:none;"></div>
+                </div>
+
+                <!-- Level Analytics -->
+                <div class="page-section" id="page-level-analytics" style="display:none;">
+                    <h2 class="page-title">📈 关卡分析</h2>
+                    <div class="table-wrapper">
+                        <table class="admin-table" id="levelAnalyticsTable">
+                            <thead>
+                                <tr>
+                                    <th>单元</th>
+                                    <th>关卡</th>
+                                    <th>参与人数</th>
+                                    <th>正确率</th>
+                                    <th>平均耗时(s)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="levelAnalyticsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Wrong Questions -->
+                <div class="page-section" id="page-wrong-questions" style="display:none;">
+                    <h2 class="page-title">❌ 错题统计</h2>
+                    <div class="table-wrapper">
+                        <table class="admin-table" id="wrongQuestionsTable">
+                            <thead>
+                                <tr>
+                                    <th>题目内容</th>
+                                    <th>关卡</th>
+                                    <th>错误次数</th>
+                                    <th>错误率</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wrongQuestionsTableBody"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Import -->
+                <div class="page-section" id="page-import" style="display:none;">
+                    <h2 class="page-title">⬆️ 题库导入</h2>
+                    <div class="import-zone" id="importZone">
+                        <div class="import-drop" id="importDrop" onclick="document.getElementById('importFileInput').click()">
+                            <div class="import-drop-icon">📁</div>
+                            <div class="import-drop-text" id="importDropText">点击选择文件或拖拽到此处</div>
+                        </div>
+                        <input type="file" id="importFileInput" accept=".json" style="display:none;"
+                               onchange="handleAdminImportFile(this.files[0])">
+                        <div class="import-preview" id="importPreview" style="display:none;">
+                            <div class="import-preview-header">
+                                <strong id="importPreviewUnit"></strong>
+                                <span id="importPreviewCount"></span>
+                            </div>
+                            <div id="importPreviewQuestions"></div>
+                        </div>
+                        <div class="import-result" id="importResult" style="display:none;"></div>
+                        <button class="login-btn" id="importSubmitBtn" onclick="doAdminImport()" disabled
+                                style="margin-top:15px;">开始导入</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="lib/chart.umd.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html>
