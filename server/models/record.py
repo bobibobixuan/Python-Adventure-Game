@@ -9,12 +9,12 @@ class AnswerRecord(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
-    question_id = Column(Integer, ForeignKey("questions.id"), nullable=False)
+    question_id = Column(Integer, ForeignKey("questions.id"), nullable=False, index=True)
     user_answer = Column(String(500), nullable=False, default="")
-    is_correct = Column(Boolean, nullable=False)
+    is_correct = Column(Boolean, nullable=False, index=True)
     time_spent = Column(Float, nullable=False, default=0.0)
     mode = Column(String(20), nullable=False, default="adventure")
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
 
     user = relationship("User")
     question = relationship("Question")
