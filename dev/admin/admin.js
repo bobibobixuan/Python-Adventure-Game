@@ -11,6 +11,20 @@ function getToken() { return localStorage.getItem(ADMIN_TOKEN_KEY) || localStora
 function setToken(t) { localStorage.setItem(ADMIN_TOKEN_KEY, t); localStorage.setItem('jwt_token', t); }
 function clearToken() { localStorage.removeItem(ADMIN_TOKEN_KEY); localStorage.removeItem('jwt_token'); localStorage.removeItem(ADMIN_USER_KEY); localStorage.removeItem('current_user'); }
 
+function showError(msg) {
+    const el = document.getElementById('adminContent');
+    if (el) {
+        const existing = document.getElementById('adminErrorBanner');
+        if (existing) existing.remove();
+        const banner = document.createElement('div');
+        banner.id = 'adminErrorBanner';
+        banner.style.cssText = 'background:#fff0f0;color:#c62828;padding:12px 16px;margin:16px 32px 0;border-radius:8px;border:1px solid #ffcdd2;font-size:0.9em;';
+        banner.textContent = '⚠ ' + msg;
+        el.insertBefore(banner, el.firstChild);
+        setTimeout(() => banner.remove(), 8000);
+    }
+}
+
 async function fetchAdmin(path, options = {}) {
     const token = getToken();
     const headers = { 'Content-Type': 'application/json', ...options.headers };
@@ -22,8 +36,9 @@ async function fetchAdmin(path, options = {}) {
         throw new Error('登录已过期');
     }
     if (!resp.ok) {
-        const err = await resp.json().catch(() => ({ detail: '请求失败' }));
-        throw new Error(err.detail || `HTTP ${resp.status}`);
+        let detail = '请求失败';
+        try { const e = await resp.json(); detail = e.detail || detail; } catch (_) {}
+        throw new Error(detail + ' (HTTP ' + resp.status + ')');
     }
     return resp.json();
 }
@@ -131,10 +146,10 @@ async function loadDashboard() {
              <div class="summary-card"><div class="card-label">平均正确率</div><div class="card-value" style="color:#f39c12;">${data.avg_accuracy}%</div></div>
              <div class="summary-card"><div class="card-label">今日活跃</div><div class="card-value" style="color:#e74c3c;">${data.active_today}</div></div>`;
 
-        renderDailyTrend(data.daily_trend);
-        renderUnitAccuracy(data.unit_accuracy);
+        try { renderDailyTrend(data.daily_trend); } catch (e) { showError('图表渲染失败(趋势): ' + e.message); }
+        try { renderUnitAccuracy(data.unit_accuracy); } catch (e) { showError('图表渲染失败(单元): ' + e.message); }
     } catch (e) {
-        console.error('Dashboard load failed:', e);
+        showError('仪表盘加载失败: ' + e.message);
     }
 }
 
@@ -239,12 +254,13 @@ async function loadStudentList() {
              <span class="page-info">第 ${data.page} / ${totalPages} 页 (共 ${data.total} 人)</span>
              <button ${currentStudentPage >= totalPages ? 'disabled' : ''} onclick="currentStudentPage++;loadStudentList()">下一页</button>`;
     } catch (e) {
-        console.error('Student list load failed:', e);
+        showError('学生列表加载失败: ' + e.message);
     }
 }
 
 // ---- Student Detail ----
 function renderStudentDetail(data) {
+    try {
     const detail = document.getElementById('studentDetail');
     detail.style.display = '';
 
@@ -279,6 +295,7 @@ function renderStudentDetail(data) {
 
     switchDetailTab('recent', detail.querySelector('.tab-btn.active'), data.user_id);
     detail.scrollIntoView({ behavior: 'smooth' });
+    } catch (e) { showError('学生详情渲染失败: ' + e.message); }
 }
 
 function closeStudentDetail() {
@@ -322,7 +339,7 @@ async function fetchAndRenderStudentDetail(userId) {
         const data = await fetchAdmin(`/api/admin/students/${userId}`);
         window._studentDetail = data;
         renderStudentDetail(data);
-    } catch (e) { console.error(e); }
+    } catch (e) { showError('学生详情加载失败: ' + e.message); }
 }
 
 function escapeHtml(text) {
@@ -346,7 +363,7 @@ async function loadLevelAnalytics() {
             </tr>`;
         }).join('');
     } catch (e) {
-        console.error('Level analytics load failed:', e);
+        showError('关卡分析加载失败: ' + e.message);
     }
 }
 
@@ -364,7 +381,7 @@ async function loadWrongQuestions() {
             </tr>`
         ).join('');
     } catch (e) {
-        console.error('Wrong questions load failed:', e);
+        showError('错题统计加载失败: ' + e.message);
     }
 }
 
