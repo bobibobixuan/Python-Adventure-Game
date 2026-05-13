@@ -103,8 +103,8 @@ class ConnectionManager:
                         except Exception:
                             pass
 
-                if stale:
-                    await self._broadcast_status()
+            if stale:
+                await self._broadcast_status()
 
 
 manager = ConnectionManager()
