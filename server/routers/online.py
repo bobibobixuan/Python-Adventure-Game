@@ -18,7 +18,6 @@ class ConnectionManager:
         self._lock = asyncio.Lock()
 
     async def connect_student(self, ws: WebSocket, user_id: int):
-        await ws.accept()
         async with self._lock:
             if user_id not in self.student_connections:
                 self.student_connections[user_id] = []
@@ -43,7 +42,6 @@ class ConnectionManager:
         await self._broadcast_status()
 
     async def connect_admin(self, ws: WebSocket):
-        await ws.accept()
         async with self._lock:
             self.admin_connections.add(ws)
         await self._broadcast_status()
@@ -113,6 +111,7 @@ manager = ConnectionManager()
 
 async def online_websocket_endpoint(websocket: WebSocket):
     """WebSocket endpoint for online status tracking."""
+    await websocket.accept()
     user_id: Optional[int] = None
     is_admin: bool = False
     authenticated: bool = False
