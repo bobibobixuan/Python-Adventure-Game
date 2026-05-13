@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(*)",
+      "Write(*)",
+      "Edit(*)",
+      "Bash(pnpm *)",
+      "Bash(node *)",
+      "Bash(npx *)",
+      "Bash(git *)",
+      "Bash(Test-Path \"C:\\\\mycode\\\\Python-Adventure-Game\\\\Dockerfile\")",
+      "Bash(Test-Path \"C:\\\\mycode\\\\Python-Adventure-Game\\\\docker-compose.yml\")",
+      "Bash(pip install *)",
+      "Bash(python *)",
+      "Bash(Select-Object -First 30)",
+      "Bash(Get-ChildItem *)",
+      "Read(//mnt/c/mycode/**)",
+      "Bash(pyinstaller --clean pyinstaller.spec --noconfirm)"
+    ]
+  }
+}

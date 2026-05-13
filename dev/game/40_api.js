@@ -79,45 +79,48 @@ const API = (() => {
 
     // Units
     async function getUnits() {
-        return fetchAPI('/api/units');
+        return fetchAPI('/api/units/');
     }
 
-    async function getUnitProgress() {
-        return fetchAPI('/api/units/progress');
+    async function getUnitLevels(unitId) {
+        return fetchAPI(`/api/units/${unitId}/levels`);
     }
 
     // Records
-    async function submitRecord(record) {
-        return fetchAPI('/api/records', {
+    async function submitAnswer(answer) {
+        return fetchAPI('/api/records/answer', {
             method: 'POST',
-            body: JSON.stringify(record)
+            body: JSON.stringify(answer)
         });
     }
 
-    async function getRecords() {
-        return fetchAPI('/api/records');
+    async function getSummary() {
+        return fetchAPI('/api/records/summary');
     }
 
-    // Scores
-    async function getScores() {
-        return fetchAPI('/api/scores');
+    async function getWrongQuestions() {
+        return fetchAPI('/api/records/wrong');
+    }
+
+    // Scores / Progress
+    async function getProgress() {
+        return fetchAPI('/api/scores/progress');
     }
 
     // Achievements
     async function getAchievements() {
-        return fetchAPI('/api/achievements');
+        return fetchAPI('/api/achievements/');
     }
 
-    async function checkAchievements(stats) {
+    async function checkAchievements() {
         return fetchAPI('/api/achievements/check', {
-            method: 'POST',
-            body: JSON.stringify(stats)
+            method: 'POST'
         });
     }
 
     // Leaderboard
     async function getLeaderboard() {
-        return fetchAPI('/api/leaderboard');
+        return fetchAPI('/api/leaderboard/');
     }
 
     // Admin
@@ -133,8 +136,8 @@ const API = (() => {
         getCurrentUser, setCurrentUser,
         isLoggedIn,
         register, login, logout,
-        getLevelQuestions, getUnits, getUnitProgress,
-        submitRecord, getRecords, getScores,
+        getLevelQuestions, getUnits, getUnitLevels,
+        submitAnswer, getSummary, getWrongQuestions, getProgress,
         getAchievements, checkAchievements,
         getLeaderboard,
         importQuestions

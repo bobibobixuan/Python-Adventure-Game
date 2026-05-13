@@ -6,6 +6,7 @@ from server.dependencies import get_current_user
 from server.models.user import User
 from server.models.achievement import Achievement, UserAchievement
 from server.routers import achievements_router
+from server.services.achievement_service import check_achievements as _check_service
 
 
 @achievements_router.get("/")
@@ -29,3 +30,8 @@ def list_achievements(db: Session = Depends(get_db), user: User = Depends(get_cu
         }
         for a in all_achievements
     ]
+
+
+@achievements_router.post("/check")
+def check_achievements(db: Session = Depends(get_db), user: User = Depends(get_current_user)):
+    return _check_service(user.id, db)
