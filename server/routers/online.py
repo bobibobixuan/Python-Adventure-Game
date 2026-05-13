@@ -46,6 +46,7 @@ class ConnectionManager:
         await ws.accept()
         async with self._lock:
             self.admin_connections.add(ws)
+        await self._broadcast_status()
 
     async def disconnect_admin(self, ws: WebSocket):
         async with self._lock:
@@ -166,12 +167,8 @@ async def online_websocket_endpoint(websocket: WebSocket):
 
             authenticated = True
 
-        if not authenticated:
-            return
-
         if is_admin:
             await manager.connect_admin(websocket)
-            await manager._broadcast_status()
             try:
                 while True:
                     await websocket.receive_text()
