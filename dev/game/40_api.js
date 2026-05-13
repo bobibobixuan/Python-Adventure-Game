@@ -1,4 +1,91 @@
 // API Layer - 所有后端通信集中在这里
+
+// Online Heartbeat WebSocket
+const OnlineHeartbeat = (() => {
+    let ws = null;
+    let reconnectTimer = null;
+    let reconnectAttempt = 0;
+    let heartbeatTimer = null;
+    let intentionalClose = false;
+
+    function getBaseUrl() {
+        const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        return `${proto}//${location.host}`;
+    }
+
+    function connect(token) {
+        if (!token) return;
+        intentionalClose = false;
+        reconnectAttempt = 0;
+
+        function doConnect() {
+            if (intentionalClose) return;
+
+            const url = `${getBaseUrl()}/ws/online`;
+            ws = new WebSocket(url);
+
+            ws.onopen = () => {
+                // 发送认证消息
+                ws.send(JSON.stringify({ type: 'auth', token: token }));
+                // 开始定期心跳
+                reconnectAttempt = 0;
+                heartbeatTimer = setInterval(() => {
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                        ws.send(JSON.stringify({ type: 'heartbeat' }));
+                    }
+                }, 30000);
+            };
+
+            ws.onclose = () => {
+                if (heartbeatTimer) {
+                    clearInterval(heartbeatTimer);
+                    heartbeatTimer = null;
+                }
+                if (intentionalClose) return;
+                scheduleReconnect(token);
+            };
+
+            ws.onerror = () => {
+                // onclose 会紧随其后触发，在 onclose 中处理重连
+            };
+        }
+
+        doConnect();
+    }
+
+    function scheduleReconnect(token) {
+        reconnectAttempt++;
+        // 指数退避 + 随机抖动：上限 30s
+        const base = Math.min(2000 * Math.pow(2, reconnectAttempt - 1), 30000);
+        const jitter = Math.random() * 3000;
+        const delay = Math.min(base + jitter, 30000);
+
+        reconnectTimer = setTimeout(() => {
+            if (!intentionalClose) {
+                connect(token);
+            }
+        }, delay);
+    }
+
+    function disconnect() {
+        intentionalClose = true;
+        if (reconnectTimer) {
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+        }
+        if (heartbeatTimer) {
+            clearInterval(heartbeatTimer);
+            heartbeatTimer = null;
+        }
+        if (ws) {
+            ws.close();
+            ws = null;
+        }
+    }
+
+    return { connect, disconnect };
+})();
+
 const API = (() => {
     const TOKEN_KEY = 'jwt_token';
     const USER_KEY = 'current_user';
@@ -18,7 +105,13 @@ const API = (() => {
 
     function getCurrentUser() {
         const raw = localStorage.getItem(USER_KEY);
-        return raw ? JSON.parse(raw) : null;
+        if (!raw) return null;
+        try {
+            return JSON.parse(raw);
+        } catch (_) {
+            clearToken();
+            return null;
+        }
     }
 
     function setCurrentUser(user) {
@@ -51,6 +144,7 @@ const API = (() => {
         });
         setToken(data.access_token);
         setCurrentUser(data.user);
+        OnlineHeartbeat.connect(data.access_token);
         return data;
     }
 
@@ -61,15 +155,17 @@ const API = (() => {
         });
         setToken(data.access_token);
         setCurrentUser(data.user);
+        OnlineHeartbeat.connect(data.access_token);
         return data;
     }
 
     function logout() {
+        OnlineHeartbeat.disconnect();
         clearToken();
     }
 
     function isLoggedIn() {
-        return !!getToken();
+        return !!getToken() && !!getCurrentUser();
     }
 
     // Questions
@@ -131,6 +227,13 @@ const API = (() => {
         });
     }
 
+    async function syncGameState(gameState) {
+        return fetchAPI('/api/records/sync-state', {
+            method: 'POST',
+            body: JSON.stringify(gameState)
+        });
+    }
+
     return {
         getToken, setToken, clearToken,
         getCurrentUser, setCurrentUser,
@@ -140,7 +243,7 @@ const API = (() => {
         submitAnswer, getSummary, getWrongQuestions, getProgress,
         getAchievements, checkAchievements,
         getLeaderboard,
-        importQuestions
+        importQuestions, syncGameState
     };
 })();
 
@@ -199,6 +302,12 @@ async function doGameRegister() {
 function onAuthSuccess() {
     document.getElementById('loginUsername').value = '';
     document.getElementById('loginPassword').value = '';
+    if (typeof renderAuthBar === 'function') {
+        renderAuthBar();
+    }
+    if (typeof syncGameStateToServer === 'function') {
+        syncGameStateToServer({ silent: true });
+    }
     switchScreen('startScreen');
 }
 
@@ -210,7 +319,14 @@ function showAuthScreen() {
 
 function doLogoutGame() {
     API.logout();
+    if (typeof renderAuthBar === 'function') {
+        renderAuthBar();
+    }
     if (typeof refreshDeveloperConsole === 'function') {
         refreshDeveloperConsole('已退出登录。');
     }
+}
+
+if (API.isLoggedIn() && typeof syncGameStateToServer === 'function') {
+    syncGameStateToServer({ silent: true });
 }
