@@ -1,6 +1,50 @@
+# Python
 .venv/
 __pycache__/
 *.pyc
+*.pyo
+*.egg-info/
+dist/
+eggs/
+
+# Virtual environments
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# SQLite
 *.db
+*.db-shm
+*.db-wal
+
+# Build
 build/
 dist/game/
+*.spec.bak
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+serverlogs/
+gologs/
+
+# Coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml

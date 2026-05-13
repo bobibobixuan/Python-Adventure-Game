@@ -1,181 +1,268 @@
-# 从0开始的Python基础教程
+<p align="center">
+  <h1 align="center">🐍 Python Adventure Game</h1>
+  <p align="center">
+    <strong>LAN-first interactive Python learning platform</strong> — zero-config classroom server with gamified coding curriculum, teacher dashboard, and real-time progress tracking.
+  </p>
+</p>
 
-一个基于原生 HTML、CSS、JavaScript 开发的 Python 入门教学项目。它的目标不是“会做几道题”而已，而是尽量把教程做成零基础小学生也能一步一步跟上的引导式课程。项目当前包含三个学习单元，支持跟老师学、练习场、极限测试、做题记录、错题分析和成就系统。
+<p align="center">
+  <a href="#features"><img src="https://img.shields.io/badge/status-active-success" alt="Status"></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/license-Educational-blue" alt="License"></a>
+  <a href="#quick-start"><img src="https://img.shields.io/badge/python-3.8+-blue" alt="Python"></a>
+  <a href="#tech-stack"><img src="https://img.shields.io/badge/backend-FastAPI-009688" alt="FastAPI"></a>
+  <a href="#tech-stack"><img src="https://img.shields.io/badge/frontend-vanilla_JS-F7DF1E?logo=javascript" alt="Vanilla JS"></a>
+</p>
 
-## 项目特点
+English | [简体中文](https://github.com/bobibobixuan/Python-Adventure-Game/blob/main/README.zh-CN.md)
 
-- 原生前端实现，无需额外框架
-- 单页游戏界面，适合本地直接打开使用
-- 三个教学单元，共 18 个关卡
-- 每道题都配有“小白版答案解析”和新手思考步骤
-- 跟老师学模式会在答题前提供关卡提示、思考顺序和题前引导
-- 支持选择题、判断题、填空题三种题型
-- 支持关卡星级、连击、积分、生命值与计时机制
-- 支持练习场随机练习
-- 支持极限测试和双单元综合挑战
-- 使用 localStorage 保存学习进度、成就和错题记录
+---
 
-## 当前内容
+## ✨ Features
 
-### 单元设置
+- **Gamified learning path** — 3 units, 18 levels with star ratings, combo streaks, scoring, health points, and countdown timers
+- **Multiple game modes** — guided learning with pre-question hints, practice arena with random drills, survival gauntlet with no second chances, and cross-unit combined challenges
+- **Real-time teacher dashboard** — live online status via WebSocket heartbeat, student activity feed, quiz statistics, and achievement tracking
+- **Achievement system** — 14 unlockable badges spanning accuracy, speed, streak, and completion milestones, with stacked toast notifications
+- **Wrong-answer analytics** — per-question mistake history with knowledge-point diagnosis and beginner-friendly step-by-step explanations
+- **Progress persistence** — server-side state sync with automatic restore after logout/relogin, cross-device profile recovery, and localStorage fault tolerance
+- **Zero-config LAN deployment** — single-command startup, auto-detected LAN IP, no external services or containers required
+- **Offline-first architecture** — vanilla HTML/CSS/JS frontend with no npm dependencies; browser-native ES modules and localStorage
+- **Role-based access control** — student, admin, and super_admin roles with scoped API permissions and JWT authentication
 
-1. 第一单元：运算符进阶
-2. 第二单元：If语句基础
-3. 第三单元：循环入门
+## 🚀 Quick Start
 
-### 模式说明
+### Requirements
 
-1. 跟老师学：按单元逐关解锁，完成关卡可获得星级，并在每题前后获得引导。
-2. 极限测试：一命到底，答错即终止。
-3. 练习场：不计时、不扣血，适合反复练习。
-4. 做题记录：查看累计题量、正确率、星级与极限测试成绩。
-5. 错误分析：查看历史错题与知识点解析。
-6. 成就一览：根据答题表现解锁成就。
-7. 新手路线提示：明确告诉初学者先学什么、卡住后去哪里补基础。
+- Python `>= 3.8`
+- Windows is the primary maintained environment (Linux/macOS compatible)
 
-## 目录结构
-
-```text
-.
-├─ build.py
-├─ dev
-│  ├─ data
-│  │  ├─ 00_units.js
-│  │  ├─ 10_unit1_questions.js
-│  │  ├─ 11_unit2_questions.js
-│  │  ├─ 12_unit3_questions.js
-│  │  ├─ 20_unit_maps.js
-│  │  └─ 30_achievements.js
-│  ├─ game
-│  │  ├─ 00_core.js
-│  │  ├─ 10_state.js
-│  │  ├─ 20_app.js
-│  │  └─ 30_devtools.js
-│  ├─ index.html
-│  └─ style.css
-└─ dist
-```
-
-## 文件说明
-
-- dev/index.html：页面骨架，包含各个界面的 HTML 结构以及打包占位符。
-- dev/style.css：游戏的样式、动画和响应式布局。
-- dev/data/*.js：按单元配置、题库映射、成就配置拆开的数据文件。
-- dev/game/*.js：按核心状态、存档逻辑、主流程、开发者工具拆开的交互逻辑。
-- build.py：先执行题库校验和 smoke check，再按文件名顺序聚合 dev/data 和 dev/game 下的脚本生成单文件版本。
-
-## 开发与发布
-
-开发时直接维护 dev 目录下的源码文件。
-
-说明：
-dev/index.html 是打包模板，内部保留了 BUILD 占位符，并不是可直接运行的完整页面。日常体验和发布请使用打包生成的 dist 文件。
-
-## 本地使用
-
-### 方式一：先校验题库
-
-在项目根目录运行：
+### One-command startup
 
 ```bash
-python tools/validate_data.py
+# Clone and enter the project
+git clone https://github.com/bobibobixuan/Python-Adventure-Game.git
+cd Python-Adventure-Game
+
+# Create virtual environment and install dependencies
+python -m venv .venv
+.venv\Scripts\activate       # Windows
+# source .venv/bin/activate  # macOS / Linux
+
+pip install -r requirements.txt
+
+# Start the server
+python -m server.main
 ```
 
-这个脚本会检查：
+The server auto-detects your LAN IP and prints the access URLs:
 
-- 题目 ID 是否重复
-- 成就 ID 是否重复
-- 单元映射是否完整
-- 每一关的题目数量是否与关卡配置一致
-- categoryId 是否越界
+```
+========================================
+  Python Adventure Game Server
+  本机访问: http://localhost
+  局域网访问: http://192.168.x.x
+========================================
+```
 
-### 方式二：打包并生成可运行版本
+Open the URL in a browser — students join via LAN, the teacher accesses `/admin` for the dashboard.
 
-在项目根目录运行：
+### Default accounts
+
+| Role | Username | Password |
+|---|---|---|
+| Student | (register via UI) | — |
+| Admin | `admin` | `admin123` |
+
+## 📦 Packaging
+
+### Build standalone executable (Windows)
+
+```bash
+pip install pyinstaller
+pyinstaller --clean pyinstaller.spec
+```
+
+The packaged binary includes the Python runtime, all dependencies, and static assets — no Python installation needed on the target machine.
+
+### Build frontend-only single-file release
 
 ```bash
 python build.py
 ```
 
-build.py 现在会自动执行：
+Generates `dist/Python基础闯关_正式版.html` — a self-contained HTML file that runs entirely in-browser with localStorage, no server required.
 
-1. 题库校验
-2. 打包结果 smoke check
-3. 生成单文件发布版
+## 🛠 Tech Stack
 
-执行后会生成：
+| Layer | Technology |
+|---|---|
+| Frontend | Vanilla HTML5, CSS3, JavaScript (ES modules) |
+| Backend API | FastAPI, Uvicorn |
+| Database | SQLite (SQLAlchemy ORM) |
+| Authentication | JWT (python-jose) with bcrypt password hashing |
+| Realtime | WebSocket (native `ws://`) with exponential-backoff reconnection |
+| Admin UI | Vanilla JS SPA with Chart.js analytics |
+| Packaging | PyInstaller (portable .exe) + custom build pipeline |
 
-```text
-dist/Python基础闯关_正式版.html
+## 📁 Project Structure
+
+```
+Python-Adventure-Game/
+├─ dev/                        # Frontend source
+│  ├─ index.html               # Single-page game shell
+│  ├─ style.css                # Styles, animations, responsive layout
+│  ├─ data/                    # Game content (units, questions, achievements)
+│  │  ├─ 00_units.js           # Unit definitions and level config
+│  │  ├─ 10_unit1_questions.js # Unit 1: Operators
+│  │  ├─ 11_unit2_questions.js # Unit 2: If Statements
+│  │  ├─ 20_unit_maps.js       # Level-to-question mapping
+│  │  └─ 30_achievements.js    # Achievement definitions
+│  ├─ game/                    # Game engine
+│  │  ├─ 00_core.js            # Utility functions and constants
+│  │  ├─ 10_state.js           # Game state and localStorage persistence
+│  │  ├─ 20_app.js             # Main game flow and UI rendering
+│  │  ├─ 30_devtools.js        # Developer console for debugging
+│  │  ├─ 40_api.js             # Backend API client
+│  │  └─ 50_admin.js           # Admin dashboard client
+│  └─ admin/                   # Teacher admin SPA
+│     ├─ index.html            # Admin panel shell
+│     ├─ admin.js              # Admin logic and WebSocket client
+│     ├─ admin.css             # Admin styles
+│     └─ lib/chart.umd.js      # Chart.js for analytics
+├─ server/                     # Backend (FastAPI)
+│  ├─ main.py                  # App entry point, lifespan, static mounting
+│  ├─ config.py                # Environment-based configuration
+│  ├─ database.py              # SQLAlchemy engine and session factory
+│  ├─ auth.py                  # JWT creation, verification, password hashing
+│  ├─ dependencies.py          # FastAPI dependency injection (get_current_user, etc.)
+│  ├─ models/                  # SQLAlchemy ORM models
+│  │  ├─ user.py               # User, AdminAction
+│  │  ├─ question.py           # Question, Unit, Level
+│  │  ├─ record.py             # AnswerRecord, UserStats
+│  │  └─ achievement.py        # Achievement, UserAchievement
+│  ├─ schemas/                 # Pydantic request/response schemas
+│  ├─ routers/                 # API route handlers
+│  │  ├─ auth.py               # POST /api/auth/register, /login
+│  │  ├─ units.py              # GET /api/units
+│  │  ├─ questions.py          # GET /api/questions
+│  │  ├─ records.py            # POST /api/records, /sync-state
+│  │  ├─ scores.py             # GET /api/scores
+│  │  ├─ achievements.py       # GET /api/achievements, POST /sync
+│  │  ├─ leaderboard.py        # GET /api/leaderboard
+│  │  ├─ admin.py              # GET /api/admin/*
+│  │  ├─ online.py             # WebSocket /ws/online
+│  │  └─ import_questions.py   # POST /api/import/questions
+│  ├─ services/                # Business logic layer
+│  │  ├─ achievement_service.py
+│  │  └─ stats_service.py
+│  ├─ seed/                    # Database seeding and question extraction
+│  └─ tests/                   # pytest test suite
+├─ tools/
+│  └─ validate_data.py         # Question bank integrity checker
+├─ build.py                    # Frontend single-file build pipeline
+├─ build.bat                   # Windows build helper
+├─ pyinstaller.spec            # PyInstaller packaging config
+├─ requirements.txt            # Python dependencies
+├─ CHANGELOG.md                # Release notes
+└─ 更新日志/                    # Detailed changelogs (Chinese)
 ```
 
-然后直接用浏览器打开这个 HTML 文件即可。
+## 📡 API Reference
 
-## 打包机制
+### Authentication
 
-build.py 会执行以下操作：
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/auth/register` | Register new student account |
+| `POST` | `/api/auth/login` | Login, returns JWT token |
+| `GET` | `/api/auth/me` | Get current user profile |
 
-1. 调用 tools/validate_data.py 校验题库结构
-2. 读取 dev/index.html
-3. 读取 dev/style.css，并包装为 style 标签
-4. 按文件名顺序读取 dev/data 下的全部 js 文件，并包装为一个 script 标签
-5. 按文件名顺序读取 dev/game 下的全部 js 文件，并包装为一个 script 标签
-6. 将占位符替换到 HTML 中
-7. 对打包结果执行 smoke check
-8. 输出到 dist 目录
+### Game Content
 
-其中 index.html 中使用了以下占位符：
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/units` | List all learning units with level metadata |
+| `GET` | `/api/questions?unit_id=&level=` | Get questions for a specific level |
+| `GET` | `/api/achievements` | List all achievable badges |
 
-- <!-- BUILD:STYLES -->
-- <!-- BUILD:DATA -->
-- <!-- BUILD:GAME -->
+### Progress & Records
 
-## 数据与存档
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/records/submit` | Submit an answer for grading |
+| `POST` | `/api/records/sync-state` | Push/pull full game progress (stars, unlocks, stats) |
+| `GET` | `/api/records/mistakes` | Retrieve wrong-answer history |
+| `POST` | `/api/achievements/sync` | Sync earned achievements to server |
 
-游戏使用浏览器 localStorage 保存以下内容：
+### Leaderboard & Admin
 
-- 关卡解锁状态
-- 关卡星级
-- 成就列表
-- 错题记录
-- 累计答题数与正确数
-- 修炼场次数
-- 极限测试通关次数
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/leaderboard` | Global score leaderboard |
+| `GET` | `/api/admin/dashboard` | Dashboard overview (student count, answer stats) |
+| `GET` | `/api/admin/students` | Student list with progress and online status |
+| `GET` | `/api/admin/actions` | Admin audit log |
 
-存档在读取时会自动做基础迁移和容错处理：
+### Realtime
 
-- 旧版字段会自动迁移到当前版本
-- 损坏存档会自动回退到默认状态
-- 错题记录仅保留最小字段，并在展示时实时回查当前题库
+| Protocol | Endpoint | Description |
+|---|---|---|
+| `WS` | `/ws/online` | WebSocket heartbeat — student online presence, admin live updates |
 
-如果需要重置记录，可以使用游戏内的记录重置功能，或手动清除浏览器本地存储。
+### Health
 
-## 适合的维护方式
+| Method | Endpoint | Description |
+|---|---|---|
+| `GET` | `/api/health` | Server health check |
 
-如果后续要继续扩展内容，建议按下面方式维护：
+## 🔧 Configuration
 
-1. 新增题目时，优先落到对应的 dev/data/*.js 文件，而不是重新堆回单体脚本。
-2. 新增界面或调整交互时，修改 dev/index.html 和对应职责的 dev/game/*.js 文件。
-3. 调整视觉样式时，修改 dev/style.css。
-4. 提交前先执行 python tools/validate_data.py。
-5. 每次改动完成后执行 python build.py 重新生成发布文件。
+### Environment variables
 
-## 开发者控制台
+| Variable | Default | Description |
+|---|---|---|
+| `SECRET_KEY` | auto-generated | JWT signing secret |
+| `DATABASE_URL` | `sqlite:///./app.db` | SQLAlchemy database URL |
+| `ADMIN_USERNAME` | `admin` | Default admin account name |
+| `ADMIN_PASSWORD` | `admin123` | Default admin account password |
+| `ACCESS_TOKEN_EXPIRE_MINUTES` | `1440` | JWT token lifetime (24h default) |
 
-做题记录页保留了开发者入口，适合本地调试和演示时快速修改进度。
+### Default ports
 
-当前支持：
+- Main server: `80` (falls back to `8000` if permission denied)
+- WebSocket: same port, path `/ws/online`
 
-- 按单元解锁、满星、重置进度
-- 全局解锁、重置、统计清理
-- 成就与错题记录清理
-- 当前存档快照导出、导入、清空
-- 存档版本和体积诊断
+### Access control
 
-## 后续可扩展方向
+Roles: `student`, `admin`, `super_admin`
 
-1. 继续增加更多 Python 基础单元，例如列表、函数、字典。
-2. 增加题目搜索、错题重练和按知识点筛选功能。
-3. 增加题库导入导出能力，便于批量维护。
-4. 增加教师端统计或班级排行榜。
-5. 增加音效与更细化的反馈动画。
+Admin scopes: user lifecycle management, question bank import, audit log review, dashboard analytics
+
+## 🌐 Deployment
+
+The recommended deployment runs the server on a classroom LAN host. Students connect via browser — no client installation required.
+
+Key operational notes:
+
+- Start the server with `python -m server.main` — it auto-detects the LAN IP and prints access URLs
+- The admin dashboard is at `/admin` route (same host); first-launch creates the default admin account
+- Database file (`app.db`) is auto-created on first startup with all tables; WAL mode is enabled for concurrent read/write
+- Frontend assets in `dev/` are served directly by FastAPI's `StaticFiles` mount in development
+- For production packaging, use `pyinstaller --clean pyinstaller.spec` to produce a standalone `.exe`
+- The single-file HTML build (`python build.py`) is a serverless fallback — it inlines all CSS/JS into one portable page
+- Backups should cover `app.db` (user data), not the `dev/` directory (static content)
+
+## 🤝 Contributing
+
+Internal project workflow — not open to public PRs at this time. Team contributors should:
+
+1. Create a focused branch from `main`
+2. Keep changes minimal and reviewable
+3. Run `python tools/validate_data.py` before committing question bank changes
+4. Run `python -m pytest server/tests/` to verify backend integrity
+5. Update `CHANGELOG.md` and `更新日志/` when user-facing behavior changes
+6. Write durable lessons back into `AGENTS.md` when they help future work
+
+## 📄 License
+
+Internal educational use only. See [LICENSE](LICENSE) for details.

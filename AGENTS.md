@@ -26,6 +26,9 @@ dev/admin/lib/chart.umd.js  # Chart.js v4.4.0 bundled for offline use
 
 ## Important Patterns
 
+### README style
+Bilingual `README.md` (English) + `README.zh-CN.md` (Chinese), cross-linked. Structure: badges → features → quick start → tech stack table → project tree → API reference table → config table → deployment → contributing → license. No screenshots. Professional tone, oriented toward technical users scanning for integration details.
+
 ### Admin auth
 All admin endpoints use `_: User = Depends(get_admin_user)` — the underscore means the user is verified but the value is unused. Returns 403 if role != "admin".
 
@@ -39,7 +42,7 @@ Use Pydantic `response_model=` on every endpoint. Schemas go in `server/schemas/
 - SQLite with `check_same_thread=False` needed for FastAPI's threaded access
 - Seed via `python -m server.seed_data --force`
 - Admin user must be created manually (not seeded): insert into `users` with `role="admin"` and bcrypt hash
-- `app.db` is gitignored? Actually no — be careful not to commit user data
+- `*.db`, `*.db-shm`, `*.db-wal` are gitignored — SQLite WAL files must be gitignored or they leak local state. `app.db` itself is also gitignored; production database should never be committed
 
 ### Offline deployment
 - No CDN dependencies — Chart.js is checked into `dev/admin/lib/`
@@ -93,6 +96,14 @@ Before creating a new WebSocket in `doConnect()`: (1) clear any pending reconnec
 
 ### Inline styles belong in CSS
 When adding new UI elements, put styles in CSS (`.online-status-card .card-value { color: #27ae60; }`) rather than inline (`style="color:#27ae60"`). Avoids duplication, keeps HTML clean.
+
+### LocalStorage cache leak on account switch
+When the same machine is shared by multiple users, `localStorage` game state persists across logout/login. If logout only clears JWT tokens but not game data (`STORAGE_KEY`), the next user who logs in will inherit the previous user's progress. The `onAuthSuccess` -> `syncGameStateToServer` push-on-login pattern then uploads the stale data to the wrong account.
+
+Fix: (1) Clear `localStorage.removeItem(STORAGE_KEY)` on logout, reset `gameState` to default. (2) On login, pull server progress first (`GET /api/scores/progress` + `GET /api/records/summary` + `GET /api/achievements/`), only push local if server is empty. Server is the source of truth when logged in.
+
+### Pull-then-push login pattern
+Login flow: fetch progress + summary + achievements in parallel; if server has data (total_questions > 0 or total_score > 0 or total_stars > 0), overwrite local gameState entirely; if server is empty, start with `createDefaultGameState()` and save. This prevents cross-account data leaks while allowing returning users to restore progress on any machine.
 
 ### WebSocket testing
 Use `httpx-ws` + `ASGIWebSocketTransport` (not `ASGITransport` — can't handle WebSocket upgrades). Signature: `aconnect_ws(url, client)`. Use `seed_users` fixture pattern to create test users rather than relying on existing DB state. Tests that sleep (auth timeout test at 6s) are slow but unavoidable for timeout-path verification.
