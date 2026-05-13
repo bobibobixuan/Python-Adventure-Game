@@ -29,10 +29,24 @@ def _get_local_ip() -> tuple[str, bool]:
         return "127.0.0.1", False
 
 
+_should_open_browser = False
+_browser_url = "http://localhost"
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    if _should_open_browser:
+        import asyncio
+        import webbrowser
+        asyncio.create_task(_delayed_browser_open(_browser_url, webbrowser))
     yield
+
+
+async def _delayed_browser_open(url: str, wb):
+    import asyncio
+    await asyncio.sleep(1.5)
+    wb.open(url)
 
 
 app = FastAPI(title="Python Adventure Game API", version="1.0.0", lifespan=lifespan)
@@ -66,40 +80,36 @@ def health():
 
 if __name__ == "__main__":
     import uvicorn
-    import webbrowser
 
     host = "0.0.0.0"
     preferred_port = 80
     fallback_port = 8000
     local_ip, ip_ok = _get_local_ip()
 
-    def _print_banner(p: int):
-        def _url(h: str) -> str:
-            return f"http://{h}" + (f":{p}" if p != 80 else "")
+    def _url(h: str, p: int) -> str:
+        return f"http://{h}" + (f":{p}" if p != 80 else "")
 
+    def _print_banner(p: int):
         print("========================================")
         print("  Python Adventure Game Server")
-        print(f"  本机访问: {_url('localhost')}")
+        print(f"  本机访问: {_url('localhost', p)}")
         if ip_ok:
-            print(f"  局域网访问: {_url(local_ip)}")
+            print(f"  局域网访问: {_url(local_ip, p)}")
         else:
             print("  (无法检测局域网IP，请手动查看本机IP)")
         print("========================================")
 
-    @app.on_event("startup")
-    def _open_browser():
-        import webbrowser
-        webbrowser.open(_url_text)
-
     port = preferred_port
-    _url_text = f"http://localhost" + (f":{port}" if port != 80 else "")
+    _should_open_browser = True
+    _browser_url = _url("localhost", port)
     _print_banner(port)
 
     try:
         uvicorn.run(app, host=host, port=port)
     except (PermissionError, OSError):
         port = fallback_port
-        _url_text = f"http://localhost:{port}"
+        _should_open_browser = True
+        _browser_url = _url("localhost", port)
         print(f"\n  !! 端口 {preferred_port} 需要管理员权限，已切换到端口 {port}\n")
         _print_banner(port)
         uvicorn.run(app, host=host, port=port)

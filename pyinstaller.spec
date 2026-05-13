@@ -5,7 +5,11 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[('dev', 'dev')],
-    hiddenimports=['server.routers', 'server.routers.import_questions', 'server.models', 'server.seed'],
+    hiddenimports=[
+        'server.routers', 'server.routers.import_questions', 'server.models', 'server.seed',
+        'passlib.handlers.bcrypt', 'passlib.handlers', 'passlib.utils', 'passlib.utils.handlers',
+        'bcrypt',
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
