@@ -5,6 +5,26 @@ function showStartScreen() {
             resetExtremeMode();
             switchScreen('startScreen');
             document.getElementById('statusBar').classList.add('hidden');
+            renderAuthBar();
+        }
+
+        function renderAuthBar() {
+            const guestEl = document.getElementById('authBarGuest');
+            const userEl = document.getElementById('authBarUser');
+            const nicknameEl = document.getElementById('authBarNickname');
+            if (!guestEl || !userEl) return;
+
+            if (API.isLoggedIn()) {
+                const user = API.getCurrentUser();
+                if (user) {
+                    guestEl.style.display = 'none';
+                    userEl.style.display = '';
+                    nicknameEl.textContent = '👤 ' + (user.nickname || user.username);
+                }
+            } else {
+                guestEl.style.display = '';
+                userEl.style.display = 'none';
+            }
         }
 
         // 切换界面

@@ -11,6 +11,8 @@ from server.database import SessionLocal, engine, Base
 from server.models.unit import Unit, Level
 from server.models.question import Question
 from server.models.achievement import Achievement
+from server.models.user import User
+from server.auth import hash_password
 from server.seed.units_and_levels import UNITS, LEVELS, ACHIEVEMENTS
 from server.seed.questions import QUESTIONS
 
@@ -48,6 +50,20 @@ def seed(force=False):
 
         db.commit()
         print(f"Seeded: {len(UNITS)} units, {len(LEVELS)} levels, {len(QUESTIONS)} questions, {len(ACHIEVEMENTS)} achievements")
+
+        existing_admin = db.query(User).filter(User.role == "admin").first()
+        if not existing_admin:
+            admin = User(
+                username="admin",
+                password_hash=hash_password("admin123"),
+                nickname="管理员",
+                role="admin",
+            )
+            db.add(admin)
+            db.commit()
+            print("Created default admin: admin / admin123")
+        else:
+            print(f"Admin user already exists: {existing_admin.username}")
 
     except Exception as e:
         db.rollback()

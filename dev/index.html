@@ -54,6 +54,17 @@
                 <h1 class="game-title">🐍 Python基础闯关</h1>
                 <p class="game-subtitle">趣味学习，挑战自我！</p>
 
+                <div class="auth-bar" id="authBar">
+                    <span class="auth-bar-guest" id="authBarGuest">
+                        <button class="auth-bar-btn" onclick="showAuthScreen()">🔐 登录 / 注册</button>
+                        <span class="auth-bar-hint">登录后可云端同步进度</span>
+                    </span>
+                    <span class="auth-bar-user" id="authBarUser" style="display:none;">
+                        <span class="auth-bar-nickname" id="authBarNickname"></span>
+                        <button class="auth-bar-btn auth-bar-btn--small" onclick="doLogoutGame()">退出</button>
+                    </span>
+                </div>
+
                 <div class="character">🐍</div>
 
                 <div class="mode-buttons">
@@ -83,6 +94,40 @@
                             <span class="mode-btn-desc">查看勋章墙和当前解锁进度。</span>
                         </button>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 登录/注册界面 -->
+        <div class="screen" id="authScreen">
+            <div class="auth-container">
+                <div class="auth-card">
+                    <div class="auth-tabs">
+                        <button class="auth-tab active" id="authTabLogin" onclick="switchAuthTab('login')">登录</button>
+                        <button class="auth-tab" id="authTabRegister" onclick="switchAuthTab('register')">注册</button>
+                    </div>
+
+                    <!-- 登录表单 -->
+                    <div class="auth-form" id="loginForm">
+                        <input type="text" id="loginUsername" placeholder="用户名" class="admin-input"
+                               onkeydown="if(event.key==='Enter') document.getElementById('loginPassword').focus()">
+                        <input type="password" id="loginPassword" placeholder="密码" class="admin-input"
+                               onkeydown="if(event.key==='Enter') doGameLogin()">
+                        <button class="login-btn" onclick="doGameLogin()">登录</button>
+                        <div class="auth-error" id="loginError"></div>
+                    </div>
+
+                    <!-- 注册表单 -->
+                    <div class="auth-form" id="registerForm" style="display:none;">
+                        <input type="text" id="regNickname" placeholder="昵称" class="admin-input">
+                        <input type="text" id="regUsername" placeholder="用户名" class="admin-input">
+                        <input type="password" id="regPassword" placeholder="密码" class="admin-input"
+                               onkeydown="if(event.key==='Enter') doGameRegister()">
+                        <button class="login-btn" onclick="doGameRegister()">注册</button>
+                        <div class="auth-error" id="registerError"></div>
+                    </div>
+
+                    <div class="auth-skip" onclick="skipAuth()">跳过，离线游玩 →</div>
                 </div>
             </div>
         </div>

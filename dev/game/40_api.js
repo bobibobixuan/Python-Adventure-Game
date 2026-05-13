@@ -143,3 +143,74 @@ const API = (() => {
         importQuestions
     };
 })();
+
+// ---- Auth UI Handlers ----
+let authTab = 'login';
+
+function switchAuthTab(tab) {
+    authTab = tab;
+    document.getElementById('authTabLogin').classList.toggle('active', tab === 'login');
+    document.getElementById('authTabRegister').classList.toggle('active', tab === 'register');
+    document.getElementById('loginForm').style.display = tab === 'login' ? '' : 'none';
+    document.getElementById('registerForm').style.display = tab === 'register' ? '' : 'none';
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('registerError').textContent = '';
+}
+
+function skipAuth() {
+    switchScreen('startScreen');
+}
+
+async function doGameLogin() {
+    const username = document.getElementById('loginUsername').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    const errEl = document.getElementById('loginError');
+    errEl.textContent = '';
+
+    if (!username || !password) { errEl.textContent = '请输入用户名和密码'; return; }
+
+    try {
+        await API.login(username, password);
+        onAuthSuccess();
+    } catch (e) {
+        errEl.textContent = e.message;
+    }
+}
+
+async function doGameRegister() {
+    const nickname = document.getElementById('regNickname').value.trim();
+    const username = document.getElementById('regUsername').value.trim();
+    const password = document.getElementById('regPassword').value;
+    const errEl = document.getElementById('registerError');
+    errEl.textContent = '';
+
+    if (!nickname) { errEl.textContent = '请输入昵称'; return; }
+    if (!username) { errEl.textContent = '请输入用户名'; return; }
+    if (!password || password.length < 6) { errEl.textContent = '密码至少6位'; return; }
+
+    try {
+        await API.register(username, password, nickname);
+        onAuthSuccess();
+    } catch (e) {
+        errEl.textContent = e.message;
+    }
+}
+
+function onAuthSuccess() {
+    document.getElementById('loginUsername').value = '';
+    document.getElementById('loginPassword').value = '';
+    switchScreen('startScreen');
+}
+
+function showAuthScreen() {
+    switchScreen('authScreen');
+    document.getElementById('loginError').textContent = '';
+    document.getElementById('registerError').textContent = '';
+}
+
+function doLogoutGame() {
+    API.logout();
+    if (typeof refreshDeveloperConsole === 'function') {
+        refreshDeveloperConsole('已退出登录。');
+    }
+}
