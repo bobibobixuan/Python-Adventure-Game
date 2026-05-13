@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>教师管理后台 - Python Adventure Game</title>
-    <link rel="stylesheet" href="admin.css">
+    <link rel="stylesheet" href="admin.css?v=1.0.2">
 </head>
 <body>
     <div class="admin-layout" id="adminLayout">
@@ -47,6 +47,22 @@
                 <div class="page-section" id="page-dashboard">
                     <h2 class="page-title">📊 仪表盘</h2>
                     <div class="summary-cards" id="dashboardCards"></div>
+                    <!-- Online status: standalone card -->
+                    <div class="summary-card online-status-card" id="onlineStatusCard" onclick="toggleOnlineDetail()" style="cursor:pointer; display:none;">
+                        <div class="card-label">🟢 当前在线</div>
+                        <div class="card-value" style="color:#27ae60;" id="onlineCount">-</div>
+                        <div class="card-sub" style="font-size:0.8em;color:#999;">/ 共 <span id="totalStudentCount">-</span> 人</div>
+                    </div>
+                    <div class="online-detail-panel" id="onlineDetailPanel" style="display:none;">
+                        <div class="online-detail-section">
+                            <h4 class="online-detail-title">🟢 在线 (<span id="onlineDetailCount">0</span>)</h4>
+                            <div class="online-student-list" id="onlineStudentList"></div>
+                        </div>
+                        <div class="online-detail-section">
+                            <h4 class="online-detail-title offline-title">🔴 离线 (<span id="offlineDetailCount">0</span>)</h4>
+                            <div class="online-student-list" id="offlineStudentList"></div>
+                        </div>
+                    </div>
                     <div class="charts-row">
                         <div class="chart-container">
                             <h3 class="chart-title">最近7天答题趋势</h3>
@@ -71,6 +87,7 @@
                         <table class="admin-table" id="studentTable">
                             <thead>
                                 <tr>
+                                    <th style="width:60px;">状态</th>
                                     <th data-sort="nickname" class="sortable" onclick="setSort('nickname')">昵称</th>
                                     <th data-sort="total_score" class="sortable" onclick="setSort('total_score')">总分</th>
                                     <th data-sort="accuracy" class="sortable" onclick="setSort('accuracy')">正确率</th>
@@ -149,6 +166,6 @@
     </div>
 
     <script src="lib/chart.umd.js"></script>
-    <script src="admin.js"></script>
+    <script src="admin.js?v=1.0.2"></script>
 </body>
 </html>
