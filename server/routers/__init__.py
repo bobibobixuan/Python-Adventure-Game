@@ -18,3 +18,4 @@ from server.routers import scores as _scores_module    # noqa: F401
 from server.routers import achievements as _achievements_module  # noqa: F401
 from server.routers import leaderboard as _leaderboard_module  # noqa: F401
 from server.routers import admin as _admin_module      # noqa: F401
+from server.routers import import_questions as _import_module  # noqa: F401
