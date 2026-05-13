@@ -48,10 +48,10 @@
                     <h2 class="page-title">📊 仪表盘</h2>
                     <div class="summary-cards" id="dashboardCards"></div>
                     <!-- Online status: standalone card -->
-                    <div class="summary-card online-status-card" id="onlineStatusCard" onclick="toggleOnlineDetail()" style="cursor:pointer; display:none;">
+                    <div class="summary-card online-status-card" id="onlineStatusCard" onclick="toggleOnlineDetail()" style="display:none;">
                         <div class="card-label">🟢 当前在线</div>
-                        <div class="card-value" style="color:#27ae60;" id="onlineCount">-</div>
-                        <div class="card-sub" style="font-size:0.8em;color:#999;">/ 共 <span id="totalStudentCount">-</span> 人</div>
+                        <div class="card-value" id="onlineCount">-</div>
+                        <div class="card-sub">/ 共 <span id="totalStudentCount">-</span> 人</div>
                     </div>
                     <div class="online-detail-panel" id="onlineDetailPanel" style="display:none;">
                         <div class="online-detail-section">
