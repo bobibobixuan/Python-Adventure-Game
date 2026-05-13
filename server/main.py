@@ -54,7 +54,6 @@ async def lifespan(app: FastAPI):
 
 
 async def _delayed_browser_open(url: str, wb):
-    import asyncio
     await asyncio.sleep(1.5)
     wb.open(url)
 
