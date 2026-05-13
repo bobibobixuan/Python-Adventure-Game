@@ -886,6 +886,7 @@ function showStartScreen() {
                     oldest.classList.add('hide');
                     setTimeout(() => {
                         if (oldest.parentNode) oldest.parentNode.removeChild(oldest);
+                        repositionRemainingToasts();
                     }, 240);
                 }
             }
