@@ -1,5 +1,6 @@
 import sys
 import socket
+import asyncio
 from pathlib import Path
 from contextlib import asynccontextmanager
 
@@ -15,6 +16,7 @@ from server.routers import (
     auth_router, units_router, questions_router, records_router,
     scores_router, achievements_router, leaderboard_router, admin_router,
 )
+from server.routers.online import online_websocket_endpoint, manager
 
 
 def _get_static_dir() -> Path:
@@ -39,11 +41,16 @@ _browser_url = "http://localhost"
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    cleanup_task = asyncio.create_task(manager.check_stale_connections())
     if _should_open_browser:
-        import asyncio
         import webbrowser
         asyncio.create_task(_delayed_browser_open(_browser_url, webbrowser))
     yield
+    cleanup_task.cancel()
+    try:
+        await cleanup_task
+    except asyncio.CancelledError:
+        pass
 
 
 async def _delayed_browser_open(url: str, wb):
@@ -53,6 +60,8 @@ async def _delayed_browser_open(url: str, wb):
 
 
 app = FastAPI(title="Python Adventure Game API", version="1.0.0", lifespan=lifespan)
+
+app.add_api_websocket_route("/ws/online", online_websocket_endpoint)
 
 app.add_middleware(
     CORSMiddleware,
