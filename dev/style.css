@@ -2205,20 +2205,23 @@
         .achievement-popup {
             --achievement-popup-accent: #ffd700;
             position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -42%) scale(0.92);
+            bottom: 24px;
+            right: 24px;
+            top: auto;
+            left: auto;
+            transform: translateY(20px) scale(0.92);
             background: linear-gradient(135deg, #1a1a2e, #16213e);
             border: 2px solid var(--achievement-popup-accent);
             border-radius: 20px;
             padding: 30px 50px;
-            z-index: 1001;
+            z-index: 9999;
             text-align: center;
             color: white;
             box-shadow: 0 0 50px rgba(255, 215, 0, 0.24);
             opacity: 0;
             pointer-events: none;
             overflow: hidden;
+            max-width: 420px;
         }
 
         .achievement-popup::before {
@@ -2233,24 +2236,23 @@
 
         .achievement-popup.show {
             opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
+            transform: translateY(0) scale(1);
             animation: achievementIn var(--motion-slow) var(--ease-bounce);
         }
 
         .achievement-popup.hide {
             opacity: 0;
-            transform: translate(-50%, -56%) scale(0.96);
+            transform: translateY(12px) scale(0.96);
             transition: opacity var(--motion-fast) var(--ease-fluid), transform var(--motion-fast) var(--ease-fluid);
         }
 
         @keyframes achievementIn {
             0% {
-                transform: translate(-50%, -40%) scale(0.86);
+                transform: translateY(20px) translateX(40px) scale(0.86);
                 opacity: 0;
             }
-
             100% {
-                transform: translate(-50%, -50%) scale(1);
+                transform: translateY(0) translateX(0) scale(1);
                 opacity: 1;
             }
         }
@@ -2287,6 +2289,16 @@
         .achievement-popup-desc {
             color: #a0a0a0;
             line-height: 1.7;
+        }
+
+        @media (max-width: 480px) {
+            .achievement-popup {
+                right: 12px;
+                left: 12px;
+                bottom: 12px;
+                max-width: none;
+                padding: 24px 20px;
+            }
         }
 
         /* 修炼场模式 */
