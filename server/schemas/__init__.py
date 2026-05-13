@@ -7,6 +7,13 @@ from server.schemas.record import (
     AnswerSubmit, AnswerSubmitResponse, UserSummaryOut,
     WrongQuestionOut, LeaderboardEntry,
 )
+from server.schemas.admin import (
+    StudentListItem, StudentListResponse, StudentDetailOut,
+    StudentSummary, LevelProgressItem, UnitProgressItem,
+    RecentAnswerItem, WrongQuestionItem,
+    LevelAnalyticsOut, WrongQuestionStatsOut,
+    DashboardOut, DailyTrendItem, UnitAccuracyItem,
+)
 
 __all__ = [
     "UserRegister", "UserLogin", "TokenResponse", "TokenRefresh", "UserOut",
@@ -14,4 +21,9 @@ __all__ = [
     "LevelProgressOut", "UnitProgressOut",
     "AnswerSubmit", "AnswerSubmitResponse", "UserSummaryOut",
     "WrongQuestionOut", "LeaderboardEntry",
+    "StudentListItem", "StudentListResponse", "StudentDetailOut",
+    "StudentSummary", "LevelProgressItem", "UnitProgressItem",
+    "RecentAnswerItem", "WrongQuestionItem",
+    "LevelAnalyticsOut", "WrongQuestionStatsOut",
+    "DashboardOut", "DailyTrendItem", "UnitAccuracyItem",
 ]
