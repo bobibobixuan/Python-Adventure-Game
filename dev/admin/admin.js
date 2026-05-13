@@ -1,11 +1,94 @@
 // ---- Auth & State ----
 const ADMIN_TOKEN_KEY = 'admin_jwt_token';
 const ADMIN_USER_KEY = 'admin_user';
-
 let currentPage = 'dashboard';
 let currentSort = 'total_score';
 let currentSortOrder = 'desc';
 let currentStudentPage = 1;
+
+let onlineUsers = [];
+let offlineUsers = [];
+let adminWs = null;
+let adminReconnectTimer = null;
+let adminReconnectAttempt = 0;
+let adminIntentionalClose = false;
+
+function connectAdminWebSocket(token) {
+    adminIntentionalClose = false;
+    adminReconnectAttempt = 0;
+
+    if (adminReconnectTimer) {
+        clearTimeout(adminReconnectTimer);
+        adminReconnectTimer = null;
+    }
+
+    function doConnect() {
+        if (adminIntentionalClose) return;
+
+        if (adminWs) {
+            adminWs.onclose = null;
+            adminWs.close();
+            adminWs = null;
+        }
+
+        const proto = location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const url = `${proto}//${location.host}/ws/online`;
+        adminWs = new WebSocket(url);
+
+        adminWs.onopen = () => {
+            adminWs.send(JSON.stringify({ type: 'auth', token: token }));
+            adminReconnectAttempt = 0;
+        };
+
+        adminWs.onmessage = (event) => {
+            try {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'online_status') {
+                    onlineUsers = msg.online_users || [];
+                    offlineUsers = msg.offline_users || [];
+                    updateOnlineUI();
+                }
+            } catch (e) { /* ignore */ }
+        };
+
+        adminWs.onclose = () => {
+            if (adminIntentionalClose) return;
+            scheduleAdminReconnect(token);
+        };
+
+        adminWs.onerror = () => {
+            console.warn('[Admin WebSocket] error, onclose will follow');
+        };
+    }
+
+    doConnect();
+}
+
+function scheduleAdminReconnect(token) {
+    adminReconnectAttempt++;
+    const base = Math.min(2000 * Math.pow(2, adminReconnectAttempt - 1), 30000);
+    const jitter = Math.random() * 3000;
+    const delay = Math.min(base + jitter, 30000);
+
+    adminReconnectTimer = setTimeout(() => {
+        if (!adminIntentionalClose) {
+            connectAdminWebSocket(token);
+        }
+    }, delay);
+}
+
+function disconnectAdminWebSocket() {
+    adminIntentionalClose = true;
+    adminReconnectAttempt = 0;
+    if (adminReconnectTimer) {
+        clearTimeout(adminReconnectTimer);
+        adminReconnectTimer = null;
+    }
+    if (adminWs) {
+        adminWs.close();
+        adminWs = null;
+    }
+}
 
 function getToken() { return localStorage.getItem(ADMIN_TOKEN_KEY); }
 function setToken(t) { localStorage.setItem(ADMIN_TOKEN_KEY, t); }
@@ -55,6 +138,11 @@ function showContent(user) {
     document.getElementById('adminContent').style.display = '';
     document.getElementById('adminUserDisplay').textContent = user.nickname || user.username;
     switchPage('dashboard');
+    // 建立在线状态 WebSocket
+    const token = getToken();
+    if (token) {
+        connectAdminWebSocket(token);
+    }
 }
 
 async function doAdminLogin() {
@@ -89,6 +177,7 @@ async function doAdminLogin() {
 }
 
 function doLogout() {
+    disconnectAdminWebSocket();
     clearToken();
     showLogin();
     document.getElementById('loginUsername').value = '';
@@ -97,6 +186,11 @@ function doLogout() {
 
 // ---- Init ----
 (function init() {
+    // 先绑定导航，再决定是否恢复登录态，避免自动登录时跳过监听器注册。
+    document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.addEventListener('click', () => switchPage(btn.dataset.page));
+    });
+
     const token = getToken();
     const userJson = localStorage.getItem(ADMIN_USER_KEY);
     if (token && userJson) {
@@ -109,11 +203,6 @@ function doLogout() {
         } catch (e) {}
     }
     showLogin();
-
-    // Sidebar nav
-    document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.addEventListener('click', () => switchPage(btn.dataset.page));
-    });
 })();
 
 // ---- Navigation ----
@@ -133,6 +222,55 @@ function switchPage(page) {
     else if (page === 'wrong-questions') loadWrongQuestions();
 
     document.getElementById('studentDetail').style.display = 'none';
+}
+
+function updateOnlineUI() {
+    // Show the online status card
+    const card = document.getElementById('onlineStatusCard');
+    if (card) card.style.display = '';
+
+    // 仪表盘卡片数字
+    const onlineCountEl = document.getElementById('onlineCount');
+    const totalCountEl = document.getElementById('totalStudentCount');
+    if (onlineCountEl) onlineCountEl.textContent = onlineUsers.length;
+    if (totalCountEl) totalCountEl.textContent = onlineUsers.length + offlineUsers.length;
+
+    // 详情面板
+    const onlineListEl = document.getElementById('onlineStudentList');
+    const offlineListEl = document.getElementById('offlineStudentList');
+    const onlineDetailCount = document.getElementById('onlineDetailCount');
+    const offlineDetailCount = document.getElementById('offlineDetailCount');
+
+    if (onlineDetailCount) onlineDetailCount.textContent = onlineUsers.length;
+    if (offlineDetailCount) offlineDetailCount.textContent = offlineUsers.length;
+
+    if (onlineListEl) {
+        onlineListEl.innerHTML = onlineUsers.length === 0
+            ? '<span style="color:#999;font-size:0.85em;">暂无在线学生</span>'
+            : onlineUsers.map(u => '<span class="online-student-tag"><span class="status-dot online"></span>' + escapeHtml(u.nickname) + '</span>').join('');
+    }
+
+    if (offlineListEl) {
+        offlineListEl.innerHTML = offlineUsers.length === 0
+            ? '<span style="color:#999;font-size:0.85em;">全部在线</span>'
+            : offlineUsers.map(u => '<span class="offline-student-tag"><span class="status-dot offline"></span>' + escapeHtml(u.nickname) + '</span>').join('');
+    }
+
+    // 如果在学生列表页面，刷新表格以更新状态列
+    if (currentPage === 'students') {
+        loadStudentList();
+    }
+}
+
+function toggleOnlineDetail() {
+    const panel = document.getElementById('onlineDetailPanel');
+    if (panel) {
+        if (panel.style.display === 'none' || panel.style.display === '') {
+            panel.style.display = 'grid';
+        } else {
+            panel.style.display = 'none';
+        }
+    }
 }
 
 // ---- Dashboard ----
@@ -239,6 +377,7 @@ async function loadStudentList() {
         const tbody = document.getElementById('studentTableBody');
         tbody.innerHTML = data.items.map(s =>
             `<tr onclick="fetchAndRenderStudentDetail(${s.user_id})">
+                <td><span class="status-dot ${onlineUsers.some(u => u.id === s.user_id) ? 'online' : 'offline'}"></span></td>
                 <td><strong>${escapeHtml(s.nickname)}</strong><br><span style="color:#999;font-size:0.8em;">@${escapeHtml(s.username)}</span></td>
                 <td>${s.total_score}</td>
                 <td>${s.accuracy}%</td>
