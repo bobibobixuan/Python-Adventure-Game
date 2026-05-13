@@ -3,8 +3,11 @@ import socket
 from pathlib import Path
 from contextlib import asynccontextmanager
 
+import os
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from server.database import engine, Base
@@ -76,6 +79,14 @@ if static_dir.exists():
 @app.get("/api/health")
 def health():
     return {"status": "ok"}
+
+
+@app.get("/admin", include_in_schema=False)
+def admin_panel_index():
+    admin_html = _get_static_dir() / "admin" / "index.html"
+    if admin_html.exists():
+        return FileResponse(str(admin_html))
+    return FileResponse(str(_get_static_dir() / "index.html"))
 
 
 if __name__ == "__main__":
