@@ -2,7 +2,6 @@ import asyncio
 import json
 
 import pytest
-from fastapi.testclient import TestClient
 from httpx import AsyncClient
 from httpx_ws import aconnect_ws
 from httpx_ws.transport import ASGIWebSocketTransport
@@ -11,11 +10,6 @@ from server.main import app
 from server.auth import create_access_token
 from server.database import SessionLocal
 from server.models.user import User
-
-
-@pytest.fixture
-def client():
-    return TestClient(app)
 
 
 @pytest.fixture
@@ -63,8 +57,6 @@ async def test_student_connect_and_heartbeat(seed_users):
             await ws.send_json({"type": "heartbeat"})
             await asyncio.sleep(0.5)
 
-    assert True
-
 
 @pytest.mark.asyncio
 async def test_admin_connect_and_receive_status(seed_users):
@@ -108,5 +100,6 @@ async def test_missing_auth_closed():
     async with AsyncClient(transport=transport, base_url="http://test") as client:
         async with aconnect_ws("/ws/online", client) as ws:
             await asyncio.sleep(6)
+            # Server should close the connection after 5s auth timeout
             with pytest.raises(Exception):
                 await ws.receive_text()
