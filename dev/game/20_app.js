@@ -268,6 +268,23 @@ function showStartScreen() {
                 document.getElementById('submitBtn').disabled = true;
             }
         }
+
+        function syncAnswerRecord(question, userAnswer, isCorrect, timeSpent, mode) {
+            if (!API.isLoggedIn()) {
+                return;
+            }
+
+            API.submitAnswer({
+                question_id: question.id,
+                user_answer: userAnswer === undefined || userAnswer === null ? '' : String(userAnswer),
+                is_correct: Boolean(isCorrect),
+                time_spent: Number(timeSpent) || 0,
+                mode,
+            }).catch(error => {
+                console.warn('提交答题记录到后端失败。', error);
+            });
+        }
+
         // 提交答案
         function submitAnswer() {
             if (gameState.isAnswerLocked) {
@@ -394,6 +411,7 @@ function showStartScreen() {
             }
 
             highlightAnswer(q.answer, isCorrect);
+            syncAnswerRecord(q, userAnswer, isCorrect, timeSpent, gameState.isExtremeMode ? 'extreme' : 'adventure');
 
             saveGameState();
 
@@ -836,6 +854,14 @@ function showStartScreen() {
             displayNextAchievementPopup();
         }
 
+        function repositionRemainingToasts() {
+            const toasts = document.querySelectorAll('.achievement-popup.show');
+            const baseBottom = 24;
+            toasts.forEach((toast, i) => {
+                toast.style.bottom = (baseBottom + i * 102) + 'px';
+            });
+        }
+
         function displayNextAchievementPopup() {
             const popup = document.getElementById('achievementPopup');
             const popupMeta = document.getElementById('popupMeta');
@@ -845,6 +871,12 @@ function showStartScreen() {
                 achievementPopupActive = false;
                 return;
             }
+
+            // 计算堆叠偏移：统计当前页面可见的 toast 数量
+            const visibleToasts = document.querySelectorAll('.achievement-popup.show').length;
+            const baseBottom = 24;
+            const stackOffset = visibleToasts * 102; // toast 估算高度 + 12px 间距
+            popup.style.bottom = (baseBottom + stackOffset) + 'px';
 
             const rarityMeta = getAchievementRarityMeta(achievement.rarity);
             const categoryMeta = getAchievementCategoryMeta(achievement.category);
@@ -858,6 +890,11 @@ function showStartScreen() {
             }
             document.getElementById('popupDesc').textContent = achievement.desc;
 
+            // 同时显示上限：超过 3 个则跳过队列中最旧的
+            if (visibleToasts >= 3) {
+                achievementPopupQueue.shift();
+            }
+
             popup.style.display = 'block';
             popup.classList.remove('hide');
             void popup.offsetWidth;
@@ -867,9 +904,11 @@ function showStartScreen() {
                 popup.classList.remove('show');
                 popup.classList.add('hide');
 
+                // 其他可见 toast 回落
                 setTimeout(() => {
                     popup.style.display = 'none';
                     popup.classList.remove('hide');
+                    repositionRemainingToasts();
                     displayNextAchievementPopup();
                 }, 240);
             }, 2800);
@@ -1068,6 +1107,7 @@ function showStartScreen() {
 
             const userAnswer = gameState.selectedAnswer || '';
             const isCorrect = normalizeAnswer(userAnswer) === normalizeAnswer(q.answer);
+            const timeSpent = 0;
 
             gameState.practiceCount++;
             if (isCorrect) {
@@ -1101,6 +1141,7 @@ function showStartScreen() {
             document.getElementById('practiceNextBtn').style.display = 'inline-block';
             document.getElementById('practiceNextBtn').textContent = '下一题 →';
 
+            syncAnswerRecord(q, userAnswer, isCorrect, timeSpent, 'practice');
             saveGameState();
             checkPracticeAchievement();
         }
