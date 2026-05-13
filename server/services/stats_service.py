@@ -104,7 +104,7 @@ def get_students(
             .filter(LevelProgress.user_id == User.id, LevelProgress.stars > 0)
             .correlate(User)
             .with_entities(func.count())
-            .as_scalar(), 0
+            .scalar_subquery(), 0
         ),
     }
     col = order_col.get(sort_by, UserStats.total_score)
@@ -303,7 +303,7 @@ def get_wrong_question_stats(db: Session, limit: int = 50) -> list:
                     db.query(func.count(AnswerRecord.id))
                     .filter(AnswerRecord.question_id == Question.id)
                     .correlate(Question)
-                    .as_scalar(), 0
+                    .scalar_subquery(), 0
                 )
             ).label("wrong_rate"),
             Unit.name.label("unit_name"),
